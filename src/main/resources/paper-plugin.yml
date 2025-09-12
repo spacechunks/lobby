@@ -1,0 +1,4 @@
+name: ExplorerLobby
+version: 1.0.0
+main: space.chunks.explorer.lobby.ExplorerLobbyPlugin
+api-version: 1.21.4
