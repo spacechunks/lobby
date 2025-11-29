@@ -1,0 +1,3 @@
+[submodule "lib/explorer"]
+	path = lib/explorer
+	url = git@github.com:spacechunks/explorer.git
