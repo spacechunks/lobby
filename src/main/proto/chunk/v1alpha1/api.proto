@@ -1,0 +1,213 @@
+/*
+ Chunk Explorer, a platform for hosting and discovering Minecraft servers.
+ Copyright (C) 2025 Yannic Rieger <oss@76k.io>
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+syntax = "proto3";
+
+package chunk.v1alpha1;
+
+option go_package = "github.com/spacechunks/explorer/api/chunk/v1alpha1";
+
+import "chunk/v1alpha1/types.proto";
+
+// ChunkService provides the public api for interacting with Chunks
+// and flavors of Chunks.
+service ChunkService {
+  // CreateChunk creates a new chunk without any flavors.
+  // chunks that do not have any flavors will be deleted
+  // after some time.
+  //
+  // Defined error codes:
+  // - INVALID_ARGUMENT:
+  //   - name is invalid
+  //   - too many tags have been provided
+  //   - name exceeds the maximum amount of allowed chars
+  //   - description exceeds the maximum amount of allowed chars.
+  rpc CreateChunk(CreateChunkRequest) returns (CreateChunkResponse);
+
+  // GetChunk returns the chunk specified by the provided id.
+  //
+  // Defined error codes:
+  // - NOT_FOUND:
+  //   - chunk with the provided id does not exist
+  // - INVALID_ARGUMENT:
+  //   - id is invalid
+  rpc GetChunk(GetChunkRequest) returns (GetChunkResponse);
+
+  // UpdateChunk updates the fields of the given chunk.
+  // Note that tags will be completely replaced with the
+  // provided ones.
+  //
+  // Defined error codes:
+  // - NOT_FOUND:
+  //   - chunk with the provided id does not exist
+  // - INVALID_ARGUMENT:
+  //   - chunk id is invalid
+  //   - name is invalid
+  //   - too many tags have been provided
+  //   - name exceeds the maximum amount of allowed chars
+  //   - description exceeds the maximum amount of allowed chars.
+  rpc UpdateChunk(UpdateChunkRequest) returns (UpdateChunkResponse);
+
+  // ListChunks lists all available Chunks.
+  rpc ListChunks(ListChunksRequest) returns (ListChunksResponse);
+
+  // CreateFlavor creates a new flavor for a given chunk.
+  //
+  // Defined error codes:
+  // - ALREADY_EXISTS:
+  //   - a flavor with the given name already exists for this chunk
+  // - INVALID_ARGUMENT:
+  //   - the provided chunk id is invalid
+  //   - the provided flavor name is invalid
+  rpc CreateFlavor(CreateFlavorRequest) returns (CreateFlavorResponse);
+
+  // CreateFlavorVersion creates a new flavor version for a
+  // given flavor by determining the added, changed and removed
+  // files. it also prevents version duplicates, meaning either
+  // version numbers or the provided set of files match with
+  // an already existing version.
+  //
+  // Defined error codes:
+  // - ALREADY_EXISTS:
+  //   - the flavor version about to be created is already present
+  //   - a version with the exact same set of files already exists
+  // - FAILED_PRECONDITION:
+  //   - the provided version hash does not match with the provided file hashes
+  rpc CreateFlavorVersion(CreateFlavorVersionRequest) returns (CreateFlavorVersionResponse);
+
+  // BuildFlavorVersion will initiate the process for building a checkpoint image.
+  // there are multiple steps involved. Calling this endpoint multiple times will
+  // have no effect, if the build process is ongoing. Build status can be retrieved
+  // by getting the flavor version.
+  //
+  // Defined error codes:
+  // - FAILED_PRECONDITION:
+  //   - the flavor version files have not been uploaded yet.
+  rpc BuildFlavorVersion(BuildFlavorVersionRequest) returns (BuildFlavorVersionResponse);
+
+  // GetUploadURL returns a presigned URL for use with a S3 client. If the expiry date
+  // is reached the client can call this endpoint again and will receive a new valid
+  // URL. Calling this endpoint multiple without the expiry date being reached will
+  // lead to the same URL being returned.
+  //
+  // Defined error codes:
+  // - NOT_FOUND:
+  //   - the targeted flavor version does not exist
+  // - ALREADY_EXISTS:
+  //   - the tarball has already been uploaded
+  // - INVALID_ARGUMENT:
+  //   - the provided flavor version id is invalid
+  //   - the provided tarball hash is empty or does not meet the requirements.
+  //     for more information about what requirements are expected see tarball_hash
+  //     documentation of GetUploadURLRequest
+  rpc GetUploadURL(GetUploadURLRequest) returns (GetUploadURLResponse);
+
+  rpc GetSupportedMinecraftVersions(GetSupportedMinecraftVersionsRequest) returns (GetSupportedMinecraftVersionsResponse);
+}
+
+message CreateChunkRequest {
+  // Name of the chunk. can be up to 50 chars.
+  string name = 1;
+
+  // Description briefly describes what the user can
+  // expect when running the Chunk. can be up to 100
+  // chars.
+  string description = 2;
+
+  // Tags categorize the chunk. Possible values could
+  // be: pvp, adventure, single-player
+  // Note that the limit is currently 4.
+  repeated string tags = 3;
+}
+
+message CreateChunkResponse {
+  Chunk chunk = 1;
+}
+
+message GetChunkRequest {
+  string id = 1;
+}
+
+message GetChunkResponse {
+  Chunk chunk = 1;
+}
+
+message UpdateChunkRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  repeated string tags = 4;
+}
+
+message UpdateChunkResponse {
+  Chunk chunk = 1;
+}
+
+message ListChunksRequest {
+}
+
+message ListChunksResponse {
+  repeated Chunk chunks = 1;
+}
+
+message CreateFlavorRequest {
+  string chunk_id = 1;
+  string name = 2;
+}
+
+message CreateFlavorResponse {
+  Flavor flavor = 1;
+}
+
+message CreateFlavorVersionRequest {
+  string flavor_id = 1;
+  FlavorVersion version = 2;
+}
+
+message CreateFlavorVersionResponse {
+  FlavorVersion version = 1;
+  repeated FileHashes changed_files = 2;
+  repeated FileHashes removed_files = 3;
+  repeated FileHashes added_files = 4;
+}
+
+message BuildFlavorVersionRequest {
+  string flavor_version_id = 1;
+}
+
+message BuildFlavorVersionResponse {
+}
+
+message GetUploadURLRequest {
+  string flavor_version_id = 1;
+
+  // tarball_hash is the base64 encoded, 256-bit SHA256 digest of the tarball
+  string tarball_hash = 2;
+}
+
+message GetUploadURLResponse {
+  string url = 1;
+}
+
+message GetSupportedMinecraftVersionsRequest {
+}
+
+message GetSupportedMinecraftVersionsResponse {
+  repeated string versions = 1;
+}
