@@ -1,0 +1,73 @@
+/*
+ Chunk Explorer, a platform for hosting and discovering Minecraft servers.
+ Copyright (C) 2025 Yannic Rieger <oss@76k.io>
+
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 3 of the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public License
+ along with this program; if not, write to the Free Software Foundation,
+ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*/
+
+syntax = "proto3";
+
+package platformd.workload.v1alpha2;
+
+option go_package = "github.com/spacechunks/explorer/api/platformd/workload/v1alpha2";
+
+message Workload {
+  // id is a universally unique value identifying the workload.
+  // currently this is in UUIDv7 format.
+  string id = 1;
+
+  // name of the workload.
+  string name = 2;
+
+  // base_image_url points to the image that was used to create the checkpoint
+  // provided by checkpoint_image_url.
+  string base_image_url = 3;
+
+  // checkpoint_image_url points to a checkpoint living in an oci compatible
+  // registry.
+  string checkpoint_image_url = 4;
+
+  // namespace the workload is be created in.
+  string namespace = 5;
+
+  // hostname of the pod.
+  string hostname = 6;
+
+  // labels applied to the pod.
+  map<string, string> labels = 7;
+
+  // the network namespace' mode as per [runtimev1.NamespaceMode].
+  int32 network_namespace_mode = 8;
+
+  // status
+  WorkloadState state = 9;
+}
+
+enum WorkloadState {
+  UNKNOWN = 0;
+  STARTING = 1;
+  RUNNING = 2;
+  DELETING = 3;
+  DELETED = 4;
+  CREATION_FAILED = 5;
+}
+
+message WorkloadStatus {
+  WorkloadState state = 2;
+
+  // port allocated for the workload. programs binding
+  // to this port will be reachable from the internet.
+  uint32 port = 3;
+}
