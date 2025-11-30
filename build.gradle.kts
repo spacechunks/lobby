@@ -24,8 +24,12 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation(kotlin("stdlib"))
-    api("com.google.protobuf:protobuf-kotlin:3.23.1")
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    implementation("io.grpc:grpc-kotlin-stub:1.5.0")
+    implementation("io.grpc:grpc-protobuf:1.61.0")
+    implementation("io.grpc:grpc-netty:1.61.0")
+    api("com.google.protobuf:protobuf-kotlin:4.33.1")
+    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 tasks.test {
@@ -52,14 +56,7 @@ tasks.named("shadowJar", ShadowJar::class) {
 
 tasks {
     runServer {
-        downloadPlugins {
-            modrinth("ViaVersion", "5.3.1")
-        }
-
-        // Configure the Minecraft version for our task.
-        // This is the only required configuration besides applying the plugin.
-        // Your plugin's jar (or shadowJar if present) will be used automatically.
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.21.10")
     }
 }
 
@@ -82,10 +79,22 @@ protobuf {
     protoc {
         artifact = "com.google.protobuf:protoc:3.23.1"
     }
+    plugins {
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.61.0"
+        }
+        create("grpckt") {
+            artifact = "io.grpc:protoc-gen-grpc-kotlin:1.5.0:jdk8@jar"
+        }
+    }
     generateProtoTasks {
         all().forEach {
+            it.plugins {
+                create("grpc")
+                create("grpckt")
+            }
             it.builtins {
-                id("kotlin")
+                create("kotlin")
             }
         }
     }
