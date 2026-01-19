@@ -1,9 +1,12 @@
 package space.chunks.explorer.lobby.display
 
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.World
+import space.chunks.explorer.lobby.Plugin
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -11,6 +14,7 @@ import kotlin.math.min
 data class GameItem(
     val icon: Material?,
     val title: Component,
+    val key: NamespacedKey,
     val backgroundColor: Material = Material.LIGHT_GRAY_CONCRETE,
     val gameId: String = "",
     val playerCount: Int = 0,
@@ -22,8 +26,9 @@ class DisplayGrid(
     private val world: World,
     private val centerLocation: Location,
     private val itemsPerRow: Int,
+    private val plugin: org.bukkit.plugin.Plugin,
     private val itemsPerPage: Int = itemsPerRow * 4,
-    private val spacing: Double = 3.0
+    private val spacing: Double = 3.8
 ) {
     private val displays = mutableListOf<GameDisplay>()
     private var focusedIndex: Int = -1
@@ -39,6 +44,7 @@ class DisplayGrid(
     fun getCurrentPage(): Int {
         return currentPage
     }
+
     fun setAllItems(items: List<GameItem>) {
         allGameItems.clear()
         allGameItems.addAll(items)
@@ -54,11 +60,6 @@ class DisplayGrid(
         }
     }
 
-    fun addItems(items: List<GameItem>) {
-        allGameItems.addAll(items)
-        totalItems += items.size
-        refreshCurrentPage()
-    }
     fun refreshCurrentPage() {
         clear()
 
@@ -73,9 +74,8 @@ class DisplayGrid(
                 location = position,
                 icon = item.icon,
                 title = item.title,
-                backgroundColor = item.backgroundColor
             )
-            display.spawn()
+            display.spawn(item.key)
             displays.add(display)
         }
 
@@ -123,13 +123,6 @@ class DisplayGrid(
         refreshCurrentPage()
         return true
     }
-    fun add(
-        icon: Material?,
-        title: Component,
-        backgroundColor: Material = Material.LIGHT_GRAY_CONCRETE
-    ) {
-        addItem(GameItem(icon, title, backgroundColor), true)
-    }
 
     fun clear() {
         displays.forEach { it.remove() }
@@ -154,11 +147,11 @@ class DisplayGrid(
         if (focusedIndex == index) return true
 
         if (focusedIndex >= 0 && focusedIndex < displays.size) {
-            displays[focusedIndex].setFocus(false)
+            displays[focusedIndex].setFocus(false, plugin = this.plugin)
         }
 
         focusedIndex = index
-        displays[focusedIndex].setFocus(true)
+        displays[focusedIndex].setFocus(true, plugin = this.plugin)
         return true
     }
 
@@ -166,7 +159,9 @@ class DisplayGrid(
         if (focusedIndex < 0) return setInitialFocus()
 
         val currentRow = focusedIndex / itemsPerRow
-        if (currentRow <= 0) return false
+        if (currentRow <= 0) {
+            return previousPage()
+        }
 
         val newIndex = focusedIndex - itemsPerRow
         return if (newIndex >= 0) setFocus(newIndex) else false
@@ -186,10 +181,10 @@ class DisplayGrid(
     fun moveFocusLeft(): Boolean {
         if (focusedIndex < 0) return setInitialFocus()
 
-        val currentColumn = focusedIndex % itemsPerRow
-        if (currentColumn <= 0) {
-            return previousPage()
-        }
+//        val currentRow = focusedIndex / itemsPerRow
+//        if (currentRow <= 0) {
+//            return previousPage()
+//        }
 
         return setFocus(focusedIndex - 1)
     }
@@ -197,10 +192,10 @@ class DisplayGrid(
     fun moveFocusRight(): Boolean {
         if (focusedIndex < 0) return setInitialFocus()
 
-        val currentColumn = focusedIndex % itemsPerRow
-        if (currentColumn >= itemsPerRow - 1) {
-            return nextPage()
-        }
+//        val currentRow = focusedIndex / itemsPerRow
+//        if (currentRow >= itemsPerPage / itemsPerRow) {
+//            return nextPage()
+//        }
 
         val newIndex = focusedIndex + 1
         return if (newIndex < displays.size) setFocus(newIndex) else false
