@@ -42,12 +42,12 @@ class ControllsListener(
         if (displayGrid.getFocusedDisplay() != null) {
             val gameItem = displayGrid.getFocusedGameItem()
             if (gameItem != null) {
-//                player.sendActionBar(Component.text(
-//                    "Page ${displayGrid.getCurrentPage() + 1}/${displayGrid.getTotalPages()} - " +
-//                    "Game: ${gameItem.gameId} - " +
-//                    "Players: ${gameItem.playerCount}/${gameItem.maxPlayers} - " +
-//                    "Status: ${gameItem.status}"
-//                ))
+                player.sendActionBar(Component.text(
+                    "Page ${displayGrid.getCurrentPage() + 1}/${displayGrid.getTotalPages()} - " +
+                    "Game: ${gameItem.gameId} - " +
+                    "Players: ${gameItem.playerCount}/${gameItem.maxPlayers} - " +
+                    "Status: ${gameItem.status}"
+                ))
             }
         }
     }
@@ -62,20 +62,7 @@ class ControllsListener(
         val previousState = lastInputState[inputKey] ?: false
 
         if (currentState && !previousState) {
-            val previousDisplay = displayGrid.getFocusedDisplay()
-            val previousIndex = displayGrid.getFocusedIndex()
-
-            val moved = action()
-
-            if (moved) {
-                val currentDisplay = displayGrid.getFocusedDisplay()
-
-                if (previousDisplay != null && previousDisplay != currentDisplay) {
-                    previousDisplay.animateBounce(plugin, isEntryAnimation = false)
-                }
-
-                currentDisplay?.animateBounce(plugin, isEntryAnimation = true)
-            }
+            action()
         }
 
         lastInputState[inputKey] = currentState

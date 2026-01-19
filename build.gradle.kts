@@ -28,7 +28,7 @@ dependencies {
     implementation("io.grpc:grpc-protobuf:1.61.0")
     implementation("io.grpc:grpc-netty:1.61.0")
     api("com.google.protobuf:protobuf-kotlin:4.33.1")
-    compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
@@ -56,7 +56,10 @@ tasks.named("shadowJar", ShadowJar::class) {
 
 tasks {
     runServer {
-        minecraftVersion("1.21.10")
+        downloadPlugins {
+            modrinth("ViaVersion", "5.7.0")
+        }
+        minecraftVersion("1.21.4")
     }
 }
 
