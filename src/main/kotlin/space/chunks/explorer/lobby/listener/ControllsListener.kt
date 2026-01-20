@@ -2,6 +2,7 @@ package space.chunks.explorer.lobby.listener
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Input
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInputEvent
@@ -23,20 +24,19 @@ class ControllsListener(
     fun onPlayerInput(event: PlayerInputEvent) {
         val player = event.player
         val input = event.input
-        val playerId = player.uniqueId.toString()
 
         if (displayGrid.getFocusedIndex() == -1) {
             displayGrid.setInitialFocus()
         }
 
-        handleDirectionalInput(playerId, "forward", input.isForward()) { displayGrid.moveFocusUp() }
-        handleDirectionalInput(playerId, "backward", input.isBackward()) { displayGrid.moveFocusDown() }
-        handleDirectionalInput(playerId, "left", input.isLeft()) { displayGrid.moveFocusLeft() }
-        handleDirectionalInput(playerId, "right", input.isRight()) { displayGrid.moveFocusRight() }
+        handleDirectionalInput(player, "forward", input.isForward()) { displayGrid.moveFocusUp() }
+        handleDirectionalInput(player, "backward", input.isBackward()) { displayGrid.moveFocusDown() }
+        handleDirectionalInput(player, "left", input.isLeft()) { displayGrid.moveFocusLeft() }
+        handleDirectionalInput(player, "right", input.isRight()) { displayGrid.moveFocusRight() }
 
         if (player.isSneaking) {
-            handleDirectionalInput(playerId, "sneak_left", input.isLeft()) { displayGrid.previousPage() }
-            handleDirectionalInput(playerId, "sneak_right", input.isRight()) { displayGrid.nextPage() }
+            handleDirectionalInput(player, "sneak_left", input.isLeft()) { displayGrid.previousPage() }
+            handleDirectionalInput(player, "sneak_right", input.isRight()) { displayGrid.nextPage() }
         }
 
         if (displayGrid.getFocusedDisplay() != null) {
@@ -53,15 +53,16 @@ class ControllsListener(
     }
 
     private fun handleDirectionalInput(
-        playerId: String, 
+        p: Player,
         inputName: String, 
         currentState: Boolean, 
         action: () -> Boolean
     ) {
-        val inputKey = "$playerId:$inputName"
+        val inputKey = "${p.uniqueId}:$inputName"
         val previousState = lastInputState[inputKey] ?: false
 
         if (currentState && !previousState) {
+            p.playSound(p.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
             action()
         }
 
