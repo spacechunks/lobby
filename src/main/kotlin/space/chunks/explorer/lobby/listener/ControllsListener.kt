@@ -38,18 +38,6 @@ class ControllsListener(
             handleDirectionalInput(player, "sneak_left", input.isLeft()) { displayGrid.previousPage() }
             handleDirectionalInput(player, "sneak_right", input.isRight()) { displayGrid.nextPage() }
         }
-
-        if (displayGrid.getFocusedDisplay() != null) {
-            val gameItem = displayGrid.getFocusedGameItem()
-            if (gameItem != null) {
-                player.sendActionBar(Component.text(
-                    "Page ${displayGrid.getCurrentPage() + 1}/${displayGrid.getTotalPages()} - " +
-                    "Game: ${gameItem.gameId} - " +
-                    "Players: ${gameItem.playerCount}/${gameItem.maxPlayers} - " +
-                    "Status: ${gameItem.status}"
-                ))
-            }
-        }
     }
 
     private fun handleDirectionalInput(

@@ -4,7 +4,9 @@ import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import net.kyori.adventure.text.Component
 import org.bukkit.*
 import org.bukkit.entity.Display
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.TextDisplay
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.scheduler.BukkitRunnable
@@ -14,6 +16,7 @@ import org.joml.Matrix4f
 import org.joml.Quaternionf
 import org.joml.Vector3f
 import space.chunks.explorer.lobby.display.DisplayGrid
+import space.chunks.explorer.lobby.display.GameDisplay
 import space.chunks.explorer.lobby.display.GameItem
 import space.chunks.explorer.lobby.listener.ControllsListener
 import space.chunks.explorer.lobby.listener.PlayerListener
@@ -161,18 +164,18 @@ class Plugin : JavaPlugin() {
 
 //        lol.setTransformationMatrix(Matrix4f().rotation(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f)))
 
-        val arrowUpLoc = center.clone().add(8.0, -1.6, 0.0)
+        val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
         val arrowUp = spawnUiElement(
             arrowUpLoc,
-            Vector3f(1f, 1f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow"),
+            Vector3f(.8f, .8f, 0.5f),
+            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
             false,
 //            1
         )
 
         val arrowDonw = spawnUiElement(
-            arrowUpLoc.clone().subtract(0.0, .5, 0.0),
-            Vector3f(1f, 1f, 0.5f),
+            arrowUpLoc.clone().subtract(0.0, .6, 0.0),
+            Vector3f(.8f, .8f, 0.5f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
             false,
 //            1
@@ -188,7 +191,8 @@ class Plugin : JavaPlugin() {
                 gameId = "game-${i}",
                 playerCount = i % 10,
                 maxPlayers = 10,
-                status = if (i % 5 == 0) "Running" else "Waiting"
+                status = if (i % 5 == 0) "Running" else "Waiting",
+                center = center
             ))
         }
 
@@ -201,7 +205,8 @@ class Plugin : JavaPlugin() {
                 gameId = "game-${i}",
                 playerCount = i % 10,
                 maxPlayers = 10,
-                status = if (i % 5 == 0) "Running" else "Waiting"
+                status = if (i % 5 == 0) "Running" else "Waiting",
+                center = center
             ))
         }
 
@@ -214,7 +219,8 @@ class Plugin : JavaPlugin() {
                 gameId = "game-${i}",
                 playerCount = i % 10,
                 maxPlayers = 10,
-                status = if (i % 5 == 0) "Running" else "Waiting"
+                status = if (i % 5 == 0) "Running" else "Waiting",
+                center = center
             ))
         }
 
