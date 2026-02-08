@@ -6,37 +6,23 @@ import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
-import space.chunks.explorer.lobby.Plugin
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
 
-data class GameItem(
-    val icon: Material?,
-    val title: Component,
-    val key: NamespacedKey,
-    val backgroundColor: Material = Material.LIGHT_GRAY_CONCRETE,
-    val gameId: String = "",
-    val playerCount: Int = 0,
-    val maxPlayers: Int = 0,
-    val status: String = "",
-    val center: Location? = null
-)
-
 class DisplayGrid(
-    private val world: World,
     private val centerLocation: Location,
     private val itemsPerRow: Int,
     private val plugin: org.bukkit.plugin.Plugin,
     private val itemsPerPage: Int = itemsPerRow * 4,
     private val spacing: Double = 3.8
 ) {
-    private val displays = mutableListOf<GameDisplay>()
+    private val displays = mutableListOf<ChunkDisplay>()
     private var focusedIndex: Int = -1
 
     private var currentPage: Int = 0
     private var totalItems: Int = 0
-    private var allGameItems = mutableListOf<GameItem>()
+    private var allGameItems = mutableListOf<ChunkDisplay>()
 
     fun getTotalPages(): Int {
         return max(1, ceil(totalItems.toDouble() / itemsPerPage).toInt())
@@ -46,14 +32,14 @@ class DisplayGrid(
         return currentPage
     }
 
-    fun setAllItems(items: List<GameItem>) {
+    fun setAllItems(items: List<ChunkDisplay>) {
         allGameItems.clear()
         allGameItems.addAll(items)
         totalItems = items.size
         refreshCurrentPage()
     }
 
-    fun addItem(item: GameItem, refreshDisplay: Boolean = true) {
+    fun addItem(item: ChunkDisplay, refreshDisplay: Boolean = true) {
         allGameItems.add(item)
         totalItems++
         if (refreshDisplay) {
@@ -65,23 +51,19 @@ class DisplayGrid(
         val startIndex = currentPage * itemsPerPage
         val endIndex = min(startIndex + itemsPerPage, totalItems)
 
-        val new = mutableListOf<GameDisplay>()
+        val new = mutableListOf<ChunkDisplay>()
 
         for (i in startIndex until endIndex) {
             val item = allGameItems[i]
             val position = calculatePositionInPage(i - startIndex)
-            val display = GameDisplay(
-                world = world,
-                location = position,
-                icon = item.icon,
-                title = item.title,
-                center = item.center
-            )
+
+            item.location = position
+            item.center = this.centerLocation
 //            if (i == startIndex)
 //                display.spawn(item.key, true, this.plugin)
 //            else
-                display.spawn(item.key)
-            new.add(display)
+                item.spawn()
+            new.add(item)
         }
 
         Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
@@ -211,7 +193,7 @@ class DisplayGrid(
         return if (newIndex < displays.size) setFocus(newIndex) else false
     }
 
-    fun getFocusedDisplay(): GameDisplay? {
+    fun getFocusedDisplay(): ChunkDisplay? {
         return if (focusedIndex >= 0 && focusedIndex < displays.size) displays[focusedIndex] else null
     }
 
@@ -219,7 +201,7 @@ class DisplayGrid(
         return focusedIndex
     }
 
-    fun getFocusedGameItem(): GameItem? {
+    fun getFocusedGameItem(): ChunkDisplay? {
         if (focusedIndex < 0 || displays.isEmpty()) return null
 
         val globalIndex = currentPage * itemsPerPage + focusedIndex

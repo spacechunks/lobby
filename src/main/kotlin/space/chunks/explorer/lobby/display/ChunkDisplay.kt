@@ -14,13 +14,14 @@ import org.joml.Matrix4f
 import org.joml.Vector3f
 
 
-class GameDisplay(
-    private val world: World,
-    private val location: Location,
-    private val icon: Material?,
-    public val title: Component,
-    private var center: Location? = null
+class ChunkDisplay(
+    val title: Component,
+    private val thumbnailTextureKey: NamespacedKey,
 ) {
+
+    var location: Location? = null
+    var center: Location? = null
+
     private var backgroundDisplay: ItemDisplay? = null
     private var highlightDisplay: ItemDisplay? = null
     private var itemDisplay: ItemDisplay? = null
@@ -30,32 +31,21 @@ class GameDisplay(
     private var breathingTaskId: Int = -1
     private var stopBreathing: Boolean = false
     private var currScale: Float = -1.0f
-    private var currHighlightScale: Float = -1.0f
 
     companion object {
+        private val ICON_MATERIAL = Material.PAPER
         private const val ICON_SCALE = 3.5f
         private const val ICON_FOCUS_SCALE = 3.2f //3.39f
-
-        private const val TEXT_OFFSET = 1.0
-        private const val TEXT_SCALE = 1.5f
-        private const val BACKGROUND_SCALE = 1.2f
-        private const val BACKGROUND_THICKNESS = 0.05f
         private const val ICON_OFFSET = 2.0
-        private const val FOCUS_SCALE = 1.3f
-        private const val NORMAL_SCALE = 1.2f
-
-        private const val HIGHLIGHT_NORMAL_SCALE = 1.1f
-        private const val HIGHLIGHT_FOCUS_SCALE = 3.6f
-        private const val HIGHLIGHT_OFFSET = 0.5
     }
 
-    fun spawn(key: NamespacedKey) {
-        val iconLocation = location.clone().add(0.0, 0.0, ICON_OFFSET)
-        if (icon != null) {
+    fun spawn() {
+        val iconLocation = this.location!!.clone().add(0.0, 0.0, ICON_OFFSET)
+        val world = iconLocation.world
             this.itemDisplay = world.spawn(iconLocation, ItemDisplay::class.java) { display ->
-                val iconItem = ItemStack(icon)
+                val iconItem = ItemStack(ICON_MATERIAL)
                 iconItem.editMeta { ii ->
-                    ii.itemModel = key
+                    ii.itemModel = this.thumbnailTextureKey
                 }
 
                 display.setItemStack(iconItem)
@@ -70,26 +60,6 @@ class GameDisplay(
                 display.billboard = Display.Billboard.CENTER
                 display.brightness = Display.Brightness(15, 15)
             }
-        }
-    }
-
-    fun spawn(key: NamespacedKey, focused: Boolean, plugin: org.bukkit.plugin.Plugin) {
-        spawn(key)
-        this.stopBreathing = false
-        this.currScale = ICON_SCALE
-        Bukkit.getScheduler().runTaskTimer(plugin, { t ->
-            if (this.stopBreathing) {
-                t.cancel()
-                return@runTaskTimer
-            }
-
-            this.breathingTaskId = t.taskId
-            val scale = if (currScale == ICON_FOCUS_SCALE) ICON_SCALE else 1f
-            this.currScale = scale
-            this.itemDisplay?.setTransformationMatrix(Matrix4f().scale(scale))
-            this.itemDisplay?.interpolationDuration = 15
-            this.itemDisplay?.interpolationDelay = 0
-        }, 0L, 15L)
     }
 
     fun remove() {
@@ -105,7 +75,7 @@ class GameDisplay(
 
 
     fun isSpawned(): Boolean {
-        return backgroundDisplay != null && highlightDisplay != null && (icon == null || itemDisplay != null)
+        return backgroundDisplay != null && highlightDisplay != null && itemDisplay != null
     }
 
     fun setFocus(focused: Boolean, animate: Boolean = false, plugin: org.bukkit.plugin.Plugin? = null): Boolean {

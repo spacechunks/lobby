@@ -17,6 +17,7 @@ import org.bukkit.event.weather.WeatherEvent
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
 import space.chunks.explorer.lobby.Plugin
+import space.chunks.explorer.lobby.display.DisplaySession
 
 class PlayerListener(
     private val plugin: Plugin,
@@ -26,22 +27,11 @@ class PlayerListener(
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
-        player.teleport(Location(voidWorld, 0.0, 100.0, 0.0))
+        val loc = Location(voidWorld, 0.0, 100.0, 0.0)
 
-        val fixedEntity = voidWorld
-            .spawn(Location(voidWorld, 0.0, 100.0, 0.0), ArmorStand::class.java) {
-                it.setAI(false)
-                it.canPickupItems = false
-                it.isInvisible = true
-                it.isSilent = true
-                it.setGravity(false)
-            }
-
-        player.gameMode = GameMode.SPECTATOR
-
-        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
-            player.spectatorTarget = fixedEntity
-        }, 10)
+        val sess = DisplaySession(player, this.plugin, loc)
+        Bukkit.getPluginManager().registerEvents(ControllsListener(this.plugin, sess.grid), this.plugin)
+        sess.start()
     }
 
     @EventHandler

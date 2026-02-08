@@ -1,14 +1,11 @@
 package space.chunks.explorer.lobby.listener
 
-import net.kyori.adventure.text.Component
-import org.bukkit.Input
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInputEvent
 import org.bukkit.plugin.Plugin
 import space.chunks.explorer.lobby.display.DisplayGrid
-import space.chunks.explorer.lobby.display.GameDisplay
 
 /**
  * Listener for player input events to navigate the display grid
