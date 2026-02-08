@@ -30,7 +30,7 @@ class PlayerListener(
         val loc = Location(voidWorld, 0.0, 100.0, 0.0)
 
         val sess = DisplaySession(player, this.plugin, loc)
-        Bukkit.getPluginManager().registerEvents(ControllsListener(this.plugin, sess.grid), this.plugin)
+        Bukkit.getPluginManager().registerEvents(ControllsListener(this.plugin, sess.chunkSelectWindow.grid), this.plugin)
         sess.start()
     }
 

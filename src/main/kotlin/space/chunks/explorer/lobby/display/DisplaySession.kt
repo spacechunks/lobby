@@ -26,12 +26,14 @@ class DisplaySession(
 ) {
     private val center = this.location.clone().add(0.0, 3.0, 10.0)
 
-    val grid = DisplayGrid(
-        this.center,
-        4,
-        this.plugin,
-        8
-    )
+//    val grid = DisplayGrid(
+//        this.center,
+//        4,
+//        this.plugin,
+//        8
+//    )
+
+    val chunkSelectWindow = ChunkSelectWindow(this.plugin, this.center)
 
     fun start() {
         this.player.teleport(this.location)
@@ -55,109 +57,108 @@ class DisplaySession(
         // TODO: fetch chunks
         spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
 
-        center.world.spawn(center.clone().add(0.0, 3.5, 0.0), ItemDisplay::class.java) { d ->
-            val stack = ItemStack(Material.PAPER)
-            stack.editMeta { m ->0
-                m.itemModel = NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo")
-            }
+        this.chunkSelectWindow.render()
 
-            d.setItemStack(stack)
+//        center.world.spawn(center.clone().add(0.0, 3.5, 0.0), ItemDisplay::class.java) { d ->
+//            val stack = ItemStack(Material.PAPER)
+//            stack.editMeta { m ->0
+//                m.itemModel = NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo")
+//            }
+//
+//            d.setItemStack(stack)
+//
+//            d.billboard = Display.Billboard.CENTER
+//
+//            d.transformation = Transformation(
+//                d.transformation.translation,
+//                d.transformation.leftRotation,
+//                Vector3f(7f, 3.5f, 1f),
+//                d.transformation.rightRotation
+//            )
+//        }
 
-            d.billboard = Display.Billboard.CENTER
-
-            d.transformation = Transformation(
-                d.transformation.translation,
-                d.transformation.leftRotation,
-                Vector3f(7f, 3.5f, 1f),
-                d.transformation.rightRotation
-            )
-        }
-
+////        spawnUiElement(
+////            center.clone().add(0.0, 3.0, 0.0),
+////            3.0f,
+////            NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo"),
+////            false
+////        )
+////
+////        spawnUiElement(
+////            center.clone().add(-7.0, 4.0, 0.0),
+////            1.0f,
+////            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2")
+////        )
+//
 //        spawnUiElement(
-//            center.clone().add(0.0, 3.0, 0.0),
-//            3.0f,
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo"),
-//            false
+//            center.clone().add(-3.5, 3.5, 0.0),
+//            Vector3f(1f, 1f, 1f),
+//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
+//            true,
 //        )
 //
 //        spawnUiElement(
-//            center.clone().add(-7.0, 4.0, 0.0),
-//            1.0f,
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2")
+//            center.clone().add(-3.0, 5.0, 0.0),
+//            Vector3f(.6f, .6f, .6f),
+//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
+//            true,
 //        )
-
-        spawnUiElement(
-            center.clone().add(-3.5, 3.5, 0.0),
-            Vector3f(1f, 1f, 1f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
-            true,
-        )
-
-        spawnUiElement(
-            center.clone().add(-3.0, 5.0, 0.0),
-            Vector3f(.6f, .6f, .6f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
-            true,
-        )
-
-
-        spawnUiElement(
-            center.clone().add(3.6, 4.5, 0.0),
-            Vector3f(1f, 1f, 1f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
-            true,
-        )
-
-        val lol = spawnUiElement(
-            center.clone().add(3.5, 2.5, 0.0),
-            Vector3f(.8f, .8f, .8f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone4"),
-            true,
-        )
-
-
-        val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
-        val arrowUp = spawnUiElement(
-            arrowUpLoc,
-            Vector3f(.8f, .8f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
-            false,
-        )
-
-        val arrowDonw = spawnUiElement(
-            arrowUpLoc.clone().subtract(0.0, .6, 0.0),
-            Vector3f(.8f, .8f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
-            false,
-        )
-
-        val gameItems = mutableListOf<ChunkDisplay>()
-        for (i in 0..7) {
-            gameItems.add(ChunkDisplay(
-                title = Component.text("Game ${i}"),
-                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail")!!
-            ))
-        }
-
-        for (i in 0..7) {
-            gameItems.add(ChunkDisplay(
-                title = Component.text("Game ${i}"),
-                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail2")!!,
-            ))
-        }
-
-        for (i in 0..7) {
-            gameItems.add(ChunkDisplay(
-                title = Component.text("Game ${i}"),
-                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail3")!!,
-            ))
-        }
-
-        val textLocation = Location(this.location.world, 0.0, 107.0, 10.0).clone()
-        textLocation.yaw += 180
-
-        this.grid.setAllItems(gameItems)
-        this.grid.setInitialFocus()
+//
+//
+//        spawnUiElement(
+//            center.clone().add(3.6, 4.5, 0.0),
+//            Vector3f(1f, 1f, 1f),
+//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
+//            true,
+//        )
+//
+//        val lol = spawnUiElement(
+//            center.clone().add(3.5, 2.5, 0.0),
+//            Vector3f(.8f, .8f, .8f),
+//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone4"),
+//            true,
+//        )
+//
+//
+//        val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
+//        val arrowUp = spawnUiElement(
+//            arrowUpLoc,
+//            Vector3f(.8f, .8f, 0.5f),
+//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
+//            false,
+//        )
+//
+//        val arrowDonw = spawnUiElement(
+//            arrowUpLoc.clone().subtract(0.0, .6, 0.0),
+//            Vector3f(.8f, .8f, 0.5f),
+//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
+//            false,
+//        )
+//
+//        val gameItems = mutableListOf<ChunkDisplay>()
+//        for (i in 0..7) {
+//            gameItems.add(ChunkDisplay(
+//                title = Component.text("Game ${i}"),
+//                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail")!!
+//            ))
+//        }
+//
+//        for (i in 0..7) {
+//            gameItems.add(ChunkDisplay(
+//                title = Component.text("Game ${i}"),
+//                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail2")!!,
+//            ))
+//        }
+//
+//        for (i in 0..7) {
+//            gameItems.add(ChunkDisplay(
+//                title = Component.text("Game ${i}"),
+//                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail3")!!,
+//            ))
+//        }
+//
+//        this.grid.setAllItems(gameItems)
+//        this.grid.setInitialFocus()
 
 
     }
@@ -183,74 +184,6 @@ class DisplaySession(
                 Vector3f(scale, scale, 0.1f),
                 it.transformation.rightRotation
             )
-        }
-    }
-
-
-    private fun spawnUiElement(
-        location: Location,
-        scale: Vector3f,
-        key: NamespacedKey?,
-        animate: Boolean,
-//        tick: Long
-    ): ItemDisplay {
-        return location.world.spawn(location, ItemDisplay::class.java) { d ->
-            val stack = ItemStack(Material.PAPER)
-            stack.editMeta { m ->
-                m.itemModel = key
-            }
-
-            d.setItemStack(stack)
-
-            d.billboard = Display.Billboard.CENTER
-
-            d.transformation = Transformation(
-                d.transformation.translation,
-                d.transformation.leftRotation,
-                scale,
-                d.transformation.rightRotation
-            )
-
-            d.brightness = Display.Brightness(15, 15)
-
-
-            if (!animate) return@spawn
-
-            // AI
-            val base: Transformation = d.getTransformation()
-            val baseTranslation = Vector3f(base.getTranslation())
-
-            val rand = java.util.Random()
-            val step = rand.nextFloat(0.02f, 0.04f)
-
-            object : BukkitRunnable() {
-                var time: Double = Math.random() * Math.PI * 2
-
-                override fun run() {
-//                    time += 0.02
-                    time += step
-
-                    val x = (sin(time) * 0.15).toFloat()
-                    val y = (sin(time * 1.5) * 0.10).toFloat()
-                    val z = (cos(time * 1.2) * 0.15).toFloat()
-
-                    val translation = Vector3f(
-                        baseTranslation.x + x,
-                        baseTranslation.y + y,
-                        baseTranslation.z + z
-                    )
-
-                    val t: Transformation = Transformation(
-                        translation,
-                        base.getLeftRotation(),
-                        base.getScale(),
-                        base.getRightRotation()
-                    )
-
-                    d.setTransformation(t)
-                    d.interpolationDelay = 0
-                }
-            }.runTaskTimer(this.plugin, 0L, 1)
         }
     }
 }
