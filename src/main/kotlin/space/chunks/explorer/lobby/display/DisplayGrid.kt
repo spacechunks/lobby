@@ -19,7 +19,8 @@ data class GameItem(
     val gameId: String = "",
     val playerCount: Int = 0,
     val maxPlayers: Int = 0,
-    val status: String = ""
+    val status: String = "",
+    val center: Location? = null
 )
 
 class DisplayGrid(
@@ -61,10 +62,10 @@ class DisplayGrid(
     }
 
     fun refreshCurrentPage() {
-        clear()
-
         val startIndex = currentPage * itemsPerPage
         val endIndex = min(startIndex + itemsPerPage, totalItems)
+
+        val new = mutableListOf<GameDisplay>()
 
         for (i in startIndex until endIndex) {
             val item = allGameItems[i]
@@ -74,10 +75,19 @@ class DisplayGrid(
                 location = position,
                 icon = item.icon,
                 title = item.title,
+                center = item.center
             )
-            display.spawn(item.key)
-            displays.add(display)
+//            if (i == startIndex)
+//                display.spawn(item.key, true, this.plugin)
+//            else
+                display.spawn(item.key)
+            new.add(display)
         }
+
+        Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
+            clear()
+            this.displays.addAll(new)
+        }, 1L)
 
         if (displays.isNotEmpty()) {
             setInitialFocus()
