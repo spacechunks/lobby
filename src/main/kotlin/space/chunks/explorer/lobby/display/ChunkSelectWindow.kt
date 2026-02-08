@@ -22,12 +22,16 @@ class ChunkSelectWindow(plugin: Plugin, center: Location) : Window(plugin, cente
         8
     )
 
+    private val elements = mutableListOf<ItemDisplay>()
+
     override fun render() {
         center.world.spawn(center.clone().add(0.0, 3.5, 0.0), ItemDisplay::class.java) { d ->
             val stack = ItemStack(Material.PAPER)
-            stack.editMeta { m ->0
+            stack.editMeta { m ->
                 m.itemModel = NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo")
             }
+
+            this.elements.add(d)
 
             d.setItemStack(stack)
 
@@ -113,6 +117,11 @@ class ChunkSelectWindow(plugin: Plugin, center: Location) : Window(plugin, cente
         this.grid.setInitialFocus()
     }
 
+    override fun close() {
+        this.elements.forEach { it.remove() }
+        this.grid.clearAll()
+    }
+
     private fun spawnUiElement(
         location: Location,
         scale: Vector3f,
@@ -125,6 +134,8 @@ class ChunkSelectWindow(plugin: Plugin, center: Location) : Window(plugin, cente
             stack.editMeta { m ->
                 m.itemModel = key
             }
+
+            this.elements.add(d)
 
             d.setItemStack(stack)
 
