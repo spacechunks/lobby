@@ -35,8 +35,6 @@ class DisplaySession(
 //        8
 //    )
 
-    val chunkSelectWindow = ChunkSelectWindow(this.plugin, this.center)
-
     fun start() {
         this.player.teleport(this.location)
 
@@ -58,23 +56,18 @@ class DisplaySession(
 
         // TODO: fetch chunks
         spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
-
-//        this.activeWindow = this.chunkSelectWindow
-//        this.chunkSelectWindow.render()
-
-        val m = mutableListOf(
-//            "Flavor ABC",
-            "abcdefghijii",
-            "abcdefghijklmnoprst",
-//            "abcde",
-//            "abcdefghijklmnopqrstuvwxy",
-        )
-
-        FlavorSelectWindow(this.plugin, this.center, m).render()
+        this.activeWindow = ChunkSelectWindow(this.plugin, this.center, this)
+        this.activeWindow?.render()
     }
 
     fun stop() {
 
+    }
+
+    fun switchWindow(new: Window) {
+        this.activeWindow?.close()
+        this.activeWindow = new
+        this.activeWindow?.render()
     }
 
     fun handleInput(input: Input) {

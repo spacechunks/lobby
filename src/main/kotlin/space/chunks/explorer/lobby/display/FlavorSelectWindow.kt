@@ -24,8 +24,9 @@ import kotlin.math.sin
 class FlavorSelectWindow(
     plugin: Plugin,
     center: Location,
+    session: DisplaySession,
     private val flavors: List<String>
-) : Window(plugin, center) {
+) : Window(plugin, center, session) {
 
     private val elements = mutableListOf<Entity>()
 
