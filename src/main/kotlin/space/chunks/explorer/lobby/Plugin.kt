@@ -3,6 +3,7 @@ package space.chunks.explorer.lobby
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import org.bukkit.*
 import org.bukkit.entity.Player
+import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
 import space.chunks.explorer.lobby.display.DisplayGrid
 import space.chunks.explorer.lobby.display.DisplaySession
@@ -48,25 +49,11 @@ class Plugin : JavaPlugin() {
 //            }
 //        }
 
-        val voidWorld = WorldCreator.name(UUID.randomUUID().toString())
-            .generator(VoidWorldGenerator())
-            .createWorld() ?: throw IllegalStateException("Failed to create void world")
-
-        prepareWorld(voidWorld)
-
-
-        Bukkit.getPluginManager().registerEvents(PlayerListener(this, voidWorld, this.sessions), this)
+        Bukkit.getPluginManager().registerEvents(PlayerListener(this, this.sessions), this)
     }
 
-    private fun prepareWorld(voidWorld: World) {
-        listOf(*voidWorld.entities.toTypedArray()).forEach { it.remove() }
-        voidWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
-        voidWorld.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
-        voidWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false)
-        voidWorld.setGameRule(GameRule.DO_FIRE_TICK, false)
-        voidWorld.setGameRule(GameRule.DO_MOB_LOOT, false)
-        voidWorld.setGameRule(GameRule.DO_TILE_DROPS, false)
-        voidWorld.time = 1000
-        voidWorld.clearWeatherDuration = -1
+
+    override fun getDefaultWorldGenerator(worldName: String, id: String?): ChunkGenerator {
+        return VoidWorldGenerator()
     }
 }

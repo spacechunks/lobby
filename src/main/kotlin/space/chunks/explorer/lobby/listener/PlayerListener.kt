@@ -3,6 +3,7 @@ package space.chunks.explorer.lobby.listener
 import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent
 import org.bukkit.Bukkit
+import org.bukkit.GameRule
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -13,6 +14,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.weather.WeatherChangeEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
@@ -20,19 +22,21 @@ import org.bukkit.util.Transformation
 import org.joml.Vector3f
 import space.chunks.explorer.lobby.Plugin
 import space.chunks.explorer.lobby.display.DisplaySession
+import kotlin.collections.set
 import kotlin.math.cos
 import kotlin.math.sin
 
 class PlayerListener(
     private val plugin: Plugin,
-    private val voidWorld: World,
     private val sessions: MutableMap<Player, DisplaySession>,
 ) : Listener {
 
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
         val player = event.player
-        val loc = Location(voidWorld, 0.0, 100.0, 0.0)
+        prepareWorld(player.location.world)
+
+        val loc = Location(player.location.world, 0.0, 100.0, 0.0)
 
         Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
             val sess = DisplaySession(player, this.plugin, loc)
@@ -127,6 +131,12 @@ class PlayerListener(
     }
 
     @EventHandler
+    fun onPlayerLeave(event: PlayerQuitEvent) {
+        this.sessions[event.player]?.stop()
+        this.sessions.remove(event.player)
+    }
+
+    @EventHandler
     fun onSpectateUnmount(event: PlayerStopSpectatingEntityEvent) {
 //        event.isCancelled = true
     }
@@ -136,6 +146,17 @@ class PlayerListener(
 //        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
 //            event.player.hideEntity(plugin, event.newSpectatorTarget)
 //        }, 10)
+    }
+
+    private fun prepareWorld(voidWorld: World) {
+        voidWorld.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
+        voidWorld.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
+        voidWorld.setGameRule(GameRule.DO_MOB_SPAWNING, false)
+        voidWorld.setGameRule(GameRule.DO_FIRE_TICK, false)
+        voidWorld.setGameRule(GameRule.DO_MOB_LOOT, false)
+        voidWorld.setGameRule(GameRule.DO_TILE_DROPS, false)
+        voidWorld.time = 1000
+        voidWorld.clearWeatherDuration = -1
     }
 
     private fun spawnUiElement(

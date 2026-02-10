@@ -2,6 +2,7 @@ name: explorer-lobby
 version: 1.0.0
 main: space.chunks.explorer.lobby.Plugin
 api-version: 1.21.4
+load: STARTUP
 commands:
   len:
   stack:

@@ -26,14 +26,9 @@ class DisplaySession(
     val location: Location
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)
-    private var activeWindow: Window? = null
 
-//    val grid = DisplayGrid(
-//        this.center,
-//        4,
-//        this.plugin,
-//        8
-//    )
+    private var activeWindow: Window? = null
+    private lateinit var background: ItemDisplay
 
     fun start() {
         this.player.teleport(this.location)
@@ -55,13 +50,14 @@ class DisplaySession(
 
 
         // TODO: fetch chunks
-        spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
+        this.background = spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
         this.activeWindow = ChunkSelectWindow(this.plugin, this.center, this)
         this.activeWindow?.render()
     }
 
     fun stop() {
-
+        this.activeWindow?.close()
+        this.background.remove()
     }
 
     fun switchWindow(new: Window) {
@@ -74,8 +70,8 @@ class DisplaySession(
         this.activeWindow?.handleInput(this.player, input)
     }
 
-    private fun spawnWall(voidWorld: World, scale: Float, z: Int, key: NamespacedKey?) {
-        voidWorld.spawn(Location(voidWorld, 0.0, 100.0, z.toDouble()), ItemDisplay::class.java) {
+    private fun spawnWall(voidWorld: World, scale: Float, z: Int, key: NamespacedKey?): ItemDisplay {
+        return voidWorld.spawn(Location(voidWorld, 0.0, 100.0, z.toDouble()), ItemDisplay::class.java) {
             val stack = ItemStack(Material.PAPER)
             stack.editMeta { m ->
                 m.itemModel = key
