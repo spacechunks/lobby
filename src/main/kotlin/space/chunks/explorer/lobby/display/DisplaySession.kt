@@ -11,6 +11,7 @@ import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInputEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitRunnable
@@ -25,6 +26,7 @@ class DisplaySession(
     val location: Location
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)
+    private var activeWindow: Window? = null
 
 //    val grid = DisplayGrid(
 //        this.center,
@@ -57,12 +59,13 @@ class DisplaySession(
         // TODO: fetch chunks
         spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
 
+//        this.activeWindow = this.chunkSelectWindow
 //        this.chunkSelectWindow.render()
 
         val m = mutableListOf(
 //            "Flavor ABC",
             "abcdefghijii",
-//            "abcdefghijklmnoprst",
+            "abcdefghijklmnoprst",
 //            "abcde",
 //            "abcdefghijklmnopqrstuvwxy",
         )
@@ -72,6 +75,10 @@ class DisplaySession(
 
     fun stop() {
 
+    }
+
+    fun handleInput(input: Input) {
+        this.activeWindow?.handleInput(this.player, input)
     }
 
     private fun spawnWall(voidWorld: World, scale: Float, z: Int, key: NamespacedKey?) {

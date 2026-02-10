@@ -9,6 +9,7 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Display
 import org.bukkit.entity.Entity
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
@@ -173,6 +174,10 @@ class FlavorSelectWindow(
 
     override fun close() {
         this.elements.forEach { it.remove() }
+    }
+
+    override fun handleInput(player: Player, input: Input) {
+        TODO("Not yet implemented")
     }
 
     private fun renderArrow() {
