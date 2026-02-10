@@ -6,6 +6,8 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInputEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitRunnable
@@ -120,6 +122,24 @@ class ChunkSelectWindow(plugin: Plugin, center: Location) : Window(plugin, cente
     override fun close() {
         this.elements.forEach { it.remove() }
         this.grid.clearAll()
+    }
+
+    override fun handleInput(player: Player, input: Input) {
+        if (this.grid.getFocusedIndex() == -1) {
+            this.grid.setInitialFocus()
+        }
+
+        if (input == Input.W || input == Input.A ||  input == Input.S || input == Input.D) {
+            player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+        }
+
+        when (input) {
+            Input.W -> this.grid.moveFocusUp()
+            Input.A -> this.grid.moveFocusLeft()
+            Input.S -> this.grid.moveFocusDown()
+            Input.D -> this.grid.moveFocusRight()
+            else -> {}
+        }
     }
 
     private fun spawnUiElement(

@@ -2,32 +2,21 @@ package space.chunks.explorer.lobby.listener
 
 import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.Color
-import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.World
-import org.bukkit.entity.ArmorStand
-import org.bukkit.entity.Bat
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
-import org.bukkit.entity.TextDisplay
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerLoginEvent
 import org.bukkit.event.weather.WeatherChangeEvent
-import org.bukkit.event.weather.WeatherEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.potion.PotionEffect
-import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Transformation
-import org.joml.AxisAngle4f
-import org.joml.Matrix4f
 import org.joml.Vector3f
 import space.chunks.explorer.lobby.Plugin
 import space.chunks.explorer.lobby.display.DisplaySession
@@ -36,10 +25,9 @@ import kotlin.math.sin
 
 class PlayerListener(
     private val plugin: Plugin,
-    private val voidWorld: World
+    private val voidWorld: World,
+    private val sessions: MutableMap<Player, DisplaySession>,
 ) : Listener {
-
-    private var d: MutableMap<String, ItemDisplay> = mutableMapOf()
 
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
@@ -48,7 +36,9 @@ class PlayerListener(
 
         Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
             val sess = DisplaySession(player, this.plugin, loc)
-            Bukkit.getPluginManager().registerEvents(ControllsListener(this.plugin, sess.chunkSelectWindow.grid), this.plugin)
+            this.sessions[player] = sess
+
+            Bukkit.getPluginManager().registerEvents(ControlsListener(this.plugin, this.sessions), this.plugin)
             sess.start()
         }, 15L)
 

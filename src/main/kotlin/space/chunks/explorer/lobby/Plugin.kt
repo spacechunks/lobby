@@ -2,8 +2,10 @@ package space.chunks.explorer.lobby
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import org.bukkit.*
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import space.chunks.explorer.lobby.display.DisplayGrid
+import space.chunks.explorer.lobby.display.DisplaySession
 import space.chunks.explorer.lobby.listener.PlayerListener
 import space.chunks.explorer.lobby.world.VoidWorldGenerator
 import java.util.*
@@ -13,6 +15,8 @@ class Plugin : JavaPlugin() {
 
     private lateinit var displayGrid: DisplayGrid
     private lateinit var chunkClient: ChunkServiceGrpcKt.ChunkServiceCoroutineStub
+
+    private val sessions = mutableMapOf<Player, DisplaySession>()
 
     // LIGHT BLUE #7ce8fe
     // A BIT DARKER BLUE #53d0fd
@@ -51,7 +55,7 @@ class Plugin : JavaPlugin() {
         prepareWorld(voidWorld)
 
 
-        Bukkit.getPluginManager().registerEvents(PlayerListener(this, voidWorld), this)
+        Bukkit.getPluginManager().registerEvents(PlayerListener(this, voidWorld, this.sessions), this)
     }
 
     private fun prepareWorld(voidWorld: World) {
