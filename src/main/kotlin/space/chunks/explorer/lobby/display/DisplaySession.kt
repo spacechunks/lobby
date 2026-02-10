@@ -24,7 +24,7 @@ class DisplaySession(
     val plugin: Plugin,
     val location: Location
 ) {
-    private val center = this.location.clone().add(0.0, 3.0, 10.0)
+    val center = this.location.clone().add(0.0, 3.0, 10.0)
 
 //    val grid = DisplayGrid(
 //        this.center,
@@ -57,110 +57,17 @@ class DisplaySession(
         // TODO: fetch chunks
         spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
 
-        this.chunkSelectWindow.render()
+//        this.chunkSelectWindow.render()
 
-//        center.world.spawn(center.clone().add(0.0, 3.5, 0.0), ItemDisplay::class.java) { d ->
-//            val stack = ItemStack(Material.PAPER)
-//            stack.editMeta { m ->0
-//                m.itemModel = NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo")
-//            }
-//
-//            d.setItemStack(stack)
-//
-//            d.billboard = Display.Billboard.CENTER
-//
-//            d.transformation = Transformation(
-//                d.transformation.translation,
-//                d.transformation.leftRotation,
-//                Vector3f(7f, 3.5f, 1f),
-//                d.transformation.rightRotation
-//            )
-//        }
+        val m = mutableListOf(
+//            "Flavor ABC",
+            "abcdefghijii",
+//            "abcdefghijklmnoprst",
+//            "abcde",
+//            "abcdefghijklmnopqrstuvwxy",
+        )
 
-////        spawnUiElement(
-////            center.clone().add(0.0, 3.0, 0.0),
-////            3.0f,
-////            NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo"),
-////            false
-////        )
-////
-////        spawnUiElement(
-////            center.clone().add(-7.0, 4.0, 0.0),
-////            1.0f,
-////            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2")
-////        )
-//
-//        spawnUiElement(
-//            center.clone().add(-3.5, 3.5, 0.0),
-//            Vector3f(1f, 1f, 1f),
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
-//            true,
-//        )
-//
-//        spawnUiElement(
-//            center.clone().add(-3.0, 5.0, 0.0),
-//            Vector3f(.6f, .6f, .6f),
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
-//            true,
-//        )
-//
-//
-//        spawnUiElement(
-//            center.clone().add(3.6, 4.5, 0.0),
-//            Vector3f(1f, 1f, 1f),
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
-//            true,
-//        )
-//
-//        val lol = spawnUiElement(
-//            center.clone().add(3.5, 2.5, 0.0),
-//            Vector3f(.8f, .8f, .8f),
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone4"),
-//            true,
-//        )
-//
-//
-//        val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
-//        val arrowUp = spawnUiElement(
-//            arrowUpLoc,
-//            Vector3f(.8f, .8f, 0.5f),
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
-//            false,
-//        )
-//
-//        val arrowDonw = spawnUiElement(
-//            arrowUpLoc.clone().subtract(0.0, .6, 0.0),
-//            Vector3f(.8f, .8f, 0.5f),
-//            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
-//            false,
-//        )
-//
-//        val gameItems = mutableListOf<ChunkDisplay>()
-//        for (i in 0..7) {
-//            gameItems.add(ChunkDisplay(
-//                title = Component.text("Game ${i}"),
-//                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail")!!
-//            ))
-//        }
-//
-//        for (i in 0..7) {
-//            gameItems.add(ChunkDisplay(
-//                title = Component.text("Game ${i}"),
-//                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail2")!!,
-//            ))
-//        }
-//
-//        for (i in 0..7) {
-//            gameItems.add(ChunkDisplay(
-//                title = Component.text("Game ${i}"),
-//                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail3")!!,
-//            ))
-//        }
-//
-//        this.grid.setAllItems(gameItems)
-//        this.grid.setInitialFocus()
-
-
+        FlavorSelectWindow(this.plugin, this.center, m).render()
     }
 
     fun stop() {
