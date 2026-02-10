@@ -4,7 +4,7 @@ import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 
-abstract class Window(protected val plugin: Plugin, protected val center: Location) {
+abstract class Window(protected val plugin: Plugin, protected val center: Location, protected val session: DisplaySession) {
     abstract fun render()
     abstract fun close()
     abstract fun handleInput(player: Player, input: Input)

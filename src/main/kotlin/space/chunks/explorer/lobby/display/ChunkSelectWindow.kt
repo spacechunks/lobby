@@ -16,7 +16,7 @@ import org.joml.Vector3f
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ChunkSelectWindow(plugin: Plugin, center: Location) : Window(plugin, center) {
+class ChunkSelectWindow(plugin: Plugin, center: Location, session: DisplaySession) : Window(plugin, center, session) {
     val grid = DisplayGrid(
         this.center,
         4,
@@ -138,6 +138,16 @@ class ChunkSelectWindow(plugin: Plugin, center: Location) : Window(plugin, cente
             Input.A -> this.grid.moveFocusLeft()
             Input.S -> this.grid.moveFocusDown()
             Input.D -> this.grid.moveFocusRight()
+            Input.SPACE -> {
+                val m = mutableListOf(
+//            "Flavor ABC",
+                    "abcdefghijii",
+                    "abcdefghijklmnoprst",
+//            "abcde",
+//            "abcdefghijklmnopqrstuvwxy",
+                )
+                this.session.switchWindow(FlavorSelectWindow(this.plugin, this.center, this.session, m))
+            }
             else -> {}
         }
     }
