@@ -1,15 +1,15 @@
 package space.chunks.explorer.lobby
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
-import org.bukkit.*
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
 import space.chunks.explorer.lobby.display.DisplayGrid
 import space.chunks.explorer.lobby.display.DisplaySession
+import space.chunks.explorer.lobby.listener.ControlsListener
 import space.chunks.explorer.lobby.listener.PlayerListener
 import space.chunks.explorer.lobby.world.VoidWorldGenerator
-import java.util.*
 
 
 class Plugin : JavaPlugin() {
@@ -49,6 +49,7 @@ class Plugin : JavaPlugin() {
 //            }
 //        }
 
+        Bukkit.getPluginManager().registerEvents(ControlsListener(this, this.sessions), this)
         Bukkit.getPluginManager().registerEvents(PlayerListener(this, this.sessions), this)
     }
 

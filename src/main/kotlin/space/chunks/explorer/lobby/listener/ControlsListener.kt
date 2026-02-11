@@ -23,6 +23,8 @@ class ControlsListener(
         val player = event.player
         val input = event.input
 
+        // TODO: clean map entries when player leaves
+
         handleDirectionalInput(player, "forward", input.isForward()) {
             this.sessions[player]?.handleInput(Input.W)
         }

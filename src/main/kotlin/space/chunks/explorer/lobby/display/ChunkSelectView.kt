@@ -15,7 +15,7 @@ import org.joml.Vector3f
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ChunkSelectWindow(plugin: Plugin, center: Location, session: DisplaySession) : Window(plugin, center, session) {
+class ChunkSelectView(plugin: Plugin, center: Location, session: DisplaySession) : View(plugin, center, session) {
     val grid = DisplayGrid(
         this.center,
         4,
@@ -151,7 +151,7 @@ class ChunkSelectWindow(plugin: Plugin, center: Location, session: DisplaySessio
                     5
                 )
                 player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
-                this.session.switchWindow(FlavorSelectWindow(this.plugin, this.center, this.session, m))
+                this.session.switchWindow(FlavorSelectView(this.plugin, this.center, this.session, m))
             }
             else -> {}
         }
