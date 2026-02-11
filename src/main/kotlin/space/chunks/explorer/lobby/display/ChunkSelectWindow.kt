@@ -7,7 +7,6 @@ import org.bukkit.NamespacedKey
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerInputEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitRunnable
@@ -129,7 +128,7 @@ class ChunkSelectWindow(plugin: Plugin, center: Location, session: DisplaySessio
             this.grid.setInitialFocus()
         }
 
-        if (input == Input.W || input == Input.A ||  input == Input.S || input == Input.D) {
+        if (input == Input.W || input == Input.A || input == Input.S || input == Input.D || input == Input.SPACE) {
             player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
         }
 
@@ -139,13 +138,19 @@ class ChunkSelectWindow(plugin: Plugin, center: Location, session: DisplaySessio
             Input.S -> this.grid.moveFocusDown()
             Input.D -> this.grid.moveFocusRight()
             Input.SPACE -> {
-                val m = mutableListOf(
-//            "Flavor ABC",
-                    "abcdefghijii",
-                    "abcdefghijklmnoprst",
-//            "abcde",
-//            "abcdefghijklmnopqrstuvwxy",
+                val m = PaginatedList(
+                    listOf(
+                        "Flavor ABC",
+                        "abcdefghijii",
+                        "abcdefghijklmnoprst",
+                        "abcde",
+                        "abcdefghijklmno",
+                        "abcdefghijklmnopqrstuvwxy",
+                        "abcdefghijklmnopqrstuvwxy",
+                    ),
+                    5
                 )
+                player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
                 this.session.switchWindow(FlavorSelectWindow(this.plugin, this.center, this.session, m))
             }
             else -> {}
