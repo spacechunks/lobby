@@ -2,15 +2,12 @@ package space.chunks.explorer.lobby.display
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.Display
-import org.bukkit.entity.Entity
-import org.bukkit.entity.ItemDisplay
-import org.bukkit.entity.Player
-import org.bukkit.entity.TextDisplay
+import org.bukkit.entity.*
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitRunnable
@@ -25,54 +22,49 @@ class FlavorSelectWindow(
     plugin: Plugin,
     center: Location,
     session: DisplaySession,
-    private val flavors: List<String>
+    private val flavors: PaginatedList<String>,
 ) : Window(plugin, center, session) {
+    private val mini = MiniMessage.miniMessage()
+    private val texts = mutableMapOf<Int, TextDisplay>()
+
+    private var pageIndicator: TextDisplay? = null
+    private var selectMarker: ItemDisplay? = null
+    private var currPage = 0
+    private var currIdx = 0
 
     private val elements = mutableListOf<Entity>()
 
     private fun xOff(biggest: Int): Double {
         return mapOf(
-            1 to 4.7,
+            1 to 4.5,
             2 to 4.5,
             3 to 4.3,
-            4 to 4.2,
-            5 to 4.0,
-            6 to 3.8,
-            7 to 3.6,
-            8 to 3.4,
-            9 to 3.2,
+            4 to 4.1,
+            5 to 3.9,
+            6 to 3.6,
+            7 to 3.5,
+            8 to 3.3,
+            9 to 3.1,
             10 to 2.7, // 3.0
-            11 to 2.8,
-            12 to 2.5,
-            13 to 2.3,
-            14 to 2.2,
-            15 to 1.9,
-            16 to 1.8,
-            17 to 1.4,
-            18 to 1.4,
-            19 to 1.2,
-            20 to 1.0,
-            21 to 0.8,
+            11 to 2.9,
+            12 to 2.7,
+            13 to 2.5,
+            14 to 2.3,
+            15 to 2.1,
+            16 to 1.9,
+            17 to 1.7,
+            18 to 1.6,
+            19 to 1.4,
+            20 to 1.2,
+            21 to 1.0,
             22 to 0.8,
-            23 to 0.4,
-            24 to 0.1,
+            23 to 0.6,
+            24 to 0.4,
             25 to 0.2,
         )[biggest] ?: 1.0
     }
 
-    private fun yOff(n: Int): Double {
-        return mapOf(
-            1 to 0.5,
-            2 to -0.5,
-            3 to -1.0,
-            4 to -1.5,
-            5 to -1.7,
-        )[n] ?: 1.0
-    }
-
     override fun render() {
-        val textLocs = mutableListOf<Location>()
-
         center.world.spawn(center.clone().add(-0.05, 3.8, 0.0), ItemDisplay::class.java) { d ->
             val stack = ItemStack(Material.PAPER)
             stack.editMeta { m ->
@@ -142,35 +134,10 @@ class FlavorSelectWindow(
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
             true,
         )
-        var space = 0.0
 
-        val d = this.flavors.sortedByDescending { it.length }
-
-        val start = this.center.clone().subtract(0.0, this.yOff(this.flavors.size), 0.0)
-
-        for (f in this.flavors) {
-            space += 1.0
-            val fill = 25 - f.length
-            var str = f
-            if (fill > 0) {
-                str += " ".repeat(fill)
-            }
-
-
-            val d = this.spawnTextElement(
-                Component.text(str),
-                start.clone().subtract(0.0, 0.5, 0.0) .subtract(this.xOff(d.first().length), space, 0.0),
-                3f,
-            )
-            textLocs.add(d.location)
-        }
-
-        this.spawnUiElement(
-            textLocs.first().clone().subtract(-5.0, -0.32, 0.0),
-            Vector3f(0.5f, 0.5f, .5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_right"),
-            false,
-        )
+        this.renderTexts()
+        this.updateSelectionMark()
+        this.updatePageIndicator()
     }
 
     override fun close() {
@@ -178,13 +145,126 @@ class FlavorSelectWindow(
     }
 
     override fun handleInput(player: Player, input: Input) {
-        TODO("Not yet implemented")
+        when (input) {
+            Input.W -> this.currIdx--
+            Input.A -> this.currPage--
+            Input.S -> this.currIdx++
+            Input.D -> this.currPage++
+            Input.SPACE -> {
+                // TODO: run selected chunk flavor
+            }
+
+            else -> {}
+        }
+
+        if (this.currPage > this.flavors.totalPages - 1) {
+            // revert our increment we did before, because we would
+            // exceed the pages list
+            this.currPage--
+            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            return
+        }
+
+        if (this.currPage < 0) {
+            // revert our decrement we did before, because we would
+            // fall below the available pages list
+            this.currPage++
+            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            return
+        }
+
+        if (input == Input.W || input == Input.A || input == Input.S || input == Input.D) {
+            player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+        }
+
+        val pageItemsCount = this.flavors.getPage(this.currPage).size
+
+        if (this.currIdx > pageItemsCount - 1) {
+            this.currIdx = 0 // jump to first entry
+        }
+
+        if (this.currIdx < 0) {
+            this.currIdx = pageItemsCount - 1 // jump to last entry
+        }
+
+        this.renderTexts()
+        this.updateSelectionMark()
+        this.updatePageIndicator()
     }
 
-    private fun renderArrow() {
+    // this is called everytime we receive an input
+    private fun renderTexts() {
+        val pageItems = this.flavors.getPage(this.currPage)
+        val d = pageItems.sortedByDescending { it.length }
+        val xOff = this.xOff(d.first().length)
+        val start = this.center.clone().subtract(0.0, 0.0, 0.0)
 
+        for ((idx, f) in pageItems.withIndex()) {
+            val fill = 25 - f.length
+            var str = f
+            if (fill > 0) {
+                str += " ".repeat(fill)
+            }
+
+            val loc = start.clone().subtract(0.0, 0.5, 0.0).subtract(xOff, 1.0 * idx, 0.0)
+            var txt = Component.text(str)
+            val td = this.texts[idx]
+
+            if (this.currIdx == idx) {
+                txt = txt.color(TextColor.fromHexString("#52cefd"))
+            }
+
+            if (td == null) {
+                this.texts[idx] = this.spawnTextElement(txt, loc, 3f)
+                continue
+            }
+
+            td.text(txt)
+            td.teleport(loc)
+        }
+
+        // clear the rest of the displays, so we don't display
+        // the previous page texts.
+        // to give a concrete example why we need this: if the
+        // first page has 5 items, and we switch to a page that
+        // only has 2 items, the last 3 items would still display
+        // the text of the previous page.
+        for (idx in (pageItems.size..<this.flavors.pageSize)) {
+            this.texts[idx]?.text(Component.text(""))
+        }
     }
 
+    // this is called everytime we receive an input
+    private fun updatePageIndicator() {
+        val txt =
+            this.mini.deserialize("<color:#53d0fd><font:spacechunks:ui>\uE102</font> <white>${this.currPage + 1}/${this.flavors.totalPages} <color:#53d0fd><font:spacechunks:ui>\uE101</font>")
+        if (this.pageIndicator == null) {
+            this.pageIndicator =
+                this.spawnTextElement(
+                    txt,
+                    this.center.clone().subtract(0.0, 6.0, 0.0),
+                    2f,
+                )
+            return
+        }
+        this.pageIndicator?.text(txt)
+    }
+
+    // this is called everytime we receive an input
+    private fun updateSelectionMark() {
+        val loc = this.texts[this.currIdx]!!.location.clone().subtract(-5.0, -0.32, 0.0)
+        if (this.selectMarker == null) {
+            this.selectMarker = this.spawnUiElement(
+                loc,
+                Vector3f(0.5f, 0.5f, .5f),
+                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_right"),
+                false,
+            )
+            return
+        }
+
+        this.selectMarker?.teleport(loc)
+    }
 
     private fun spawnUiElement(
         location: Location,
