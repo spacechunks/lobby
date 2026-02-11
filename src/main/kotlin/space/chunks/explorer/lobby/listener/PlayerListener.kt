@@ -2,8 +2,6 @@ package space.chunks.explorer.lobby.listener
 
 import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.*
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
@@ -18,7 +16,6 @@ import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Transformation
-import org.joml.Matrix4f
 import org.joml.Vector3f
 import space.chunks.explorer.lobby.Plugin
 import space.chunks.explorer.lobby.display.DisplaySession
@@ -46,13 +43,11 @@ class PlayerListener(
 
         val loc = Location(player.location.world, 0.0, 100.0, 0.0)
 
-        Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
-            val sess = DisplaySession(player, this.plugin, loc)
-            this.sessions[player] = sess
 
-            Bukkit.getPluginManager().registerEvents(ControlsListener(this.plugin, this.sessions), this.plugin)
-            sess.start()
-        }, 15L)
+        val sess = DisplaySession(player, this.plugin, loc)
+        this.sessions[player] = sess
+
+        sess.start()
 
 
 //        this.plugin.getCommand("stack")!!.setExecutor { sender, command, label, args ->
@@ -104,60 +99,60 @@ class PlayerListener(
 //            return@setExecutor false
 //        }
 
-        this.plugin.getCommand("len")!!.setExecutor { sender, command, label, args ->
-            if (!label.equals("len", true)) {
-                return@setExecutor false
-            }
-
-            fun spawnTextElement(txt: Component, loc: Location, scale: Float): TextDisplay {
-                return loc.world.spawn(loc, TextDisplay::class.java) { d ->
-                    d.text(txt)
-//                    d.setTransformationMatrix(
-//                        Matrix4f().scale(scale).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
-//                    )
-                    d.alignment = TextDisplay.TextAlignment.LEFT
-                    d.billboard = Display.Billboard.CENTER
-                    d.backgroundColor = Color.fromARGB(0, 0, 0, 0)
-                    d.brightness = Display.Brightness(15, 15)
-                }
-            }
-
-            val fill = 25 - args[0].length
-            var str = args[0]
-            if (fill > 0) {
-                str += " ".repeat(fill)
-            }
-
-            val sess = this.sessions[player]!!
-
-
-            val m = MiniMessage.miniMessage()
-            if (d == null) {
-                d = spawnTextElement(
-                    m.deserialize("<color:#53d0fd><font:spacechunks:ui>\uE102</font> <white>1/10 <color:#53d0fd><font:spacechunks:ui>\uE101</font>"),
-                    sess.center,
-                    0f,
-                )
-
-//                d = spawnTextElement(Component.text(str), sess.center, 3f)
-//                a = this.spawnUiElement(
-//                    sess.center.clone().subtract(-5.0, -0.32, 0.0),
-//                    Vector3f(0.5f, 0.5f, .5f),
-//                    NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_right"),
-//                    false,
+//        this.plugin.getCommand("len")!!.setExecutor { sender, command, label, args ->
+//            if (!label.equals("len", true)) {
+//                return@setExecutor false
+//            }
+//
+//            fun spawnTextElement(txt: Component, loc: Location, scale: Float): TextDisplay {
+//                return loc.world.spawn(loc, TextDisplay::class.java) { d ->
+//                    d.text(txt)
+////                    d.setTransformationMatrix(
+////                        Matrix4f().scale(scale).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
+////                    )
+//                    d.alignment = TextDisplay.TextAlignment.LEFT
+//                    d.billboard = Display.Billboard.CENTER
+//                    d.backgroundColor = Color.fromARGB(0, 0, 0, 0)
+//                    d.brightness = Display.Brightness(15, 15)
+//                }
+//            }
+//
+//            val fill = 25 - args[0].length
+//            var str = args[0]
+//            if (fill > 0) {
+//                str += " ".repeat(fill)
+//            }
+//
+//            val sess = this.sessions[player]!!
+//
+//
+//            val m = MiniMessage.miniMessage()
+//            if (d == null) {
+//                d = spawnTextElement(
+//                    m.deserialize("<color:#53d0fd><font:spacechunks:ui>\uE102</font> <white>1/10 <color:#53d0fd><font:spacechunks:ui>\uE101</font>"),
+//                    sess.center,
+//                    0f,
 //                )
-            }
-
-            val new = sess.center.clone().subtract(args[1].toDouble(), args[2].toDouble(), args[3].toDouble())
-
-//            val arrowSpace = "<font:spacechunks:space>\uF824\uF822\uF821</font> "
-
-            d?.teleport(new)
-            d?.setTransformationMatrix(Matrix4f().scale(args[4].toFloat()))
-//            a?.teleport(new.clone().subtract(-5.0, -0.32, 0.0))
-
-            return@setExecutor false
-        }
+//
+////                d = spawnTextElement(Component.text(str), sess.center, 3f)
+////                a = this.spawnUiElement(
+////                    sess.center.clone().subtract(-5.0, -0.32, 0.0),
+////                    Vector3f(0.5f, 0.5f, .5f),
+////                    NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_right"),
+////                    false,
+////                )
+//            }
+//
+//            val new = sess.center.clone().subtract(args[1].toDouble(), args[2].toDouble(), args[3].toDouble())
+//
+////            val arrowSpace = "<font:spacechunks:space>\uF824\uF822\uF821</font> "
+//
+//            d?.teleport(new)
+//            d?.setTransformationMatrix(Matrix4f().scale(args[4].toFloat()))
+////            a?.teleport(new.clone().subtract(-5.0, -0.32, 0.0))
+//
+//            return@setExecutor false
+//        }
     }
 
     @EventHandler

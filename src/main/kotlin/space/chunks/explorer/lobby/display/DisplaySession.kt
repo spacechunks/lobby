@@ -1,24 +1,14 @@
 package space.chunks.explorer.lobby.display
 
-import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
-import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.World
+import org.bukkit.*
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerInputEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
-import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Transformation
 import org.joml.Vector3f
-import kotlin.math.cos
-import kotlin.math.sin
 
 class DisplaySession(
     val player: Player,
@@ -27,7 +17,7 @@ class DisplaySession(
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)
 
-    private var activeWindow: Window? = null
+    private var activeView: View? = null
     private lateinit var background: ItemDisplay
 
     fun start() {
@@ -51,23 +41,23 @@ class DisplaySession(
 
         // TODO: fetch chunks
         this.background = spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
-        this.activeWindow = ChunkSelectWindow(this.plugin, this.center, this)
-        this.activeWindow?.render()
+        this.activeView = ChunkSelectView(this.plugin, this.center, this)
+        this.activeView?.render()
     }
 
     fun stop() {
-        this.activeWindow?.close()
+        this.activeView?.close()
         this.background.remove()
     }
 
-    fun switchWindow(new: Window) {
-        this.activeWindow?.close()
-        this.activeWindow = new
-        this.activeWindow?.render()
+    fun switchWindow(new: View) {
+        this.activeView?.close()
+        this.activeView = new
+        this.activeView?.render()
     }
 
     fun handleInput(input: Input) {
-        this.activeWindow?.handleInput(this.player, input)
+        this.activeView?.handleInput(this.player, input)
     }
 
     private fun spawnWall(voidWorld: World, scale: Float, z: Int, key: NamespacedKey?): ItemDisplay {

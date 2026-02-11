@@ -18,12 +18,12 @@ import org.joml.Vector3f
 import kotlin.math.cos
 import kotlin.math.sin
 
-class FlavorSelectWindow(
+class FlavorSelectView(
     plugin: Plugin,
     center: Location,
     session: DisplaySession,
     private val flavors: PaginatedList<String>,
-) : Window(plugin, center, session) {
+) : View(plugin, center, session) {
     private val mini = MiniMessage.miniMessage()
     private val texts = mutableMapOf<Int, TextDisplay>()
 
@@ -35,6 +35,7 @@ class FlavorSelectWindow(
     private val elements = mutableListOf<Entity>()
 
     private fun xOff(biggest: Int): Double {
+        // dont ask lmao
         return mapOf(
             1 to 4.5,
             2 to 4.5,
@@ -45,7 +46,7 @@ class FlavorSelectWindow(
             7 to 3.5,
             8 to 3.3,
             9 to 3.1,
-            10 to 2.7, // 3.0
+            10 to 2.7,
             11 to 2.9,
             12 to 2.7,
             13 to 2.5,
@@ -86,7 +87,7 @@ class FlavorSelectWindow(
         }
 
         this.spawnTextElement(
-            Component.text("Choose your Flavor!").color(TextColor.fromHexString("#52cefd")),
+            this.mini.deserialize("<gradient:#E3ECFD:#C1D7F9>Choose your flavor!</gradient>"),
             this.center.clone().add(0.0, 1.0, 0.0), 3.5f,
         )
 
