@@ -7,7 +7,7 @@ import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
-import org.bukkit.util.Transformation
+import org.joml.Matrix4f
 import org.joml.Vector3f
 
 class DisplaySession(
@@ -43,10 +43,14 @@ class DisplaySession(
         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             this.player.spectatorTarget = fixedEntity
         }, 10)
-
-
+        
         // TODO: fetch chunks
-        this.background = spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
+        this.background = spawnWall(
+            this.location.world,
+            75f,
+            20,
+            NamespacedKey.fromString("minecraft:black_concrete"),
+        )
         this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid)
         this.activeView?.render()
     }
@@ -74,15 +78,8 @@ class DisplaySession(
             }
 
             it.brightness = Display.Brightness(15, 15)
-
             it.setItemStack(stack)
-
-            it.transformation = Transformation(
-                it.transformation.translation,
-                it.transformation.leftRotation,
-                Vector3f(scale, scale, 0.1f),
-                it.transformation.rightRotation
-            )
+            it.setTransformationMatrix(Matrix4f().scale(Vector3f(scale, scale, 0.1f)))
         }
     }
 }
