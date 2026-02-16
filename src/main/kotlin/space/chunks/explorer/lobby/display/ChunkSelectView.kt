@@ -23,6 +23,13 @@ class ChunkSelectView(
 ) : View(plugin, center, session) {
     private val elements = mutableListOf<ItemDisplay>()
 
+    private val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
+    private val arrowDownLoc = this.arrowUpLoc.clone().subtract(0.0, .6, 0.0)
+    private val middleArrowLoc = center.clone().add(8.0, -1.7, 0.0)
+
+    private var arrowDown: ItemDisplay? = null
+    private var arrowUp: ItemDisplay? = null
+
     override fun render() {
         center.world.spawn(center.clone().add(0.0, 3.5, 0.0), ItemDisplay::class.java) { d ->
             val stack = ItemStack(Material.PAPER)
@@ -43,7 +50,6 @@ class ChunkSelectView(
                 d.transformation.rightRotation
             )
         }
-
 
         spawnUiElement(
             center.clone().add(-3.5, 3.5, 0.0),
@@ -74,21 +80,8 @@ class ChunkSelectView(
             true,
         )
 
-
-        val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
-        val arrowUp = spawnUiElement(
-            arrowUpLoc,
-            Vector3f(.8f, .8f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
-            false,
-        )
-
-        val arrowDonw = spawnUiElement(
-            arrowUpLoc.clone().subtract(0.0, .6, 0.0),
-            Vector3f(.8f, .8f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
-            false,
-        )
+        this.spawnArrowUp(this.arrowUpLoc)
+        this.spawnArrowDown(this.arrowDownLoc)
 
         val gameItems = mutableListOf<ChunkDisplay>()
         for (i in 0..7) {
@@ -113,6 +106,7 @@ class ChunkSelectView(
         }
 
         this.grid.setAllItems(gameItems)
+        this.renderArrows()
         this.grid.setInitialFocus()
     }
 
@@ -131,9 +125,15 @@ class ChunkSelectView(
         }
 
         when (input) {
-            Input.W -> this.grid.moveFocusUp()
+            Input.W -> {
+                this.grid.moveFocusUp()
+                this.renderArrows()
+            }
             Input.A -> this.grid.moveFocusLeft()
-            Input.S -> this.grid.moveFocusDown()
+            Input.S -> {
+                this.grid.moveFocusDown()
+                this.renderArrows()
+            }
             Input.D -> this.grid.moveFocusRight()
             Input.SPACE -> {
                 val m = PaginatedList(
@@ -155,6 +155,68 @@ class ChunkSelectView(
                 player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
             }
         }
+    }
+
+    private fun renderArrows() {
+        // there is only one page, so don't display any arrows
+        if (this.grid.getTotalPages() == 1) {
+            this.arrowUp?.remove()
+            this.arrowDown?.remove()
+            this.arrowUp = null
+            this.arrowDown = null
+            return
+        }
+
+        // we are on the first page and there are multiple pages ahead,
+        // so only display the arrow down
+        if (this.grid.getCurrentPage() == 1 && this.grid.getTotalPages() >= 1) {
+            this.arrowUp?.remove()
+            this.arrowUp = null
+            this.spawnArrowDown(this.middleArrowLoc)
+            return
+        }
+
+        // we are on the last page, so only display arrow up
+        if (this.grid.getCurrentPage() == this.grid.getTotalPages()) {
+            this.arrowDown?.remove()
+            this.arrowDown = null
+            this.spawnArrowUp(this.middleArrowLoc)
+            return
+        }
+
+        // we are in the middle pages, meaning we can navigate
+        // up or down, so display both arrows.
+
+        this.spawnArrowUp(this.arrowUpLoc)
+        this.spawnArrowDown(this.arrowDownLoc)
+    }
+
+    private fun spawnArrowUp(loc: Location) {
+        if (this.arrowUp == null) {
+            this.arrowUp = spawnUiElement(
+                loc,
+                Vector3f(.8f, .8f, 0.5f),
+                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
+                false,
+            )
+            return
+        }
+
+        this.arrowUp?.teleport(loc)
+    }
+
+    private fun spawnArrowDown(loc: Location) {
+        if (this.arrowDown == null) {
+            this.arrowDown = spawnUiElement(
+                loc,
+                Vector3f(.8f, .8f, 0.5f),
+                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
+                false,
+            )
+            return
+        }
+
+        this.arrowDown?.teleport(loc)
     }
 
     private fun spawnUiElement(

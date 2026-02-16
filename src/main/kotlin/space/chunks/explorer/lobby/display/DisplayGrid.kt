@@ -25,7 +25,7 @@ class DisplayGrid(
     }
 
     fun getCurrentPage(): Int {
-        return currentPage
+        return currentPage + 1
     }
 
     fun setAllItems(items: List<ChunkDisplay>) {
