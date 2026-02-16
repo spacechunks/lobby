@@ -120,21 +120,25 @@ class ChunkSelectView(
             this.grid.setInitialFocus()
         }
 
-        if (input == Input.W || input == Input.A || input == Input.S || input == Input.D || input == Input.SPACE) {
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
-        }
+        var hasNext = false
 
         when (input) {
             Input.W -> {
-                this.grid.moveFocusUp()
+                hasNext = this.grid.moveFocusUp()
                 this.renderArrows()
             }
-            Input.A -> this.grid.moveFocusLeft()
+
+            Input.A -> {
+                hasNext = this.grid.moveFocusLeft()
+            }
             Input.S -> {
-                this.grid.moveFocusDown()
+                hasNext = this.grid.moveFocusDown()
                 this.renderArrows()
             }
-            Input.D -> this.grid.moveFocusRight()
+
+            Input.D -> {
+                hasNext = this.grid.moveFocusRight()
+            }
             Input.SPACE -> {
                 val m = PaginatedList(
                     listOf(
@@ -155,6 +159,13 @@ class ChunkSelectView(
                 player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
             }
         }
+
+        if (!hasNext) {
+            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            return
+        }
+
+        player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
     }
 
     private fun renderArrows() {
