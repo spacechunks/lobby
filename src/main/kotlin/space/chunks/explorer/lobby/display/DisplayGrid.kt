@@ -65,7 +65,6 @@ class DisplayGrid(
             if (displays.isNotEmpty()) {
                 setInitialFocus()
             }
-
         }, 2L)
     }
 
