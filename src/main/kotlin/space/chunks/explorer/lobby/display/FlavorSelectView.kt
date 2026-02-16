@@ -155,6 +155,7 @@ class FlavorSelectView(
                 // TODO: run selected chunk flavor
             }
             Input.SNEAK -> {
+                player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
                 this.session.switchWindow(ChunkSelectView(this.plugin, this.center, this.session, this.session.grid))
             }
         }
