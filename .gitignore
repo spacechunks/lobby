@@ -5,6 +5,7 @@ build/
 !**/src/test/**/build/
 
 /pack/
+.kotlin/
 
 ### IntelliJ IDEA ###
 .idea/
