@@ -1,11 +1,7 @@
 package space.chunks.explorer.lobby.display
 
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.World
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -122,12 +118,12 @@ class DisplayGrid(
         focusedIndex = -1
     }
 
-    fun clearAll() {
-        clear()
-        allGameItems.clear()
-        totalItems = 0
-        currentPage = 0
-    }
+//    fun clearAll() {
+//        clear()
+//        allGameItems.clear()
+//        totalItems = 0
+//        currentPage = 0
+//    }
 
     fun setInitialFocus(): Boolean {
         if (displays.isEmpty()) return false

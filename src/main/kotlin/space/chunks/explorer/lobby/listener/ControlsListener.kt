@@ -45,6 +45,10 @@ class ControlsListener(
             this.sessions[player]?.handleInput(Input.SPACE)
         }
 
+        handleDirectionalInput(player, "sneak", input.isSneak()) {
+            this.sessions[player]?.handleInput(Input.SNEAK)
+        }
+
 //        handleDirectionalInput(player, "forward", input.isForward()) { displayGrid.moveFocusUp() }
 //        handleDirectionalInput(player, "backward", input.isBackward()) { displayGrid.moveFocusDown() }
 //        handleDirectionalInput(player, "left", input.isLeft()) { displayGrid.moveFocusLeft() }

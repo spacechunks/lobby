@@ -15,14 +15,12 @@ import org.joml.Vector3f
 import kotlin.math.cos
 import kotlin.math.sin
 
-class ChunkSelectView(plugin: Plugin, center: Location, session: DisplaySession) : View(plugin, center, session) {
-    val grid = DisplayGrid(
-        this.center,
-        4,
-        this.plugin,
-        8
-    )
-
+class ChunkSelectView(
+    plugin: Plugin,
+    center: Location,
+    session: DisplaySession,
+    val grid: DisplayGrid
+) : View(plugin, center, session) {
     private val elements = mutableListOf<ItemDisplay>()
 
     override fun render() {
@@ -120,7 +118,7 @@ class ChunkSelectView(plugin: Plugin, center: Location, session: DisplaySession)
 
     override fun close() {
         this.elements.forEach { it.remove() }
-        this.grid.clearAll()
+        this.grid.clear()
     }
 
     override fun handleInput(player: Player, input: Input) {
@@ -153,7 +151,9 @@ class ChunkSelectView(plugin: Plugin, center: Location, session: DisplaySession)
                 player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
                 this.session.switchWindow(FlavorSelectView(this.plugin, this.center, this.session, m))
             }
-            else -> {}
+            Input.SNEAK -> {
+                player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            }
         }
     }
 

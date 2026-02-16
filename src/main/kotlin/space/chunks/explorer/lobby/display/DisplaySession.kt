@@ -16,6 +16,12 @@ class DisplaySession(
     val location: Location
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)
+    val grid = DisplayGrid(
+        center,
+        4,
+        plugin,
+        8
+    )
 
     private var activeView: View? = null
     private lateinit var background: ItemDisplay
@@ -41,7 +47,7 @@ class DisplaySession(
 
         // TODO: fetch chunks
         this.background = spawnWall(this.location.world, 75f, 20, NamespacedKey.fromString("minecraft:black_concrete"))
-        this.activeView = ChunkSelectView(this.plugin, this.center, this)
+        this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid)
         this.activeView?.render()
     }
 

@@ -92,21 +92,21 @@ class FlavorSelectView(
         )
 
         this.spawnUiElement(
-            this.center.clone().add(-7.5, 1.5, 0.0),
+            this.center.clone().add(-6.5, 1.5, 0.0),
             Vector3f(4.0f, 4.0f, 4.0f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/satellite"),
             true,
         )
 
         this.spawnUiElement(
-            this.center.clone().add(-10.5, 3.0, 0.0),
+            this.center.clone().add(-9.5, 3.0, 0.0),
             Vector3f(1.0f, 1.0f, 1.0f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
             true,
         )
 
         this.spawnUiElement(
-            this.center.clone().add(-8.5, -1.5, 0.0),
+            this.center.clone().add(-7.5, -1.5, 0.0),
             Vector3f(1.0f, 1.0f, 1.0f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
             true,
@@ -114,7 +114,7 @@ class FlavorSelectView(
 
 //        /stack 10.5 -6.0 1.5 spacechunks:explorer/chunk_select/stone1 2.5 true
         this.spawnUiElement(
-            this.center.clone().add(9.5, -5.0, 0.0),
+            this.center.clone().add(8.5, -5.0, 0.0),
             Vector3f(2.5f, 2.5f, 2.5f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
             true,
@@ -122,7 +122,7 @@ class FlavorSelectView(
 
 //        /stack 10.5 -8.0 1.5 spacechunks:explorer/chunk_select/stone2 .5 true
         this.spawnUiElement(
-            this.center.clone().add(9.5, -7.0, 0.0),
+            this.center.clone().add(8.5, -7.0, 0.0),
             Vector3f(0.5f, 0.5f, 0.5f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
             true,
@@ -130,7 +130,7 @@ class FlavorSelectView(
 
 //        /stack 10.0 -5.0 1.5 spacechunks:explorer/chunk_select/stone3 .7 true
         this.spawnUiElement(
-            this.center.clone().add(9.5, -3.8, 0.0),
+            this.center.clone().add(8.5, -3.8, 0.0),
             Vector3f(0.7f, 0.7f, 0.7f),
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
             true,
@@ -154,8 +154,9 @@ class FlavorSelectView(
             Input.SPACE -> {
                 // TODO: run selected chunk flavor
             }
-
-            else -> {}
+            Input.SNEAK -> {
+                this.session.switchWindow(ChunkSelectView(this.plugin, this.center, this.session, this.session.grid))
+            }
         }
 
         if (this.currPage > this.flavors.totalPages - 1) {
