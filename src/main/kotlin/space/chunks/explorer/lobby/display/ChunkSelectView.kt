@@ -2,11 +2,12 @@ package space.chunks.explorer.lobby.display
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
+import space.chunks.explorer.lobby.pack.Sounds
+import space.chunks.explorer.lobby.pack.Textures
 
 class ChunkSelectView(
     plugin: Plugin,
@@ -25,35 +26,35 @@ class ChunkSelectView(
         this.spawnItemDisplay(
             center.clone().add(0.0, 3.5, 0.0),
             Vector3f(7f, 3.5f, 1f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo"),
+            Textures.LOGO_WIDE,
             false,
         )
 
         this.spawnItemDisplay(
             center.clone().add(-3.5, 3.5, 0.0),
             Vector3f(1f, 1f, 1f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
+            Textures.STONE_1,
             true,
         )
 
         this.spawnItemDisplay(
             center.clone().add(-3.0, 5.0, 0.0),
             Vector3f(.6f, .6f, .6f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
+            Textures.STONE_3,
             true,
         )
 
         this.spawnItemDisplay(
             center.clone().add(3.6, 4.5, 0.0),
             Vector3f(1f, 1f, 1f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
+            Textures.STONE_2,
             true,
         )
 
         this.spawnItemDisplay(
             center.clone().add(3.5, 2.5, 0.0),
             Vector3f(.8f, .8f, .8f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone4"),
+            Textures.STONE_4,
             true,
         )
 
@@ -63,22 +64,22 @@ class ChunkSelectView(
         val gameItems = mutableListOf<ChunkDisplay>()
         for (i in 0..7) {
             gameItems.add(ChunkDisplay(
-                title = Component.text("Game ${i}"),
-                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail")!!
+                title = Component.text("Game $i"),
+                thumbnailTextureKey = Textures.PH_THUMBNAIL_1!!
             ))
         }
 
         for (i in 0..7) {
             gameItems.add(ChunkDisplay(
-                title = Component.text("Game ${i}"),
-                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail2")!!,
+                title = Component.text("Game $i"),
+                thumbnailTextureKey = Textures.PH_THUMBNAIL_2!!,
             ))
         }
 
         for (i in 0..7) {
             gameItems.add(ChunkDisplay(
-                title = Component.text("Game ${i}"),
-                thumbnailTextureKey = NamespacedKey.fromString("spacechunks:explorer/chunk_select/chunk_thumbnail3")!!,
+                title = Component.text("Game $i"),
+                thumbnailTextureKey = Textures.PH_THUMBNAIL_3!!,
             ))
         }
 
@@ -129,20 +130,20 @@ class ChunkSelectView(
                     ),
                     5
                 )
-                player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+                player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
                 this.session.switchWindow(FlavorSelectView(this.plugin, this.center, this.session, m))
             }
             Input.SNEAK -> {
-                player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+                player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
             }
         }
 
         if (!hasNext) {
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
             return
         }
 
-        player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+        player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
     }
 
     private fun renderArrows() {
@@ -184,7 +185,7 @@ class ChunkSelectView(
             this.arrowUp = this.spawnItemDisplay(
                 loc,
                 Vector3f(.8f, .8f, 0.5f),
-                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_up"),
+                Textures.ARROW_UP,
                 false,
             )
             return
@@ -198,7 +199,7 @@ class ChunkSelectView(
             this.arrowDown = this.spawnItemDisplay(
                 loc,
                 Vector3f(.8f, .8f, 0.5f),
-                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_down"),
+                Textures.ARROW_DOWN,
                 false,
             )
             return

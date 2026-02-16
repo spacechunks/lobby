@@ -4,12 +4,13 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Location
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
+import space.chunks.explorer.lobby.pack.Sounds
+import space.chunks.explorer.lobby.pack.Textures
 
 class FlavorSelectView(
     plugin: Plugin,
@@ -60,7 +61,7 @@ class FlavorSelectView(
         this.spawnItemDisplay(
             center.clone().add(-0.05, 3.8, 0.0),
             Vector3f(7f, 3.5f, 1f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo"),
+            Textures.LOGO_WIDE,
             false
         )
 
@@ -72,42 +73,42 @@ class FlavorSelectView(
         this.spawnItemDisplay(
             this.center.clone().add(-6.5, 1.5, 0.0),
             Vector3f(4.0f, 4.0f, 4.0f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/satellite"),
+            Textures.SATELLITE,
             true,
         )
 
         this.spawnItemDisplay(
             this.center.clone().add(-9.5, 3.0, 0.0),
             Vector3f(1.0f, 1.0f, 1.0f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
+            Textures.STONE_2,
             true,
         )
 
         this.spawnItemDisplay(
             this.center.clone().add(-7.5, -1.5, 0.0),
             Vector3f(1.0f, 1.0f, 1.0f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
+            Textures.STONE_3,
             true,
         )
 
         this.spawnItemDisplay(
             this.center.clone().add(8.5, -5.0, 0.0),
             Vector3f(2.5f, 2.5f, 2.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
+            Textures.STONE_1,
             true,
         )
 
         this.spawnItemDisplay(
             this.center.clone().add(8.5, -7.0, 0.0),
             Vector3f(0.5f, 0.5f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
+            Textures.STONE_2,
             true,
         )
 
         this.spawnItemDisplay(
             this.center.clone().add(8.5, -3.8, 0.0),
             Vector3f(0.7f, 0.7f, 0.7f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
+            Textures.STONE_3,
             true,
         )
 
@@ -130,7 +131,7 @@ class FlavorSelectView(
                 // TODO: run selected chunk flavor
             }
             Input.SNEAK -> {
-                player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+                player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
                 this.session.switchWindow(ChunkSelectView(this.plugin, this.center, this.session, this.session.grid))
             }
         }
@@ -139,7 +140,7 @@ class FlavorSelectView(
             // revert our increment we did before, because we would
             // exceed the pages list
             this.currPage--
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
             return
         }
 
@@ -147,12 +148,12 @@ class FlavorSelectView(
             // revert our decrement we did before, because we would
             // fall below the available pages list
             this.currPage++
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
             return
         }
 
         if (input == Input.W || input == Input.A || input == Input.S || input == Input.D) {
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
         }
 
         val pageItemsCount = this.flavors.getPage(this.currPage).size
@@ -235,7 +236,7 @@ class FlavorSelectView(
             this.selectMarker = this.spawnItemDisplay(
                 loc,
                 Vector3f(0.5f, 0.5f, .5f),
-                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_right"),
+                Textures.ARROW_RIGHT,
                 false,
             )
             return

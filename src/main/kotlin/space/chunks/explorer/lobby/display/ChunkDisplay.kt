@@ -13,7 +13,6 @@ import org.joml.AxisAngle4f
 import org.joml.Matrix4f
 import org.joml.Vector3f
 
-
 class ChunkDisplay(
     val title: Component,
     private val thumbnailTextureKey: NamespacedKey,
@@ -73,13 +72,10 @@ class ChunkDisplay(
         itemDisplay = null
     }
 
-
-    fun isSpawned(): Boolean {
-        return backgroundDisplay != null && highlightDisplay != null && itemDisplay != null
-    }
-
     fun setFocus(focused: Boolean, animate: Boolean = false, plugin: org.bukkit.plugin.Plugin? = null): Boolean {
         if (isFocused == focused) return false
+
+        // in german we call what comes next "kompletter einschiss"
 
         if (focused) {
             this.stopBreathing = false
@@ -123,12 +119,12 @@ class ChunkDisplay(
                 space += 0.25
                 val descLoc = loc.clone().subtract(0.0, space, 0.0)
                 val tdDesc = descLoc.world.spawnEntity(descLoc, EntityType.TEXT_DISPLAY) as TextDisplay
-                tdDesc!!.text(Component.text(l!!))
-                tdDesc!!.backgroundColor = Color.fromARGB(0, 0, 0, 0)
-                tdDesc!!.setTransformationMatrix(
+                tdDesc.text(Component.text(l!!))
+                tdDesc.backgroundColor = Color.fromARGB(0, 0, 0, 0)
+                tdDesc.setTransformationMatrix(
                     Matrix4f().scale(1f).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
                 )
-                this.tdDesc!!.add(tdDesc)
+                this.tdDesc.add(tdDesc)
             }
 
         } else {
@@ -144,7 +140,7 @@ class ChunkDisplay(
         val current = StringBuilder()
 
         for (word in input.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
-            if (current.length == 0) {
+            if (current.isEmpty()) {
                 current.append(word)
             } else if (current.length + 1 + word.length <= maxLineLength) {
                 current.append(' ').append(word)
@@ -161,37 +157,6 @@ class ChunkDisplay(
 
         return lines
     }
-
-    val WORD_POOL: Array<String> = arrayOf<String>(
-        "minecraft", "plugin", "display", "entity", "paper", "server", "player",
-        "world", "block", "chunk", "random", "system", "text", "hologram",
-        "command", "event", "listener", "packet", "network", "update",
-        "position", "vector", "height", "scale", "transform", "render",
-        "logic", "spacing", "perfect", "dynamic", "calculation"
-    )
-
-    fun randomSentence(maxLength: Int): String {
-        val random = java.util.Random()
-        val sb = java.lang.StringBuilder()
-
-        while (true) {
-            val word = WORD_POOL[random.nextInt(WORD_POOL.size)]
-
-            if (sb.isEmpty()) {
-                if (word.length > maxLength) continue
-                sb.append(word)
-            } else {
-                if (sb.length + 1 + word.length > maxLength) break
-                sb.append(' ').append(word)
-            }
-        }
-
-        sb.setCharAt(0, sb.get(0).uppercaseChar())
-        sb.append('.')
-
-        return sb.toString()
-    }
-
 
     fun updateFocus() {
         val iconScale = if (isFocused) ICON_FOCUS_SCALE else ICON_SCALE
