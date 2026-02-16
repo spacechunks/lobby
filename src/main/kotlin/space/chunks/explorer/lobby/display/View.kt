@@ -58,13 +58,6 @@ abstract class View(
             d.setTransformationMatrix(Matrix4f().scale(scale))
             d.brightness = Display.Brightness(15, 15)
 
-//            d.transformation = Transformation(
-//                d.transformation.translation,
-//                d.transformation.leftRotation,
-//                scale,
-//                d.transformation.rightRotation
-//            )
-
             this.elements.add(d)
 
             if (!animate) return@spawn

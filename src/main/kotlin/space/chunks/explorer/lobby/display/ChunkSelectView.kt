@@ -2,14 +2,10 @@ package space.chunks.explorer.lobby.display
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
-import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.Display
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
-import org.bukkit.util.Transformation
 import org.joml.Vector3f
 
 class ChunkSelectView(
@@ -26,25 +22,12 @@ class ChunkSelectView(
     private var arrowUp: ItemDisplay? = null
 
     override fun render() {
-        center.world.spawn(center.clone().add(0.0, 3.5, 0.0), ItemDisplay::class.java) { d ->
-            val stack = ItemStack(Material.PAPER)
-            stack.editMeta { m ->
-                m.itemModel = NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo")
-            }
-
-            this.elements.add(d)
-
-            d.setItemStack(stack)
-
-            d.billboard = Display.Billboard.CENTER
-
-            d.transformation = Transformation(
-                d.transformation.translation,
-                d.transformation.leftRotation,
-                Vector3f(7f, 3.5f, 1f),
-                d.transformation.rightRotation
-            )
-        }
+        this.spawnItemDisplay(
+            center.clone().add(0.0, 3.5, 0.0),
+            Vector3f(7f, 3.5f, 1f),
+            NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo"),
+            false,
+        )
 
         this.spawnItemDisplay(
             center.clone().add(-3.5, 3.5, 0.0),
@@ -59,7 +42,6 @@ class ChunkSelectView(
             NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
             true,
         )
-
 
         this.spawnItemDisplay(
             center.clone().add(3.6, 4.5, 0.0),
