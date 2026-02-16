@@ -3,20 +3,14 @@ package space.chunks.explorer.lobby.display
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.Color
 import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.entity.*
-import org.bukkit.inventory.ItemStack
+import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.Player
+import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
-import org.bukkit.scheduler.BukkitRunnable
-import org.bukkit.util.Transformation
-import org.joml.AxisAngle4f
-import org.joml.Matrix4f
 import org.joml.Vector3f
-import kotlin.math.cos
-import kotlin.math.sin
+import space.chunks.explorer.lobby.pack.Sounds
+import space.chunks.explorer.lobby.pack.Textures
 
 class FlavorSelectView(
     plugin: Plugin,
@@ -31,8 +25,6 @@ class FlavorSelectView(
     private var selectMarker: ItemDisplay? = null
     private var currPage = 0
     private var currIdx = 0
-
-    private val elements = mutableListOf<Entity>()
 
     private fun xOff(biggest: Int): Double {
         // dont ask lmao
@@ -66,73 +58,57 @@ class FlavorSelectView(
     }
 
     override fun render() {
-        center.world.spawn(center.clone().add(-0.05, 3.8, 0.0), ItemDisplay::class.java) { d ->
-            val stack = ItemStack(Material.PAPER)
-            stack.editMeta { m ->
-                m.itemModel = NamespacedKey.fromString("spacechunks:explorer/chunk_select/logo")
-            }
-
-            this.elements.add(d)
-
-            d.setItemStack(stack)
-
-            d.billboard = Display.Billboard.CENTER
-
-            d.transformation = Transformation(
-                d.transformation.translation,
-                d.transformation.leftRotation,
-                Vector3f(7f, 3.5f, 1f),
-                d.transformation.rightRotation
-            )
-        }
+        this.spawnItemDisplay(
+            center.clone().add(-0.05, 3.8, 0.0),
+            Vector3f(7f, 3.5f, 1f),
+            Textures.LOGO_WIDE,
+            false
+        )
 
         this.spawnTextElement(
             this.mini.deserialize("<gradient:#E3ECFD:#C1D7F9>Choose your flavor!</gradient>"),
             this.center.clone().add(0.0, 1.0, 0.0), 3.5f,
         )
 
-        this.spawnUiElement(
+        this.spawnItemDisplay(
             this.center.clone().add(-6.5, 1.5, 0.0),
             Vector3f(4.0f, 4.0f, 4.0f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/satellite"),
+            Textures.SATELLITE,
             true,
         )
 
-        this.spawnUiElement(
+        this.spawnItemDisplay(
             this.center.clone().add(-9.5, 3.0, 0.0),
             Vector3f(1.0f, 1.0f, 1.0f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
+            Textures.STONE_2,
             true,
         )
 
-        this.spawnUiElement(
+        this.spawnItemDisplay(
             this.center.clone().add(-7.5, -1.5, 0.0),
             Vector3f(1.0f, 1.0f, 1.0f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
+            Textures.STONE_3,
             true,
         )
 
-//        /stack 10.5 -6.0 1.5 spacechunks:explorer/chunk_select/stone1 2.5 true
-        this.spawnUiElement(
+        this.spawnItemDisplay(
             this.center.clone().add(8.5, -5.0, 0.0),
             Vector3f(2.5f, 2.5f, 2.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone1"),
+            Textures.STONE_1,
             true,
         )
 
-//        /stack 10.5 -8.0 1.5 spacechunks:explorer/chunk_select/stone2 .5 true
-        this.spawnUiElement(
+        this.spawnItemDisplay(
             this.center.clone().add(8.5, -7.0, 0.0),
             Vector3f(0.5f, 0.5f, 0.5f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone2"),
+            Textures.STONE_2,
             true,
         )
 
-//        /stack 10.0 -5.0 1.5 spacechunks:explorer/chunk_select/stone3 .7 true
-        this.spawnUiElement(
+        this.spawnItemDisplay(
             this.center.clone().add(8.5, -3.8, 0.0),
             Vector3f(0.7f, 0.7f, 0.7f),
-            NamespacedKey.fromString("spacechunks:explorer/chunk_select/stone3"),
+            Textures.STONE_3,
             true,
         )
 
@@ -155,7 +131,7 @@ class FlavorSelectView(
                 // TODO: run selected chunk flavor
             }
             Input.SNEAK -> {
-                player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+                player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
                 this.session.switchWindow(ChunkSelectView(this.plugin, this.center, this.session, this.session.grid))
             }
         }
@@ -164,7 +140,7 @@ class FlavorSelectView(
             // revert our increment we did before, because we would
             // exceed the pages list
             this.currPage--
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
             return
         }
 
@@ -172,12 +148,12 @@ class FlavorSelectView(
             // revert our decrement we did before, because we would
             // fall below the available pages list
             this.currPage++
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click_err", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
             return
         }
 
         if (input == Input.W || input == Input.A || input == Input.S || input == Input.D) {
-            player.playSound(player.location, "spacechunks.explorer.chunk_select.click", 0.5f, 1f)
+            player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
         }
 
         val pageItemsCount = this.flavors.getPage(this.currPage).size
@@ -257,98 +233,15 @@ class FlavorSelectView(
     private fun updateSelectionMark() {
         val loc = this.texts[this.currIdx]!!.location.clone().subtract(-5.0, -0.32, 0.0)
         if (this.selectMarker == null) {
-            this.selectMarker = this.spawnUiElement(
+            this.selectMarker = this.spawnItemDisplay(
                 loc,
                 Vector3f(0.5f, 0.5f, .5f),
-                NamespacedKey.fromString("spacechunks:explorer/chunk_select/arrow_right"),
+                Textures.ARROW_RIGHT,
                 false,
             )
             return
         }
 
         this.selectMarker?.teleport(loc)
-    }
-
-    private fun spawnUiElement(
-        location: Location,
-        scale: Vector3f,
-        key: NamespacedKey?,
-        animate: Boolean,
-//        tick: Long
-    ): ItemDisplay {
-        return location.world.spawn(location, ItemDisplay::class.java) { d ->
-            val stack = ItemStack(Material.PAPER)
-            stack.editMeta { m ->
-                m.itemModel = key
-            }
-
-            this.elements.add(d)
-
-            d.setItemStack(stack)
-
-            d.billboard = Display.Billboard.CENTER
-
-            d.transformation = Transformation(
-                d.transformation.translation,
-                d.transformation.leftRotation,
-                scale,
-                d.transformation.rightRotation
-            )
-
-            d.brightness = Display.Brightness(15, 15)
-
-
-            if (!animate) return@spawn
-
-            // AI
-            val base: Transformation = d.getTransformation()
-            val baseTranslation = Vector3f(base.getTranslation())
-
-            val rand = java.util.Random()
-            val step = rand.nextFloat(0.02f, 0.04f)
-
-            object : BukkitRunnable() {
-                var time: Double = Math.random() * Math.PI * 2
-
-                override fun run() {
-//                    time += 0.02
-                    time += step
-
-                    val x = (sin(time) * 0.15).toFloat()
-                    val y = (sin(time * 1.5) * 0.10).toFloat()
-                    val z = (cos(time * 1.2) * 0.15).toFloat()
-
-                    val translation = Vector3f(
-                        baseTranslation.x + x,
-                        baseTranslation.y + y,
-                        baseTranslation.z + z
-                    )
-
-                    val t: Transformation = Transformation(
-                        translation,
-                        base.getLeftRotation(),
-                        base.getScale(),
-                        base.getRightRotation()
-                    )
-
-                    d.setTransformation(t)
-                    d.interpolationDelay = 0
-                }
-            }.runTaskTimer(this.plugin, 0L, 1)
-        }
-    }
-
-    private fun spawnTextElement(txt: Component, loc: Location, scale: Float): TextDisplay {
-        return loc.world.spawn(loc, TextDisplay::class.java) { d ->
-            this.elements.add(d)
-            d.text(txt)
-            d.setTransformationMatrix(
-                Matrix4f().scale(scale).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
-            )
-            d.alignment = TextDisplay.TextAlignment.LEFT
-            d.billboard = Display.Billboard.FIXED
-            d.backgroundColor = Color.fromARGB(0, 0, 0, 0)
-            d.brightness = Display.Brightness(15, 15)
-        }
     }
 }

@@ -48,16 +48,6 @@ class ControlsListener(
         handleDirectionalInput(player, "sneak", input.isSneak()) {
             this.sessions[player]?.handleInput(Input.SNEAK)
         }
-
-//        handleDirectionalInput(player, "forward", input.isForward()) { displayGrid.moveFocusUp() }
-//        handleDirectionalInput(player, "backward", input.isBackward()) { displayGrid.moveFocusDown() }
-//        handleDirectionalInput(player, "left", input.isLeft()) { displayGrid.moveFocusLeft() }
-//        handleDirectionalInput(player, "right", input.isRight()) { displayGrid.moveFocusRight() }
-//
-//        if (player.isSneaking) {
-//            handleDirectionalInput(player, "sneak_left", input.isLeft()) { displayGrid.previousPage() }
-//            handleDirectionalInput(player, "sneak_right", input.isRight()) { displayGrid.nextPage() }
-//        }
     }
 
     private fun handleDirectionalInput(
