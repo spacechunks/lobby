@@ -163,7 +163,7 @@ class PlayerListener(
 
     @EventHandler
     fun onSpectateUnmount(event: PlayerStopSpectatingEntityEvent) {
-//        event.isCancelled = true
+        event.isCancelled = true
     }
 
     @EventHandler

@@ -1,11 +1,7 @@
 package space.chunks.explorer.lobby.display
 
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Location
-import org.bukkit.Material
-import org.bukkit.NamespacedKey
-import org.bukkit.World
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -59,21 +55,18 @@ class DisplayGrid(
 
             item.location = position
             item.center = this.centerLocation
-//            if (i == startIndex)
-//                display.spawn(item.key, true, this.plugin)
-//            else
-                item.spawn()
+            item.spawn()
             new.add(item)
         }
 
         Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
             clear()
             this.displays.addAll(new)
-        }, 1L)
+            if (displays.isNotEmpty()) {
+                setInitialFocus()
+            }
 
-        if (displays.isNotEmpty()) {
-            setInitialFocus()
-        }
+        }, 2L)
     }
 
     private fun calculatePositionInPage(indexInPage: Int): Location {
@@ -117,20 +110,22 @@ class DisplayGrid(
     }
 
     fun clear() {
-        displays.forEach { it.remove() }
+        displays.forEach {
+            it.setFocus(false)
+            it.remove()
+        }
         displays.clear()
         focusedIndex = -1
     }
 
-    fun clearAll() {
-        clear()
-        allGameItems.clear()
-        totalItems = 0
-        currentPage = 0
-    }
+//    fun clearAll() {
+//        clear()
+//        allGameItems.clear()
+//        totalItems = 0
+//        currentPage = 0
+//    }
 
     fun setInitialFocus(): Boolean {
-        if (displays.isEmpty()) return false
         return setFocus(0)
     }
 
