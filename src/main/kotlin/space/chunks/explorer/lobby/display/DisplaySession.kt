@@ -46,9 +46,8 @@ class DisplaySession(
         
         // TODO: fetch chunks
         this.background = spawnWall(
-            this.location.world,
+            this.location.clone().add(0.0, 0.0, 20.0),
             75f,
-            20,
             NamespacedKey.fromString("minecraft:black_concrete"),
         )
         this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid)
@@ -70,8 +69,8 @@ class DisplaySession(
         this.activeView?.handleInput(this.player, input)
     }
 
-    private fun spawnWall(voidWorld: World, scale: Float, z: Int, key: NamespacedKey?): ItemDisplay {
-        return voidWorld.spawn(Location(voidWorld, 0.0, 100.0, z.toDouble()), ItemDisplay::class.java) {
+    private fun spawnWall(location: Location, scale: Float, key: NamespacedKey?): ItemDisplay {
+        return location.world.spawn(location, ItemDisplay::class.java) {
             val stack = ItemStack(Material.PAPER)
             stack.editMeta { m ->
                 m.itemModel = key
