@@ -2,11 +2,14 @@ package space.chunks.explorer.lobby
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import org.bukkit.Bukkit
+import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.util.Vector
 import space.chunks.explorer.lobby.display.DisplayGrid
 import space.chunks.explorer.lobby.display.DisplaySession
+import space.chunks.explorer.lobby.listener.CancelListener
 import space.chunks.explorer.lobby.listener.ControlsListener
 import space.chunks.explorer.lobby.listener.PlayerListener
 import space.chunks.explorer.lobby.world.VoidWorldGenerator
@@ -14,10 +17,8 @@ import space.chunks.explorer.lobby.world.VoidWorldGenerator
 
 class Plugin : JavaPlugin() {
 
-    private lateinit var displayGrid: DisplayGrid
-    private lateinit var chunkClient: ChunkServiceGrpcKt.ChunkServiceCoroutineStub
-
     private val sessions = mutableMapOf<Player, DisplaySession>()
+    private lateinit var chunkClient: ChunkServiceGrpcKt.ChunkServiceCoroutineStub
 
     // LIGHT BLUE #7ce8fe
     // A BIT DARKER BLUE #53d0fd
@@ -49,8 +50,11 @@ class Plugin : JavaPlugin() {
 //            }
 //        }
 
+        val spawn = Vector(0.0, 100.0, 0.0)
+
         Bukkit.getPluginManager().registerEvents(ControlsListener(this, this.sessions), this)
-        Bukkit.getPluginManager().registerEvents(PlayerListener(this, this.sessions), this)
+        Bukkit.getPluginManager().registerEvents(PlayerListener(this, this.sessions, spawn), this)
+        Bukkit.getPluginManager().registerEvents(CancelListener(), this)
     }
 
 
