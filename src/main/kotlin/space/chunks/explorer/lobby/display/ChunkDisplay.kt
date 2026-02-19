@@ -1,5 +1,6 @@
 package space.chunks.explorer.lobby.display
 
+import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.*
@@ -15,6 +16,7 @@ import org.joml.Vector3f
 
 class ChunkDisplay(
     val title: Component,
+    val chunk: Types.Chunk,
     private val thumbnailTextureKey: NamespacedKey,
 ) {
 

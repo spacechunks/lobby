@@ -1,5 +1,6 @@
 package space.chunks.explorer.lobby.display
 
+import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -16,7 +17,7 @@ class FlavorSelectView(
     plugin: Plugin,
     center: Location,
     session: DisplaySession,
-    private val flavors: PaginatedList<String>,
+    private val flavors: PaginatedList<Types.Flavor>,
 ) : View(plugin, center, session) {
     private val mini = MiniMessage.miniMessage()
     private val texts = mutableMapOf<Int, TextDisplay>()
@@ -174,13 +175,13 @@ class FlavorSelectView(
     // this is called everytime we receive an input
     private fun renderTexts() {
         val pageItems = this.flavors.getPage(this.currPage)
-        val d = pageItems.sortedByDescending { it.length }
-        val xOff = this.xOff(d.first().length)
+        val d = pageItems.sortedByDescending { it.name.length }
+        val xOff = this.xOff(d.first().name.length)
         val start = this.center.clone().subtract(0.0, 0.0, 0.0)
 
         for ((idx, f) in pageItems.withIndex()) {
-            val fill = 25 - f.length
-            var str = f
+            val fill = 25 - f.name.length
+            var str = f.name
             if (fill > 0) {
                 str += " ".repeat(fill)
             }

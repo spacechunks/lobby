@@ -39,7 +39,7 @@ class PlayerListener(
             Vector(Bukkit.getOnlinePlayers().size * 100.0, 0.0, 0.0),
         )
 
-        val sess = DisplaySession(player, this.plugin, loc)
+        val sess = DisplaySession(player, this.plugin, loc, this.plugin.chunks)
         this.sessions[player] = sess
 
         sess.start()

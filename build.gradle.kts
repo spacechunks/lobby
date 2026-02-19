@@ -1,7 +1,6 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.google.protobuf.gradle.*
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -27,7 +26,7 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.5.0")
     implementation("io.grpc:grpc-protobuf:1.61.0")
     implementation("io.grpc:grpc-netty:1.61.0")
-    api("com.google.protobuf:protobuf-kotlin:4.33.1")
+    api("com.google.protobuf:protobuf-kotlin:3.25.8")
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
@@ -51,6 +50,11 @@ tasks.withType<KotlinCompile> {
 
 tasks.named("shadowJar", ShadowJar::class) {
     mergeServiceFiles()
+    // ai told me to do this, because of class loader problems with paper
+    relocate(
+        "com.google.protobuf",
+        "space.chunks.shadow.protobuf"
+    )
     archiveFileName.set("${project.name}.jar")
 }
 
@@ -80,7 +84,7 @@ sourceSets {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.23.1"
+        artifact = "com.google.protobuf:protoc:3.25.8"
     }
     plugins {
         create("grpc") {
