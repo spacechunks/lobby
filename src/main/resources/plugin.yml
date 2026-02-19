@@ -1,8 +1,8 @@
-name: explorer-lobby
+name: chunk-viewer
 version: 1.0.0
 main: space.chunks.explorer.lobby.Plugin
 api-version: 1.21.4
-load: STARTUP
+load: STARTUP # needed, so it can make use of the world generator that we set in bukkit.yml
 commands:
   len:
   stack:

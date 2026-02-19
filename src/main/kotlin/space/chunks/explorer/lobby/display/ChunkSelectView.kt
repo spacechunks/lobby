@@ -2,6 +2,7 @@ package space.chunks.explorer.lobby.display
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Location
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -13,7 +14,7 @@ class ChunkSelectView(
     plugin: Plugin,
     center: Location,
     session: DisplaySession,
-    val grid: DisplayGrid
+    val grid: DisplayGrid,
 ) : View(plugin, center, session) {
     private val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
     private val arrowDownLoc = this.arrowUpLoc.clone().subtract(0.0, .6, 0.0)
@@ -61,29 +62,36 @@ class ChunkSelectView(
         this.spawnArrowUp(this.arrowUpLoc)
         this.spawnArrowDown(this.arrowDownLoc)
 
-        val gameItems = mutableListOf<ChunkDisplay>()
-        for (i in 0..7) {
-            gameItems.add(ChunkDisplay(
-                title = Component.text("Game $i"),
-                thumbnailTextureKey = Textures.PH_THUMBNAIL_1!!
-            ))
-        }
+        val items = this.session.chunks.map { c ->
+            ChunkDisplay(
+                Component.text(c.name),
+                c,
+                NamespacedKey.fromString("spacechunks:explorer/chunk_select/thumbnails/missing")!!,
+            )
+        }.toList()
 
-        for (i in 0..7) {
-            gameItems.add(ChunkDisplay(
-                title = Component.text("Game $i"),
-                thumbnailTextureKey = Textures.PH_THUMBNAIL_2!!,
-            ))
-        }
+//        for (i in 0..7) {
+//            gameItems.add(ChunkDisplay(
+//                title = Component.text("Game $i"),
+//                thumbnailTextureKey = Textures.PH_THUMBNAIL_1!!
+//            ))
+//        }
+//
+//        for (i in 0..7) {
+//            gameItems.add(ChunkDisplay(
+//                title = Component.text("Game $i"),
+//                thumbnailTextureKey = Textures.PH_THUMBNAIL_2!!,
+//            ))
+//        }
+//
+//        for (i in 0..7) {
+//            gameItems.add(ChunkDisplay(
+//                title = Component.text("Game $i"),
+//                thumbnailTextureKey = Textures.PH_THUMBNAIL_3!!,
+//            ))
+//        }
 
-        for (i in 0..7) {
-            gameItems.add(ChunkDisplay(
-                title = Component.text("Game $i"),
-                thumbnailTextureKey = Textures.PH_THUMBNAIL_3!!,
-            ))
-        }
-
-        this.grid.setAllItems(gameItems)
+        this.grid.setAllItems(items)
         this.renderArrows()
         this.grid.setInitialFocus()
     }
@@ -118,16 +126,9 @@ class ChunkSelectView(
                 hasNext = this.grid.moveFocusRight()
             }
             Input.SPACE -> {
+                val focused = this.grid.getFocusedGameItem()
                 val m = PaginatedList(
-                    listOf(
-                        "Flavor ABC",
-                        "abcdefghijii",
-                        "abcdefghijklmnoprst",
-                        "abcde",
-                        "abcdefghijklmno",
-                        "abcdefghijklmnopqrstuvwxy",
-                        "abcdefghijklmnopqrstuvwxy",
-                    ),
+                    focused!!.chunk.flavorsList.toList(),
                     5
                 )
                 player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
