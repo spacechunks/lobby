@@ -1,5 +1,6 @@
 package space.chunks.explorer.lobby.listener
 
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.GameRule
 import org.bukkit.entity.Player
@@ -33,6 +34,7 @@ class PlayerListener(
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
+        event.joinMessage(Component.text(""))
         val player = event.player
 
         val loc = this.spawn.toLocation(player.world).add(
