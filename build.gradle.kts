@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.3.10"
     id("xyz.jpenilla.run-paper") version "2.3.1"
     id("com.gradleup.shadow") version "9.0.0-beta4"
     id("com.google.protobuf") version "0.9.5"
@@ -26,8 +26,9 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.5.0")
     implementation("io.grpc:grpc-protobuf:1.61.0")
     implementation("io.grpc:grpc-netty:1.61.0")
+    implementation("aws.sdk.kotlin:s3:1.6.26")
     api("com.google.protobuf:protobuf-kotlin:3.25.8")
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
@@ -63,7 +64,7 @@ tasks {
         downloadPlugins {
             modrinth("ViaVersion", "5.7.0")
         }
-        minecraftVersion("1.21.4")
+        minecraftVersion("1.21.11")
     }
 }
 
