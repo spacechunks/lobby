@@ -1,6 +1,5 @@
 package space.chunks.explorer.lobby.display
 
-import chunks.space.api.explorer.chunk.v1alpha1.Types
 import org.bukkit.*
 import org.bukkit.entity.ArmorStand
 import org.bukkit.entity.Display
@@ -15,7 +14,7 @@ class DisplaySession(
     val player: Player,
     val plugin: Plugin,
     val location: Location,
-    val chunks: List<Types.Chunk>
+    val chunks: List<ChunkDisplay>
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)
     val grid = DisplayGrid(

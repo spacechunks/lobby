@@ -17,7 +17,7 @@ import org.joml.Vector3f
 class ChunkDisplay(
     val title: Component,
     val chunk: Types.Chunk,
-    private val thumbnailTextureKey: NamespacedKey,
+    private val thumbnailKey: NamespacedKey,
 ) {
 
     var location: Location? = null
@@ -46,7 +46,7 @@ class ChunkDisplay(
             this.itemDisplay = world.spawn(iconLocation, ItemDisplay::class.java) { display ->
                 val iconItem = ItemStack(ICON_MATERIAL)
                 iconItem.editMeta { ii ->
-                    ii.itemModel = this.thumbnailTextureKey
+                    ii.itemModel = this.thumbnailKey
                 }
 
                 display.setItemStack(iconItem)

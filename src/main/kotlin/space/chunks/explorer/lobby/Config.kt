@@ -1,32 +1,106 @@
 package space.chunks.explorer.lobby
 
 import org.bukkit.configuration.file.FileConfiguration
-import kotlin.text.split
+
+data class S3Config(
+    val accessKey: String,
+    val secretKey: String,
+    val bucket: String,
+    val region: String,
+    val endpoint: String,
+    val packObjectKey: String
+) {
+    companion object {
+        fun parse(config: FileConfiguration): S3Config {
+            val accessKey =
+                config.getString("resourcePack.s3.accessKey")
+                    ?: throw RuntimeException("resourcePack.s3.accessKey is missing")
+
+            val secretKey =
+                config.getString("resourcePack.s3.secretKey")
+                    ?: throw RuntimeException("resourcePack.s3.secretKey is missing")
+
+            val bucket = config.getString("resourcePack.s3.bucket")
+                ?: throw RuntimeException("resourcePack.s3.bucket is missing")
+
+            val region = config.getString("resourcePack.s3.region")
+                ?: throw RuntimeException("resourcePack.s3.region is missing")
+
+            val endpoint =
+                config.getString("resourcePack.s3.endpoint")
+                    ?: throw RuntimeException("resourcePack.s3.endpoint is missing")
+
+            val objKey =
+                config.getString("resourcePack.s3.packObjectKey")
+                    ?: throw RuntimeException("resourcePack.s3.packObjectKey is missing")
+
+            return S3Config(accessKey, secretKey, bucket, region, endpoint, objKey)
+        }
+    }
+}
+
+data class ResourcePackConfig(
+    val fetchIntervalSeconds: Int,
+    val thumbnailsLocation: String,
+    val thumbnailMissingKey: String,
+    val thumbnailKeyPrefix: String,
+    val s3: S3Config,
+) {
+    companion object {
+        fun parse(config: FileConfiguration): ResourcePackConfig {
+            val fetchIntervalSeconds = config.getInt("resourcePack.fetchIntervalSeconds")
+
+            val thumbnailsLocation = config.getString("resourcePack.thumbnailsLocation")
+                ?: throw RuntimeException("resourcePack.thumbnailsLocation is missing")
+
+            val thumbnailMissingKey = config.getString("resourcePack.thumbnailMissingKey")
+                ?: throw RuntimeException("resourcePack.thumbnailMissingKey is missing")
+
+            val thumbnailKeyPrefix = config.getString("resourcePack.thumbnailKeyPrefix")
+                ?: throw RuntimeException("resourcePack.thumbnailKeyPrefix is missing")
+
+            return ResourcePackConfig(
+                fetchIntervalSeconds,
+                thumbnailsLocation,
+                thumbnailMissingKey,
+                thumbnailKeyPrefix,
+                S3Config.parse(config)
+            )
+        }
+    }
+}
+
+data class ControlPlaneConfig(
+    val addr: String,
+    val port: Int,
+    val apiToken: String,
+) {
+    companion object {
+        fun parse(config: FileConfiguration): ControlPlaneConfig {
+            val explorerEndpoint =
+                config.getString("controlPlane.endpoint")
+                    ?: throw RuntimeException("controlPlane.endpoint is missing")
+
+            val parts = explorerEndpoint.split(":")
+
+            if (parts.size < 2) {
+                throw RuntimeException("controlPlaneEndpoint is invalid")
+            }
+
+            val controlPlaneAPIToken = config.getString("controlPlane.apiToken")
+                ?: throw RuntimeException("controlPlane.apiToken is missing")
+
+            return ControlPlaneConfig(parts[0], parts[1].toInt(), controlPlaneAPIToken)
+        }
+    }
+}
 
 data class Config(
-    val controlPlaneEndpointAddr: String,
-    val controlPlaneEndpointPort: Int,
-    val controlPlaneAPIToken: String,
+    val controlPlane: ControlPlaneConfig,
+    val resourcePack: ResourcePackConfig,
 )
 
 fun parseConfig(config: FileConfiguration): Config {
-    val explorerEndpoint =
-        config.getString("controlPlaneEndpoint")
-            ?: throw RuntimeException("controlPlaneEndpoint is missing")
-
-    val parts = explorerEndpoint.split(":")
-
-    if (parts.size < 2) {
-        throw RuntimeException("controlPlaneEndpoint is invalid")
-    }
-
-    val controlPlaneAPIToken  = config.getString("controlPlaneAPIToken")
-        ?: throw RuntimeException("controlPlaneAPIToken is missing")
-
-    return Config(
-        parts[0],
-        parts[1].toInt(),
-        controlPlaneAPIToken
-    )
+    return Config(ControlPlaneConfig.parse(config), ResourcePackConfig.parse(config))
 }
 

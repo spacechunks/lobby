@@ -1,5 +1,8 @@
 package space.chunks.explorer.lobby.listener
 
+import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialConfigureEvent
+import net.kyori.adventure.resource.ResourcePackInfo
+import net.kyori.adventure.resource.ResourcePackRequest
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.GameRule
@@ -12,9 +15,14 @@ import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.util.Vector
 import space.chunks.explorer.lobby.Plugin
 import space.chunks.explorer.lobby.display.DisplaySession
+import space.chunks.explorer.lobby.pack.PackService
+import java.net.URI
+import java.util.*
+
 
 class PlayerListener(
     private val plugin: Plugin,
+    private val packService: PackService,
     private val sessions: MutableMap<Player, DisplaySession>,
     private val spawn: Vector
 ) : Listener {
@@ -51,5 +59,25 @@ class PlayerListener(
     fun onPlayerQuit(event: PlayerQuitEvent) {
         this.sessions[event.player]?.stop()
         this.sessions.remove(event.player)
+    }
+
+    @EventHandler
+    fun onConfigure(event: PlayerConnectionInitialConfigureEvent) {
+
+        this.plugin.logger.info("PACKHASH ${this.packService.packHash}")
+        this.plugin.logger.info("PACKHASH ${this.packService.packDownloadUrl}")
+
+        val info = ResourcePackInfo.resourcePackInfo(
+            UUID.randomUUID(),
+            URI.create(this.packService.packDownloadUrl),
+            this.packService.packHash.get()
+        )
+
+        val request = ResourcePackRequest.resourcePackRequest()
+            .packs(info)
+            .required(true)
+            .build()
+
+        event.connection.audience.sendResourcePacks(request)
     }
 }

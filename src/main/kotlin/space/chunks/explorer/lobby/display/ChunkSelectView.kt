@@ -1,8 +1,6 @@
 package space.chunks.explorer.lobby.display
 
-import net.kyori.adventure.text.Component
 import org.bukkit.Location
-import org.bukkit.NamespacedKey
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
@@ -62,14 +60,6 @@ class ChunkSelectView(
         this.spawnArrowUp(this.arrowUpLoc)
         this.spawnArrowDown(this.arrowDownLoc)
 
-        val items = this.session.chunks.map { c ->
-            ChunkDisplay(
-                Component.text(c.name),
-                c,
-                NamespacedKey.fromString("spacechunks:explorer/chunk_select/thumbnails/missing")!!,
-            )
-        }.toList()
-
 //        for (i in 0..7) {
 //            gameItems.add(ChunkDisplay(
 //                title = Component.text("Game $i"),
@@ -91,7 +81,7 @@ class ChunkSelectView(
 //            ))
 //        }
 
-        this.grid.setAllItems(items)
+        this.grid.setAllItems(this.session.chunks)
         this.renderArrows()
         this.grid.setInitialFocus()
     }

@@ -1,28 +1,31 @@
 package space.chunks.explorer.lobby
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
-import chunks.space.api.explorer.chunk.v1alpha1.Types
 import chunks.space.api.explorer.chunk.v1alpha1.listChunksRequest
 import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.runBlocking
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.util.Vector
+import space.chunks.explorer.lobby.display.ChunkDisplay
 import space.chunks.explorer.lobby.display.DisplaySession
 import space.chunks.explorer.lobby.grpc.AuthCredentials
 import space.chunks.explorer.lobby.listener.CancelListener
 import space.chunks.explorer.lobby.listener.ControlsListener
 import space.chunks.explorer.lobby.listener.PlayerListener
+import space.chunks.explorer.lobby.pack.PackService
 import space.chunks.explorer.lobby.world.VoidWorldGenerator
+import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.logging.Level
 
 
 class Plugin : JavaPlugin() {
-
-    val chunks = CopyOnWriteArrayList<Types.Chunk>()
+    val chunks = CopyOnWriteArrayList<ChunkDisplay>()
 
     private val sessions = mutableMapOf<Player, DisplaySession>()
 
@@ -39,28 +42,50 @@ class Plugin : JavaPlugin() {
             return
         }
 
+        val packService = PackService(this, cfg.resourcePack)
+
+        packService.startPeriodicPull()
+
         val channel = ManagedChannelBuilder
-            .forAddress(cfg.controlPlaneEndpointAddr, cfg.controlPlaneEndpointPort)
+            .forAddress(cfg.controlPlane.addr, cfg.controlPlane.port)
             .useTransportSecurity()
             .build()
 
         val chunkClient = ChunkServiceGrpcKt.ChunkServiceCoroutineStub(channel)
-            .withCallCredentials(AuthCredentials(cfg.controlPlaneAPIToken))
+            .withCallCredentials(AuthCredentials(cfg.controlPlane.apiToken))
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, { _ ->
             runBlocking {
                 val resp = chunkClient.listChunks(listChunksRequest {})
                 logger.info("got ${resp.chunksList.size} chunks from control plane")
 
+                val d = resp.chunksList.map { c ->
+                    val textureFile = File(
+                        dataFolder,
+                        "pack-files/${cfg.resourcePack.thumbnailsLocation}/${c.id}.png"
+                    )
+
+                    val key =
+                        if (textureFile.exists())
+                            NamespacedKey.fromString("${cfg.resourcePack.thumbnailKeyPrefix}/${c.id}")!!
+                        else
+                            NamespacedKey.fromString(cfg.resourcePack.thumbnailMissingKey)!!
+
+                    ChunkDisplay(Component.text(c.name), c, key)
+                }.toList()
+
                 chunks.clear()
-                chunks.addAll(resp.chunksList)
+                chunks.addAll(d)
             }
         }, 0, 20 * 5)
 
         val spawn = Vector(0.0, 100.0, 0.0)
 
         Bukkit.getPluginManager().registerEvents(ControlsListener(this, this.sessions), this)
-        Bukkit.getPluginManager().registerEvents(PlayerListener(this, this.sessions, spawn), this)
+        Bukkit.getPluginManager().registerEvents(
+            PlayerListener(this, packService, this.sessions, spawn),
+            this
+        )
         Bukkit.getPluginManager().registerEvents(CancelListener(), this)
     }
 
