@@ -61,12 +61,9 @@ class PlayerListener(
         this.sessions.remove(event.player)
     }
 
+    
     @EventHandler
     fun onConfigure(event: PlayerConnectionInitialConfigureEvent) {
-
-        this.plugin.logger.info("PACKHASH ${this.packService.packHash}")
-        this.plugin.logger.info("PACKHASH ${this.packService.packDownloadUrl}")
-
         val info = ResourcePackInfo.resourcePackInfo(
             UUID.randomUUID(),
             URI.create(this.packService.packDownloadUrl),
