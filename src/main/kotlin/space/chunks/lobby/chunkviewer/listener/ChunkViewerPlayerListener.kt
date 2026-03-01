@@ -12,21 +12,23 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.WorldLoadEvent
+import org.bukkit.plugin.Plugin
 import org.bukkit.util.Vector
-import space.chunks.Plugin
-import space.chunks.chunkviewer.display.DisplaySession
-import space.chunks.chunkviewer.pack.PackService
+import space.chunks.lobby.chunkviewer.display.ChunkDisplay
+import space.chunks.lobby.chunkviewer.display.DisplaySession
+import space.chunks.lobby.chunkviewer.pack.PackService
 import java.net.URI
 import java.util.*
 
 // 0.5 -42 0.5
 
 
-class PlayerListener(
+class ChunkViewerPlayerListener(
     private val plugin: Plugin,
     private val packService: PackService,
     private val sessions: MutableMap<Player, DisplaySession>,
-    private val spawn: Vector
+    private val spawn: Vector,
+    private val chunks: List<ChunkDisplay>
 ) : Listener {
 
     @EventHandler
@@ -51,7 +53,7 @@ class PlayerListener(
             Vector(Bukkit.getOnlinePlayers().size * 100.0, 0.0, 0.0),
         )
 
-        val sess = DisplaySession(player, this.plugin, loc, this.plugin.chunks)
+        val sess = DisplaySession(player, this.plugin, loc, this.chunks)
         this.sessions[player] = sess
 
 //        sess.start()

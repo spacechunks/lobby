@@ -8,8 +8,8 @@ import aws.smithy.kotlin.runtime.content.writeToFile
 import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.runBlocking
 import org.bukkit.Bukkit
-import org.bukkit.plugin.java.JavaPlugin
-import space.chunks.chunkviewer.ResourcePackConfig
+import org.bukkit.plugin.Plugin
+import space.chunks.lobby.chunkviewer.ResourcePackConfig
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipInputStream
 
 class PackService(
-    private val plugin: JavaPlugin,
+    private val plugin: Plugin,
     private val cfg: ResourcePackConfig,
 ) {
     val packDownloadUrl = "https://${this.cfg.s3.bucket}.${this.cfg.s3.endpoint.replace("https://", "")}/${this.cfg.s3.packObjectKey}"

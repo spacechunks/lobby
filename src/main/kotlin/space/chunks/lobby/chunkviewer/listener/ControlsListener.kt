@@ -4,17 +4,13 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInputEvent
-import org.bukkit.plugin.Plugin
-import space.chunks.chunkviewer.display.DisplaySession
-import space.chunks.chunkviewer.display.Input
+import space.chunks.lobby.chunkviewer.display.DisplaySession
+import space.chunks.lobby.chunkviewer.display.Input
 
 /**
  * Listener for player input events to navigate the display grid
  */
-class ControlsListener(
-    private val plugin: Plugin,
-    private val sessions: MutableMap<Player, DisplaySession>,
-) : Listener {
+class ControlsListener(private val sessions: MutableMap<Player, DisplaySession>) : Listener {
 
     private val lastInputState = mutableMapOf<String, Boolean>()
 
