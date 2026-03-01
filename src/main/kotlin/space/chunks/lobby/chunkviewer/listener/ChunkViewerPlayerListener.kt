@@ -4,9 +4,7 @@ import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialCo
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
 import org.bukkit.GameRule
-import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -15,7 +13,7 @@ import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.plugin.Plugin
 import org.bukkit.util.Vector
 import space.chunks.lobby.chunkviewer.display.ChunkDisplay
-import space.chunks.lobby.chunkviewer.display.DisplaySession
+import space.chunks.lobby.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.chunkviewer.pack.PackService
 import java.net.URI
 import java.util.*
@@ -26,7 +24,7 @@ import java.util.*
 class ChunkViewerPlayerListener(
     private val plugin: Plugin,
     private val packService: PackService,
-    private val sessions: MutableMap<Player, DisplaySession>,
+    private val sessionService: DisplaySessionService,
     private val spawn: Vector,
     private val chunks: List<ChunkDisplay>
 ) : Listener {
@@ -48,21 +46,11 @@ class ChunkViewerPlayerListener(
     fun onPlayerJoin(event: PlayerJoinEvent) {
         event.joinMessage(Component.text(""))
         val player = event.player
-
-        val loc = this.spawn.toLocation(player.world).add(
-            Vector(Bukkit.getOnlinePlayers().size * 100.0, 0.0, 0.0),
-        )
-
-        val sess = DisplaySession(player, this.plugin, loc, this.chunks)
-        this.sessions[player] = sess
-
-//        sess.start()
     }
 
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
-        this.sessions[event.player]?.stop()
-        this.sessions.remove(event.player)
+        this.sessionService.closeSession(event.player)
     }
 
 
