@@ -1,4 +1,4 @@
-package space.chunks
+package space.chunks.lobby
 
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
@@ -8,10 +8,13 @@ import space.chunks.lobby.spawn.SpawnModule
 
 class Plugin : JavaPlugin() {
 
+    private val chunkViewerMod = ChunkViewerModule(this)
+    private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this)
+
     override fun onEnable() {
         val modules = listOf(
-            ChunkViewerModule(this),
-            SpawnModule(this)
+            chunkViewerMod,
+            spawnMod,
         )
 
         modules.forEach {

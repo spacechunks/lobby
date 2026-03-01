@@ -3,12 +3,20 @@ package space.chunks.lobby.spawn
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
 import space.chunks.lobby.LobbyModule
+import space.chunks.lobby.chunkviewer.display.DisplaySessionService
 
-class SpawnModule(plugin: Plugin) : LobbyModule(plugin) {
+class SpawnModule(
+    private val sessSvc: DisplaySessionService,
+    plugin: Plugin,
+) : LobbyModule(plugin) {
     override fun onEnable() {
-        Bukkit.getPluginManager().registerEvents(SpawnPlayerListener(), this.plugin)
+        val w = Bukkit.getWorld("devlobby")!!
+
+        Bukkit.getPluginManager().registerEvents(
+            SpawnPlayerListener(w, this.sessSvc),
+            this.plugin,
+        )
     }
 
-    override fun onDisable() {
-    }
+    override fun onDisable() {}
 }

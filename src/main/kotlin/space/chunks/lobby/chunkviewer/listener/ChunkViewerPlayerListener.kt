@@ -3,7 +3,6 @@ package space.chunks.lobby.chunkviewer.listener
 import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialConfigureEvent
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
-import net.kyori.adventure.text.Component
 import org.bukkit.GameRule
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -44,7 +43,6 @@ class ChunkViewerPlayerListener(
 
     @EventHandler
     fun onPlayerJoin(event: PlayerJoinEvent) {
-        event.joinMessage(Component.text(""))
         val player = event.player
     }
 
