@@ -4,13 +4,13 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInputEvent
-import space.chunks.lobby.chunkviewer.display.DisplaySession
+import space.chunks.lobby.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.chunkviewer.display.Input
 
 /**
  * Listener for player input events to navigate the display grid
  */
-class ControlsListener(private val sessions: MutableMap<Player, DisplaySession>) : Listener {
+class ControlsListener(private val sessionService: DisplaySessionService) : Listener {
 
     private val lastInputState = mutableMapOf<String, Boolean>()
 
@@ -22,27 +22,27 @@ class ControlsListener(private val sessions: MutableMap<Player, DisplaySession>)
         // TODO: clean map entries when player leaves
 
         handleDirectionalInput(player, "forward", input.isForward()) {
-            this.sessions[player]?.handleInput(Input.W)
+            this.sessionService.getSession(player)?.handleInput(Input.W)
         }
 
         handleDirectionalInput(player, "backward", input.isBackward()) {
-            this.sessions[player]?.handleInput(Input.S)
+            this.sessionService.getSession(player)?.handleInput(Input.S)
         }
 
         handleDirectionalInput(player, "left", input.isLeft()) {
-            this.sessions[player]?.handleInput(Input.A)
+            this.sessionService.getSession(player)?.handleInput(Input.A)
         }
 
         handleDirectionalInput(player, "right", input.isRight()) {
-            this.sessions[player]?.handleInput(Input.D)
+            this.sessionService.getSession(player)?.handleInput(Input.D)
         }
 
         handleDirectionalInput(player, "jump", input.isJump()) {
-            this.sessions[player]?.handleInput(Input.SPACE)
+            this.sessionService.getSession(player)?.handleInput(Input.SPACE)
         }
 
         handleDirectionalInput(player, "sneak", input.isSneak()) {
-            this.sessions[player]?.handleInput(Input.SNEAK)
+            this.sessionService.getSession(player)?.handleInput(Input.SNEAK)
         }
     }
 

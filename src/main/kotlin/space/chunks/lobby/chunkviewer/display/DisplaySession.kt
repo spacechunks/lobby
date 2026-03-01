@@ -44,7 +44,7 @@ class DisplaySession(
         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             this.player.spectatorTarget = fixedEntity
         }, 10)
-        
+
         // TODO: fetch chunks
         this.background = spawnWall(
             this.location.clone().add(0.0, 0.0, 20.0),

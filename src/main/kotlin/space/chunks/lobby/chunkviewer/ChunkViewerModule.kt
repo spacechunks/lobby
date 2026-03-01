@@ -7,24 +7,30 @@ import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.Player
+import org.bukkit.WorldCreator
 import org.bukkit.plugin.Plugin
 import org.bukkit.util.Vector
 import space.chunks.lobby.LobbyModule
 import space.chunks.lobby.chunkviewer.display.ChunkDisplay
-import space.chunks.lobby.chunkviewer.display.DisplaySession
+import space.chunks.lobby.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.chunkviewer.grpc.AuthCredentials
 import space.chunks.lobby.chunkviewer.listener.CancelListener
 import space.chunks.lobby.chunkviewer.listener.ChunkViewerPlayerListener
 import space.chunks.lobby.chunkviewer.listener.ControlsListener
 import space.chunks.lobby.chunkviewer.pack.PackService
+import space.chunks.lobby.chunkviewer.world.VoidWorldGenerator
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
 class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin) {
     val chunks = CopyOnWriteArrayList<ChunkDisplay>()
-
-    private val sessions = mutableMapOf<Player, DisplaySession>()
+    val worldName = "chunk_viewer"
+    val sessionService = DisplaySessionService(
+        this.plugin,
+        this.chunks,
+        Vector(0.0, 100.0, 0.0),
+        this.worldName,
+    )
 
     // FIXME: find better solution
     private val logger = this.plugin.logger
@@ -35,8 +41,14 @@ class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin) {
     // A BIT DARKER BLUE #53d0fd
 
     override fun onEnable() {
-        val cfg = parseConfig(this.config)
+        Bukkit.createWorld(
+            WorldCreator(this.worldName)
+                .generator(VoidWorldGenerator())
+                .generateStructures(false)
+        )
 
+
+        val cfg = parseConfig(this.config)
         val packService = PackService(this.plugin, cfg.resourcePack)
 
         packService.startPeriodicPull()
@@ -76,9 +88,9 @@ class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin) {
 
         val spawn = Vector(0.0, 100.0, 0.0)
 
-        Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessions), this.plugin)
+        Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(
-            ChunkViewerPlayerListener(this.plugin, packService, this.sessions, spawn, this.chunks),
+            ChunkViewerPlayerListener(this.plugin, packService, this.sessionService, spawn, this.chunks),
             this.plugin,
         )
 
