@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 
-class PlayerListener : Listener {
+class SpawnPlayerListener : Listener {
 
     @EventHandler
     private fun onPlayerJoin(event: PlayerJoinEvent) {

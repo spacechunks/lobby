@@ -10,8 +10,8 @@ import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
-import space.chunks.chunkviewer.pack.Sounds
-import space.chunks.chunkviewer.pack.Textures
+import space.chunks.lobby.chunkviewer.pack.Sounds
+import space.chunks.lobby.chunkviewer.pack.Textures
 
 class FlavorSelectView(
     plugin: Plugin,

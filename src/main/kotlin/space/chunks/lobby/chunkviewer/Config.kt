@@ -44,7 +44,7 @@ data class ResourcePackConfig(
     val thumbnailsLocation: String,
     val thumbnailMissingKey: String,
     val thumbnailKeyPrefix: String,
-    val s3: space.chunks.chunkviewer.S3Config,
+    val s3: S3Config,
 ) {
     companion object {
         fun parse(config: FileConfiguration): ResourcePackConfig {
