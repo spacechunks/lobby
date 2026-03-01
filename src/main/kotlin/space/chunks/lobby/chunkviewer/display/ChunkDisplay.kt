@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.display
+package space.chunks.lobby.chunkviewer.display
 
 import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component

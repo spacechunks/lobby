@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.pack
+package space.chunks.lobby.chunkviewer.pack
 
 import org.bukkit.NamespacedKey
 

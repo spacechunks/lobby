@@ -1,12 +1,12 @@
-package space.chunks.explorer.lobby.listener
+package space.chunks.lobby.chunkviewer.listener
 
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInputEvent
 import org.bukkit.plugin.Plugin
-import space.chunks.explorer.lobby.display.DisplaySession
-import space.chunks.explorer.lobby.display.Input
+import space.chunks.chunkviewer.display.DisplaySession
+import space.chunks.chunkviewer.display.Input
 
 /**
  * Listener for player input events to navigate the display grid

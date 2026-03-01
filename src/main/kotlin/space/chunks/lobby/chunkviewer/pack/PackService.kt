@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.pack
+package space.chunks.lobby.chunkviewer.pack
 
 import aws.sdk.kotlin.runtime.auth.credentials.StaticCredentialsProvider
 import aws.sdk.kotlin.services.s3.S3Client
@@ -9,7 +9,7 @@ import aws.smithy.kotlin.runtime.net.url.Url
 import kotlinx.coroutines.runBlocking
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
-import space.chunks.explorer.lobby.ResourcePackConfig
+import space.chunks.chunkviewer.ResourcePackConfig
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest

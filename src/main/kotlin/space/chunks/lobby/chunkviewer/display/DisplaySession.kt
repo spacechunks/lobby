@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.display
+package space.chunks.lobby.chunkviewer.display
 
 import org.bukkit.*
 import org.bukkit.entity.ArmorStand
