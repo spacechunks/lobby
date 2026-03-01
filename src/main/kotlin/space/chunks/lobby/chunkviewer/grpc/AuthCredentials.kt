@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.grpc
+package space.chunks.lobby.chunkviewer.grpc
 
 import io.grpc.CallCredentials
 import io.grpc.Metadata

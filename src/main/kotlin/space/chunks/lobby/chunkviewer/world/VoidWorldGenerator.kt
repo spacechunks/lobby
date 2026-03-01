@@ -1,9 +1,9 @@
-package space.chunks.explorer.lobby.world
+package space.chunks.lobby.chunkviewer.world
 
 import org.bukkit.generator.BiomeProvider
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.generator.WorldInfo
-import java.util.Random
+import java.util.*
 
 class VoidWorldGenerator : ChunkGenerator() {
 

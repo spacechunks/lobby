@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby
+package space.chunks
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import chunks.space.api.explorer.chunk.v1alpha1.listChunksRequest
@@ -11,18 +11,19 @@ import org.bukkit.entity.Player
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.util.Vector
-import space.chunks.explorer.lobby.display.ChunkDisplay
-import space.chunks.explorer.lobby.display.DisplaySession
-import space.chunks.explorer.lobby.grpc.AuthCredentials
-import space.chunks.explorer.lobby.listener.CancelListener
-import space.chunks.explorer.lobby.listener.ControlsListener
-import space.chunks.explorer.lobby.listener.PlayerListener
-import space.chunks.explorer.lobby.pack.PackService
-import space.chunks.explorer.lobby.world.VoidWorldGenerator
+import space.chunks.lobby.chunkviewer.Config
+import space.chunks.lobby.chunkviewer.display.ChunkDisplay
+import space.chunks.lobby.chunkviewer.display.DisplaySession
+import space.chunks.lobby.chunkviewer.grpc.AuthCredentials
+import space.chunks.lobby.chunkviewer.listener.CancelListener
+import space.chunks.lobby.chunkviewer.listener.ControlsListener
+import space.chunks.lobby.chunkviewer.listener.PlayerListener
+import space.chunks.lobby.chunkviewer.pack.PackService
+import space.chunks.lobby.chunkviewer.parseConfig
+import space.chunks.lobby.chunkviewer.world.VoidWorldGenerator
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.logging.Level
-
 
 class Plugin : JavaPlugin() {
     val chunks = CopyOnWriteArrayList<ChunkDisplay>()
@@ -87,6 +88,10 @@ class Plugin : JavaPlugin() {
             this
         )
         Bukkit.getPluginManager().registerEvents(CancelListener(), this)
+
+
+        // lobby
+        Bukkit.getPluginManager().registerEvents(space.chunks.lobby.spawn.PlayerListener(), this)
     }
 
 

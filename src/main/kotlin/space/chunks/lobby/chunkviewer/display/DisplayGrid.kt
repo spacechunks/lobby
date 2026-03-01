@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.display
+package space.chunks.lobby.chunkviewer.display
 
 import org.bukkit.Bukkit
 import org.bukkit.Location

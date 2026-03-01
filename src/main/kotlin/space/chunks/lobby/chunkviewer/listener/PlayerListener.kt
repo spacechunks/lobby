@@ -1,4 +1,4 @@
-package space.chunks.explorer.lobby.listener
+package space.chunks.lobby.chunkviewer.listener
 
 import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialConfigureEvent
 import net.kyori.adventure.resource.ResourcePackInfo
@@ -13,11 +13,13 @@ import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.util.Vector
-import space.chunks.explorer.lobby.Plugin
-import space.chunks.explorer.lobby.display.DisplaySession
-import space.chunks.explorer.lobby.pack.PackService
+import space.chunks.Plugin
+import space.chunks.chunkviewer.display.DisplaySession
+import space.chunks.chunkviewer.pack.PackService
 import java.net.URI
 import java.util.*
+
+// 0.5 -42 0.5
 
 
 class PlayerListener(
@@ -52,7 +54,7 @@ class PlayerListener(
         val sess = DisplaySession(player, this.plugin, loc, this.plugin.chunks)
         this.sessions[player] = sess
 
-        sess.start()
+//        sess.start()
     }
 
     @EventHandler
@@ -61,7 +63,7 @@ class PlayerListener(
         this.sessions.remove(event.player)
     }
 
-    
+
     @EventHandler
     fun onConfigure(event: PlayerConnectionInitialConfigureEvent) {
         val info = ResourcePackInfo.resourcePackInfo(
