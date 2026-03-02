@@ -23,3 +23,7 @@ object Sounds {
     val CLICK = "spacechunks.explorer.chunk_viewer.click"
     val CLICK_ERR = "spacechunks.explorer.chunk_viewer.click_err"
 }
+
+object Fonts {
+    val CHUNK_VIEWER = NamespacedKey.fromString("spacechunks:chunk_viewer")
+}
