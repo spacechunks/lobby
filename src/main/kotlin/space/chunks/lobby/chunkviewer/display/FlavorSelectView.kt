@@ -10,6 +10,7 @@ import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
+import space.chunks.lobby.chunkviewer.pack.Fonts
 import space.chunks.lobby.chunkviewer.pack.Sounds
 import space.chunks.lobby.chunkviewer.pack.Textures
 
@@ -67,7 +68,8 @@ class FlavorSelectView(
         )
 
         this.spawnTextElement(
-            this.mini.deserialize("<gradient:#E3ECFD:#C1D7F9>Choose your flavor!</gradient>"),
+            this.mini.deserialize("<gradient:#E3ECFD:#C1D7F9>Choose your flavor!</gradient>")
+                .font(Fonts.CHUNK_VIEWER),
             this.center.clone().add(0.0, 1.0, 0.0), 3.5f,
         )
 
@@ -187,7 +189,7 @@ class FlavorSelectView(
             }
 
             val loc = start.clone().subtract(0.0, 0.5, 0.0).subtract(xOff, 1.0 * idx, 0.0)
-            var txt = Component.text(str)
+            var txt = Component.text(str).font(Fonts.CHUNK_VIEWER)
             val td = this.texts[idx]
 
             if (this.currIdx == idx) {
@@ -217,7 +219,7 @@ class FlavorSelectView(
     // this is called everytime we receive an input
     private fun updatePageIndicator() {
         val txt =
-            this.mini.deserialize("<color:#53d0fd><font:spacechunks:ui>\uE102</font> <white>${this.currPage + 1}/${this.flavors.totalPages} <color:#53d0fd><font:spacechunks:ui>\uE101</font>")
+            this.mini.deserialize("<color:#53d0fd><font:spacechunks:ui>\uE102</font> <font:spacechunks:chunk_viewer><white>${this.currPage + 1}/${this.flavors.totalPages}</font> <color:#53d0fd><font:spacechunks:ui>\uE101</font>")
         if (this.pageIndicator == null) {
             this.pageIndicator =
                 this.spawnTextElement(

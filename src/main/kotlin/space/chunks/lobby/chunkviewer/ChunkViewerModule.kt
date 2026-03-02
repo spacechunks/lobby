@@ -42,7 +42,6 @@ class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin, "chunk-viewer") {
                 .generateStructures(false)
         )
 
-
         val cfg = parseConfig(this.config)
         val packService = PackService(this.logger, this.plugin, cfg.resourcePack)
 

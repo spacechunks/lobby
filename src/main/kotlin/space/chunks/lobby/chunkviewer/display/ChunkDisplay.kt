@@ -13,13 +13,13 @@ import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import space.chunks.lobby.chunkviewer.pack.Fonts
 
 class ChunkDisplay(
     val title: Component,
     val chunk: Types.Chunk,
     private val thumbnailKey: NamespacedKey,
 ) {
-
     var location: Location? = null
     var center: Location? = null
 
@@ -106,7 +106,9 @@ class ChunkDisplay(
         if (focused) {
             val loc = center!!.clone().subtract(0.0, 4.7, 3.0)
             this.tdName = loc.world.spawnEntity(loc, EntityType.TEXT_DISPLAY) as TextDisplay
-            this.tdName!!.text(this.title.color(TextColor.fromHexString("#52cefd")))
+            this.tdName!!.text(
+                this.title.color(TextColor.fromHexString("#52cefd")).font(Fonts.CHUNK_VIEWER)
+            )
             this.tdName!!.backgroundColor = Color.fromARGB(0, 0, 0, 0)
             this.tdName!!.setTransformationMatrix(
                 Matrix4f().scale(1.5f).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
@@ -121,7 +123,7 @@ class ChunkDisplay(
                 space += 0.25
                 val descLoc = loc.clone().subtract(0.0, space, 0.0)
                 val tdDesc = descLoc.world.spawnEntity(descLoc, EntityType.TEXT_DISPLAY) as TextDisplay
-                tdDesc.text(Component.text(l!!))
+                tdDesc.text(Component.text(l!!).font(Fonts.CHUNK_VIEWER))
                 tdDesc.backgroundColor = Color.fromARGB(0, 0, 0, 0)
                 tdDesc.setTransformationMatrix(
                     Matrix4f().scale(1f).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
@@ -138,7 +140,7 @@ class ChunkDisplay(
     }
 
     fun wrapText(input: String, maxLineLength: Int): MutableList<String?> {
-        val lines: MutableList<String?> = ArrayList<String?>()
+        val lines: MutableList<String?> = ArrayList()
         val current = StringBuilder()
 
         for (word in input.split("\\s+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()) {
