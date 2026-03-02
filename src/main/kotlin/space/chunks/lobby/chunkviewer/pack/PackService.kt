@@ -14,9 +14,11 @@ import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
 import java.util.concurrent.atomic.AtomicReference
+import java.util.logging.Logger
 import java.util.zip.ZipInputStream
 
 class PackService(
+    private val logger: Logger,
     private val plugin: Plugin,
     private val cfg: ResourcePackConfig,
 ) {
@@ -37,7 +39,6 @@ class PackService(
         Bukkit.getScheduler().runTaskTimerAsynchronously(this.plugin, { _ ->
             val pack = File(this.plugin.dataFolder, "pack.zip")
             val localHash = if (pack.exists()) sha1(pack) else ""
-            val logger = this.plugin.logger
 
             runBlocking {
                 val headResp = s3.headObject {

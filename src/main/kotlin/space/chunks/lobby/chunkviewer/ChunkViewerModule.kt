@@ -22,7 +22,7 @@ import space.chunks.lobby.chunkviewer.world.VoidWorldGenerator
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
-class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin) {
+class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin, "chunk-viewer") {
     val chunks = CopyOnWriteArrayList<ChunkDisplay>()
     val worldName = "chunk_viewer"
     val sessionService = DisplaySessionService(
@@ -31,11 +31,6 @@ class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin) {
         Vector(0.0, 100.0, 0.0),
         this.worldName,
     )
-
-    // FIXME: find better solution
-    private val logger = this.plugin.logger
-    private val config = this.plugin.config
-    private val dataFolder = this.plugin.dataFolder
 
     // LIGHT BLUE #7ce8fe
     // A BIT DARKER BLUE #53d0fd
@@ -49,7 +44,7 @@ class ChunkViewerModule(plugin: Plugin) : LobbyModule(plugin) {
 
 
         val cfg = parseConfig(this.config)
-        val packService = PackService(this.plugin, cfg.resourcePack)
+        val packService = PackService(this.logger, this.plugin, cfg.resourcePack)
 
         packService.startPeriodicPull()
 
