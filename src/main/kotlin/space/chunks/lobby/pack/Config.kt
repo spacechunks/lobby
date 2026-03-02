@@ -13,26 +13,26 @@ data class S3Config(
     companion object {
         fun parse(config: FileConfiguration): S3Config {
             val accessKey =
-                config.getString("chunkViewer.resourcePack.s3.accessKey")
-                    ?: throw RuntimeException("chunkViewer.resourcePack.s3.accessKey is missing")
+                config.getString("resourcePack.s3.accessKey")
+                    ?: throw RuntimeException("resourcePack.s3.accessKey is missing")
 
             val secretKey =
-                config.getString("chunkViewer.resourcePack.s3.secretKey")
-                    ?: throw RuntimeException("chunkViewer.resourcePack.s3.secretKey is missing")
+                config.getString("resourcePack.s3.secretKey")
+                    ?: throw RuntimeException("resourcePack.s3.secretKey is missing")
 
-            val bucket = config.getString("chunkViewer.resourcePack.s3.bucket")
-                ?: throw RuntimeException("chunkViewer.resourcePack.s3.bucket is missing")
+            val bucket = config.getString("resourcePack.s3.bucket")
+                ?: throw RuntimeException("resourcePack.s3.bucket is missing")
 
-            val region = config.getString("chunkViewer.resourcePack.s3.region")
-                ?: throw RuntimeException("chunkViewer.resourcePack.s3.region is missing")
+            val region = config.getString("resourcePack.s3.region")
+                ?: throw RuntimeException("resourcePack.s3.region is missing")
 
             val endpoint =
-                config.getString("chunkViewer.resourcePack.s3.endpoint")
-                    ?: throw RuntimeException("chunkViewer.resourcePack.s3.endpoint is missing")
+                config.getString("resourcePack.s3.endpoint")
+                    ?: throw RuntimeException("resourcePack.s3.endpoint is missing")
 
             val objKey =
-                config.getString("chunkViewer.resourcePack.s3.packObjectKey")
-                    ?: throw RuntimeException("chunkViewer.resourcePack.s3.packObjectKey is missing")
+                config.getString("resourcePack.s3.packObjectKey")
+                    ?: throw RuntimeException("resourcePack.s3.packObjectKey is missing")
 
             return S3Config(accessKey, secretKey, bucket, region, endpoint, objKey)
         }
@@ -48,16 +48,16 @@ data class ResourcePackConfig(
 ) {
     companion object {
         fun parse(config: FileConfiguration): ResourcePackConfig {
-            val fetchIntervalSeconds = config.getInt("chunkViewer.resourcePack.fetchIntervalSeconds")
+            val fetchIntervalSeconds = config.getInt("resourcePack.fetchIntervalSeconds")
 
-            val thumbnailsLocation = config.getString("chunkViewer.resourcePack.thumbnailsLocation")
-                ?: throw RuntimeException("chunkViewer.resourcePack.thumbnailsLocation is missing")
+            val thumbnailsLocation = config.getString("resourcePack.thumbnailsLocation")
+                ?: throw RuntimeException("resourcePack.thumbnailsLocation is missing")
 
-            val thumbnailMissingKey = config.getString("chunkViewer.resourcePack.thumbnailMissingKey")
-                ?: throw RuntimeException("chunkViewer.resourcePack.thumbnailMissingKey is missing")
+            val thumbnailMissingKey = config.getString("resourcePack.thumbnailMissingKey")
+                ?: throw RuntimeException("resourcePack.thumbnailMissingKey is missing")
 
-            val thumbnailKeyPrefix = config.getString("chunkViewer.resourcePack.thumbnailKeyPrefix")
-                ?: throw RuntimeException("chunkViewer.resourcePack.thumbnailKeyPrefix is missing")
+            val thumbnailKeyPrefix = config.getString("resourcePack.thumbnailKeyPrefix")
+                ?: throw RuntimeException("resourcePack.thumbnailKeyPrefix is missing")
 
             return ResourcePackConfig(
                 fetchIntervalSeconds,
