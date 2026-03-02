@@ -1,4 +1,4 @@
-package space.chunks.lobby.chunkviewer.display
+package space.chunks.lobby.modules.chunkviewer.display
 
 class PaginatedList<T>(
     val items: List<T>,

@@ -1,4 +1,4 @@
-package space.chunks.lobby.spawn
+package space.chunks.lobby.modules.spawn
 
 import net.kyori.adventure.text.Component
 import org.bukkit.GameMode
@@ -11,7 +11,7 @@ import org.bukkit.event.block.Action
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
-import space.chunks.lobby.chunkviewer.display.DisplaySessionService
+import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 
 class SpawnPlayerListener(
     private val world: World,

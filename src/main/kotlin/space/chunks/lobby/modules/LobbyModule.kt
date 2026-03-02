@@ -1,4 +1,4 @@
-package space.chunks.lobby
+package space.chunks.lobby.modules
 
 import org.bukkit.event.Listener
 import org.bukkit.plugin.Plugin

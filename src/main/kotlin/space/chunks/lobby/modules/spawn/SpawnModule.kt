@@ -1,9 +1,9 @@
-package space.chunks.lobby.spawn
+package space.chunks.lobby.modules.spawn
 
 import org.bukkit.Bukkit
 import org.bukkit.plugin.Plugin
-import space.chunks.lobby.LobbyModule
-import space.chunks.lobby.chunkviewer.display.DisplaySessionService
+import space.chunks.lobby.modules.LobbyModule
+import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 
 class SpawnModule(
     private val sessSvc: DisplaySessionService,

@@ -1,12 +1,12 @@
-package space.chunks.lobby.chunkviewer.display
+package space.chunks.lobby.modules.chunkviewer.display
 
 import org.bukkit.Location
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
-import space.chunks.lobby.chunkviewer.pack.Sounds
-import space.chunks.lobby.chunkviewer.pack.Textures
+import space.chunks.lobby.pack.Sounds
+import space.chunks.lobby.pack.Textures
 
 class ChunkSelectView(
     plugin: Plugin,

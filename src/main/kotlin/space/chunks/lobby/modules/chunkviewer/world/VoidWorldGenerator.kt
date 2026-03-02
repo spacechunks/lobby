@@ -1,4 +1,4 @@
-package space.chunks.lobby.chunkviewer.world
+package space.chunks.lobby.modules.chunkviewer.world
 
 import org.bukkit.generator.BiomeProvider
 import org.bukkit.generator.ChunkGenerator
