@@ -1,4 +1,4 @@
-package space.chunks.lobby.chunkviewer.display
+package space.chunks.lobby.modules.chunkviewer.display
 
 import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
@@ -10,9 +10,9 @@ import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
-import space.chunks.lobby.chunkviewer.pack.Fonts
-import space.chunks.lobby.chunkviewer.pack.Sounds
-import space.chunks.lobby.chunkviewer.pack.Textures
+import space.chunks.lobby.pack.Fonts
+import space.chunks.lobby.pack.Sounds
+import space.chunks.lobby.pack.Textures
 
 class FlavorSelectView(
     plugin: Plugin,

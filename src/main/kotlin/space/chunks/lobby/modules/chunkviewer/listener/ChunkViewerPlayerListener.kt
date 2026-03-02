@@ -1,8 +1,5 @@
-package space.chunks.lobby.chunkviewer.listener
+package space.chunks.lobby.modules.chunkviewer.listener
 
-import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialConfigureEvent
-import net.kyori.adventure.resource.ResourcePackInfo
-import net.kyori.adventure.resource.ResourcePackRequest
 import org.bukkit.GameRule
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -11,15 +8,11 @@ import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.WorldLoadEvent
 import org.bukkit.plugin.Plugin
 import org.bukkit.util.Vector
-import space.chunks.lobby.chunkviewer.display.ChunkDisplay
-import space.chunks.lobby.chunkviewer.display.DisplaySessionService
-import space.chunks.lobby.chunkviewer.pack.PackService
-import java.net.URI
-import java.util.*
+import space.chunks.lobby.modules.chunkviewer.display.ChunkDisplay
+import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 
 class ChunkViewerPlayerListener(
     private val plugin: Plugin,
-    private val packService: PackService,
     private val sessionService: DisplaySessionService,
     private val spawn: Vector,
     private val chunks: List<ChunkDisplay>
@@ -46,21 +39,5 @@ class ChunkViewerPlayerListener(
     @EventHandler
     fun onPlayerQuit(event: PlayerQuitEvent) {
         this.sessionService.closeSession(event.player)
-    }
-
-    @EventHandler
-    fun onConfigure(event: PlayerConnectionInitialConfigureEvent) {
-        val info = ResourcePackInfo.resourcePackInfo(
-            UUID.randomUUID(),
-            URI.create(this.packService.packDownloadUrl),
-            this.packService.packHash.get()
-        )
-
-        val request = ResourcePackRequest.resourcePackRequest()
-            .packs(info)
-            .required(true)
-            .build()
-
-        event.connection.audience.sendResourcePacks(request)
     }
 }

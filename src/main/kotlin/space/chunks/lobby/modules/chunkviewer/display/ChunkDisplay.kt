@@ -1,4 +1,4 @@
-package space.chunks.lobby.chunkviewer.display
+package space.chunks.lobby.modules.chunkviewer.display
 
 import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
@@ -13,7 +13,7 @@ import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Matrix4f
 import org.joml.Vector3f
-import space.chunks.lobby.chunkviewer.pack.Fonts
+import space.chunks.lobby.pack.Fonts
 
 class ChunkDisplay(
     val title: Component,

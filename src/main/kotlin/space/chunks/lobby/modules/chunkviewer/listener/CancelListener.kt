@@ -1,4 +1,4 @@
-package space.chunks.lobby.chunkviewer.listener
+package space.chunks.lobby.modules.chunkviewer.listener
 
 import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent
 import org.bukkit.event.EventHandler
