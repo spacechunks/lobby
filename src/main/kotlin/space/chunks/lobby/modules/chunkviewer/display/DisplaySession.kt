@@ -48,7 +48,7 @@ class DisplaySession(
         // TODO: fetch chunks
         this.background = spawnWall(
             this.location.clone().add(0.0, 0.0, 20.0),
-            75f,
+            100f,
             NamespacedKey.fromString("minecraft:black_concrete"),
         )
         this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid)

@@ -1,10 +1,10 @@
 package space.chunks.lobby.modules.spawn
 
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
-import org.bukkit.World
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 
 class SpawnPlayerListener(
-    private val world: World,
+    private val config: Config,
     private val sessionService: DisplaySessionService,
 ) : Listener {
     @EventHandler
@@ -24,7 +24,15 @@ class SpawnPlayerListener(
         val player = event.player
         player.gameMode = GameMode.ADVENTURE
         player.inventory.setItem(4, ItemStack(Material.NETHER_STAR))
-        player.teleport(Location(world, 0.5, -42.0, 0.5))
+
+        player.teleport(
+            Location(
+                Bukkit.getWorld(this.config.world),
+                this.config.spawnLocation.x,
+                this.config.spawnLocation.y,
+                this.config.spawnLocation.z
+            )
+        )
     }
 
     @EventHandler

@@ -10,10 +10,9 @@ class SpawnModule(
     plugin: Plugin,
 ) : LobbyModule(plugin, "spawn") {
     override fun onEnable() {
-        val w = Bukkit.getWorld("devlobby")!!
-
+        val cfg = Config.parse(this.plugin.config)
         Bukkit.getPluginManager().registerEvents(
-            SpawnPlayerListener(w, this.sessSvc),
+            SpawnPlayerListener(cfg, this.sessSvc),
             this.plugin,
         )
     }
