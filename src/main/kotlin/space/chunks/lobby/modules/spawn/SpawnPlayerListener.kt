@@ -38,6 +38,13 @@ class SpawnPlayerListener(
     @EventHandler
     private fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
+    
+        // nexo uses note blocks to display custom blocks.
+        // interacting with them will change the block.
+        if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
+            event.isCancelled = true
+            return
+        }
 
         if (event.action != Action.RIGHT_CLICK_BLOCK && event.action != Action.RIGHT_CLICK_AIR) return
         if (player.inventory.itemInMainHand.type != Material.NETHER_STAR) return
