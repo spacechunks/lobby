@@ -1,10 +1,12 @@
 package space.chunks.lobby.modules.chunkviewer.display
 
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
+import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.pack.Sounds
 import space.chunks.lobby.pack.Textures
 
@@ -125,7 +127,10 @@ class ChunkSelectView(
                 this.session.switchWindow(FlavorSelectView(this.plugin, this.center, this.session, m))
             }
             Input.SNEAK -> {
-                player.playSound(player.location, Sounds.CLICK_ERR, 0.5f, 1f)
+                // original actor that is responsible for creating the session
+                // has to take care on how to close it.
+                Bukkit.getPluginManager().callEvent(PlayerIntentLeaveDisplaySessionEvent(player))
+                player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
             }
         }
 

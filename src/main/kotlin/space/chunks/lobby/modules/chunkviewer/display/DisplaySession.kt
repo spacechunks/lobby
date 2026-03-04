@@ -7,6 +7,7 @@ import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
+import org.bukkit.potion.PotionEffectType
 import org.joml.Matrix4f
 import org.joml.Vector3f
 
@@ -26,11 +27,13 @@ class DisplaySession(
 
     private var activeView: View? = null
     private lateinit var background: ItemDisplay
+    private lateinit var camera: ArmorStand
 
     fun start() {
+        player.addPotionEffect(PotionEffectType.DARKNESS.createEffect(40, Int.MAX_VALUE))
         this.player.teleport(this.location)
 
-        val fixedEntity = this.location.world
+        this.camera = this.location.world
             .spawn(this.location, ArmorStand::class.java) {
                 it.setAI(false)
                 it.canPickupItems = false
@@ -42,7 +45,7 @@ class DisplaySession(
         this.player.gameMode = GameMode.SPECTATOR
 
         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
-            this.player.spectatorTarget = fixedEntity
+            this.player.spectatorTarget = camera
         }, 10)
 
         // TODO: fetch chunks
@@ -58,6 +61,7 @@ class DisplaySession(
     fun stop() {
         this.activeView?.close()
         this.background.remove()
+        this.camera.remove()
     }
 
     fun switchWindow(new: View) {

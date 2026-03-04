@@ -12,7 +12,7 @@ class SpawnModule(
     override fun onEnable() {
         val cfg = Config.parse(this.plugin.config)
         Bukkit.getPluginManager().registerEvents(
-            SpawnPlayerListener(cfg, this.sessSvc),
+            SpawnPlayerListener(this.plugin, cfg, this.sessSvc),
             this.plugin,
         )
     }
