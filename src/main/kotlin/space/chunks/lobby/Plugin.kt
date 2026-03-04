@@ -49,7 +49,7 @@ class Plugin : JavaPlugin(), Listener {
         val future = CompletableFuture<ResourcePackStatus>()
 
         val info = ResourcePackInfo.resourcePackInfo(
-            UUID.randomUUID(),
+            UUID.fromString("92de217b-8b2b-403b-86a5-fe26fa3a9b5f"),
             URI.create(this.packService.packDownloadUrl),
             this.packService.packHash.get()
         )
