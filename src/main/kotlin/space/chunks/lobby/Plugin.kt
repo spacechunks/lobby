@@ -1,8 +1,10 @@
 package space.chunks.lobby
 
-import io.papermc.paper.event.connection.configuration.PlayerConnectionInitialConfigureEvent
+import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
+import net.kyori.adventure.resource.ResourcePackStatus
+import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -15,6 +17,8 @@ import space.chunks.lobby.pack.PackService
 import space.chunks.lobby.pack.ResourcePackConfig
 import java.net.URI
 import java.util.*
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
 
 class Plugin : JavaPlugin(), Listener {
 
@@ -40,7 +44,10 @@ class Plugin : JavaPlugin(), Listener {
     }
 
     @EventHandler
-    fun onConfigure(event: PlayerConnectionInitialConfigureEvent) {
+    fun onAsyncConfigure(event: AsyncPlayerConnectionConfigureEvent) {
+        val conn = event.connection
+        val future = CompletableFuture<ResourcePackStatus>()
+
         val info = ResourcePackInfo.resourcePackInfo(
             UUID.randomUUID(),
             URI.create(this.packService.packDownloadUrl),
@@ -50,10 +57,41 @@ class Plugin : JavaPlugin(), Listener {
         val request = ResourcePackRequest.resourcePackRequest()
             .packs(info)
             .required(true)
+            .callback { _, status, _ -> future.complete(status) }
             .build()
 
-        event.connection.audience.sendResourcePacks(request)
+        conn.audience.sendResourcePacks(request)
+
+        val status = try {
+            future.get(30, TimeUnit.SECONDS)
+        } catch (_: Throwable) {
+            null
+        }
+
+        when (status) {
+            ResourcePackStatus.SUCCESSFULLY_LOADED,
+            ResourcePackStatus.ACCEPTED -> {
+                return
+            }
+
+            ResourcePackStatus.DECLINED -> {
+                conn.disconnect(Component.text("You must accept the resource pack to play."))
+            }
+
+            ResourcePackStatus.FAILED_DOWNLOAD,
+            ResourcePackStatus.FAILED_RELOAD,
+            ResourcePackStatus.INVALID_URL,
+            ResourcePackStatus.DISCARDED,
+            null -> {
+                conn.disconnect(Component.text("Resource pack failed to load. Please try again."))
+            }
+
+            else -> {
+                conn.disconnect(Component.text("Something went really wrong :/ -> $status"))
+            }
+        }
     }
+
 
     override fun getDefaultWorldGenerator(worldName: String, id: String?): ChunkGenerator {
         return VoidWorldGenerator()
