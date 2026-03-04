@@ -12,6 +12,8 @@ class DisplaySessionService(
     private val worldName: String,
 ) {
     private val sessions = mutableMapOf<Player, DisplaySession>()
+    private val slots = mutableListOf(this.spawn)
+    private val slotsPerPlayer = mutableMapOf<Player, Vector>()
 
     /**
      * starts the display session for a player with a 1-second delay.
@@ -19,9 +21,16 @@ class DisplaySessionService(
     fun startSession(player: Player) {
         val w = Bukkit.getWorld(this.worldName) ?: throw IllegalStateException("world $worldName does not exist")
 
-        val loc = this.spawn.toLocation(w).add(
-            Vector(Bukkit.getOnlinePlayers().size * 100.0, 0.0, 0.0),
-        )
+        // this should prevent display sessions from being spawned at the same location
+        val slot = this.slots
+            .last()
+            .clone()
+            .add(Vector(100.0, 0.0, 0.0))
+
+        this.slots.add(slot)
+        this.slotsPerPlayer[player] = slot
+
+        val loc = slot.toLocation(w)
 
         val sess = DisplaySession(player, this.plugin, loc, this.chunks)
         this.sessions[player] = sess
@@ -43,5 +52,10 @@ class DisplaySessionService(
     fun closeSession(player: Player) {
         this.sessions[player]?.stop()
         this.sessions.remove(player)
+
+        this.slotsPerPlayer[player]?.let {
+            this.slots.remove(it)
+            this.slotsPerPlayer.remove(player)
+        }
     }
 }
