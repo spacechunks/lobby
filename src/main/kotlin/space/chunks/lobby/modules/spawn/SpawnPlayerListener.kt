@@ -8,6 +8,7 @@ import org.bukkit.Material
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
+import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
@@ -53,7 +54,11 @@ class SpawnPlayerListener(
         if (event.action != Action.RIGHT_CLICK_BLOCK && event.action != Action.RIGHT_CLICK_AIR) return
         if (player.inventory.itemInMainHand.type != Material.NETHER_STAR) return
 
-        player.addPotionEffect(PotionEffectType.DARKNESS.createEffect(60, Int.MAX_VALUE))
+        player.addPotionEffect(
+            PotionEffectType.DARKNESS
+                .createEffect(60, Int.MAX_VALUE)
+                .withParticles(false)
+        )
 
         // timing is set so that once the darkness almost reaches the player, we teleport them
         Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
@@ -62,9 +67,18 @@ class SpawnPlayerListener(
     }
 
     @EventHandler
+    private fun onEntityDamage(event: EntityDamageEvent) {
+        event.isCancelled = true
+    }
+
+    @EventHandler
     private fun onPlayerIntentLeaveDisplaySession(event: PlayerIntentLeaveDisplaySessionEvent) {
         val player = event.player
-        player.addPotionEffect(PotionEffectType.DARKNESS.createEffect(25, Int.MAX_VALUE))
+        player.addPotionEffect(
+            PotionEffectType.DARKNESS
+                .createEffect(25, Int.MAX_VALUE)
+                .withParticles(false)
+        )
         player.spectatorTarget = null
         player.gameMode = GameMode.ADVENTURE
         player.teleport(
