@@ -124,7 +124,9 @@ class ChunkSelectView(
                     5
                 )
                 player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
-                this.session.switchWindow(FlavorSelectView(this.plugin, this.center, this.session, m))
+                this.session.switchWindow(
+                    FlavorSelectView(this.plugin, this.center, this.session, focused.chunk, m),
+                )
             }
             Input.SNEAK -> {
                 // original actor that is responsible for creating the session

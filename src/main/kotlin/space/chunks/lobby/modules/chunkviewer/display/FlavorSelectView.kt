@@ -4,12 +4,14 @@ import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
+import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Fonts
 import space.chunks.lobby.pack.Sounds
 import space.chunks.lobby.pack.Textures
@@ -18,6 +20,7 @@ class FlavorSelectView(
     plugin: Plugin,
     center: Location,
     session: DisplaySession,
+    private val chunk: Types.Chunk,
     private val flavors: PaginatedList<Types.Flavor>,
 ) : View(plugin, center, session) {
     private val mini = MiniMessage.miniMessage()
@@ -131,7 +134,8 @@ class FlavorSelectView(
             Input.S -> this.currIdx++
             Input.D -> this.currPage++
             Input.SPACE -> {
-                // TODO: run selected chunk flavor
+                val selected = this.flavors.getPage(this.currPage)[this.currIdx]
+                Bukkit.getPluginManager().callEvent(PlayerSelectFlavorEvent(this.chunk, selected, player))
             }
             Input.SNEAK -> {
                 player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)

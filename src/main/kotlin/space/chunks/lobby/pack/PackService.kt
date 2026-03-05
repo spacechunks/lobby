@@ -12,6 +12,7 @@ import org.bukkit.plugin.Plugin
 import java.io.File
 import java.io.FileOutputStream
 import java.security.MessageDigest
+import java.util.*
 import java.util.concurrent.atomic.AtomicReference
 import java.util.logging.Logger
 import java.util.zip.ZipInputStream
@@ -24,6 +25,7 @@ class PackService(
     val packDownloadUrl = "https://${this.cfg.s3.bucket}.${this.cfg.s3.endpoint.replace("https://", "")}/${this.cfg.s3.packObjectKey}"
     val packHash = AtomicReference("")
 
+    private val hashPerPlayer = mutableMapOf<UUID, String>()
 
     fun startPeriodicPull() {
         val s3 = S3Client {
@@ -67,6 +69,14 @@ class PackService(
                 }
             }
         }, 0L, 20 * this.cfg.fetchIntervalSeconds.toLong())
+    }
+
+    fun setCurrentPack(playerId: UUID, hash: String) {
+        this.hashPerPlayer[playerId] = hash
+    }
+
+    fun getCurrentPack(playerId: UUID): String {
+        return this.hashPerPlayer[playerId] ?: return ""
     }
 
     private fun sha1(f: File): String {

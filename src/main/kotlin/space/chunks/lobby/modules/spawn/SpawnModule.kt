@@ -9,6 +9,7 @@ class SpawnModule(
     private val sessSvc: DisplaySessionService,
     plugin: Plugin,
 ) : LobbyModule(plugin, "spawn") {
+
     override fun onEnable() {
         val cfg = Config.parse(this.plugin.config)
         Bukkit.getPluginManager().registerEvents(

@@ -5,6 +5,7 @@ import org.bukkit.Bukkit
 import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
@@ -16,6 +17,7 @@ import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
+import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 
 class SpawnPlayerListener(
     private val plugin: Plugin,
@@ -72,8 +74,16 @@ class SpawnPlayerListener(
     }
 
     @EventHandler
+    private fun onPlayerFlavorSelect(event: PlayerSelectFlavorEvent) {
+        this.closeSessionAndBackToSpawn(event.player)
+    }
+
+    @EventHandler
     private fun onPlayerIntentLeaveDisplaySession(event: PlayerIntentLeaveDisplaySessionEvent) {
-        val player = event.player
+        this.closeSessionAndBackToSpawn(event.player)
+    }
+
+    private fun closeSessionAndBackToSpawn(player: Player) {
         player.addPotionEffect(
             PotionEffectType.DARKNESS
                 .createEffect(25, Int.MAX_VALUE)

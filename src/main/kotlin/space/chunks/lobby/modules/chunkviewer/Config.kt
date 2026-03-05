@@ -28,10 +28,14 @@ data class ControlPlaneConfig(
 }
 
 data class Config(
+    val instancePollIntervalSeconds: Int,
     val controlPlane: ControlPlaneConfig,
 )
 
 fun parseConfig(config: FileConfiguration): Config {
-    return Config(ControlPlaneConfig.parse(config))
+    return Config(
+        config.getInt("chunkViewer.instancePollIntervalSeconds", 1),
+        ControlPlaneConfig.parse(config)
+    )
 }
 

@@ -16,9 +16,11 @@ class DisplaySessionService(
     private val slotsPerPlayer = mutableMapOf<Player, Vector>()
 
     /**
-     * starts the display session for a player with a 1-second delay.
+     * starts the display session for a player with a 10-tick delay.
      */
     fun startSession(player: Player) {
+        // TODO: check if the player has the latest pack installed, if not -> re-send
+
         val w = Bukkit.getWorld(this.worldName) ?: throw IllegalStateException("world $worldName does not exist")
 
         // this should prevent display sessions from being spawned at the same location
