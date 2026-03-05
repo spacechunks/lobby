@@ -47,11 +47,12 @@ class Plugin : JavaPlugin(), Listener {
     fun onAsyncConfigure(event: AsyncPlayerConnectionConfigureEvent) {
         val conn = event.connection
         val future = CompletableFuture<ResourcePackStatus>()
+        val hash = this.packService.packHash.get()
 
         val info = ResourcePackInfo.resourcePackInfo(
             UUID.fromString("92de217b-8b2b-403b-86a5-fe26fa3a9b5f"),
             URI.create(this.packService.packDownloadUrl),
-            this.packService.packHash.get()
+            hash
         )
 
         val request = ResourcePackRequest.resourcePackRequest()
@@ -71,6 +72,7 @@ class Plugin : JavaPlugin(), Listener {
         when (status) {
             ResourcePackStatus.SUCCESSFULLY_LOADED,
             ResourcePackStatus.ACCEPTED -> {
+                this.packService.setCurrentPack(conn.profile.id!!, hash)
                 return
             }
 

@@ -2,10 +2,12 @@ package space.chunks.lobby.modules.chunkviewer
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import chunks.space.api.explorer.chunk.v1alpha1.listChunksRequest
+import chunks.space.api.explorer.instance.v1alpha1.InstanceServiceGrpcKt
 import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
+import org.bukkit.GameRule
 import org.bukkit.NamespacedKey
 import org.bukkit.WorldCreator
 import org.bukkit.plugin.Plugin
@@ -43,7 +45,16 @@ class ChunkViewerModule(
             WorldCreator(this.worldName)
                 .generator(VoidWorldGenerator())
                 .generateStructures(false)
-        )
+        )?.let { w ->
+            w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
+            w.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
+            w.setGameRule(GameRule.DO_MOB_SPAWNING, false)
+            w.setGameRule(GameRule.DO_FIRE_TICK, false)
+            w.setGameRule(GameRule.DO_MOB_LOOT, false)
+            w.setGameRule(GameRule.DO_TILE_DROPS, false)
+            w.time = 1000
+            w.clearWeatherDuration = -1
+        }
 
         val cfg = parseConfig(this.config)
 
@@ -53,6 +64,9 @@ class ChunkViewerModule(
             .build()
 
         val chunkClient = ChunkServiceGrpcKt.ChunkServiceCoroutineStub(channel)
+            .withCallCredentials(AuthCredentials(cfg.controlPlane.apiToken))
+
+        val instanceClient = InstanceServiceGrpcKt.InstanceServiceCoroutineStub(channel)
             .withCallCredentials(AuthCredentials(cfg.controlPlane.apiToken))
 
         Bukkit.getScheduler().runTaskTimerAsynchronously(this.plugin, { _ ->
@@ -84,7 +98,9 @@ class ChunkViewerModule(
 
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(
-            ChunkViewerPlayerListener(this.plugin, this.sessionService, spawn, this.chunks),
+            ChunkViewerPlayerListener(
+                this.logger, this.plugin, this.sessionService, instanceClient, cfg.instancePollIntervalSeconds,
+            ),
             this.plugin,
         )
 
