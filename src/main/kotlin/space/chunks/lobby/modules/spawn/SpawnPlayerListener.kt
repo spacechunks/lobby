@@ -1,10 +1,8 @@
 package space.chunks.lobby.modules.spawn
 
+import com.google.gson.JsonParser
 import net.kyori.adventure.text.Component
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
-import org.bukkit.Location
-import org.bukkit.Material
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -40,6 +38,32 @@ class SpawnPlayerListener(
                 this.config.spawnLocation.z
             )
         )
+
+        player
+            .retrieveCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/pushback")!!)
+            .thenAccept {
+                if (it == null) {
+                    return@thenAccept
+                }
+
+                val obj = JsonParser.parseString(it.decodeToString()).asJsonObject
+                val reason = obj["reason"].asString
+
+                if (reason == "CONNECTION_ERROR") {
+                    player.sendMessage(Component.text("You got pushed back to the lobby, because an error while connecting to the server occurred."))
+                    return@thenAccept
+                }
+
+                if (reason == "INVALID_TRANSFER_DATA") {
+                    player.sendMessage(Component.text("You got pushed back due to invalid transfer data."))
+                    return@thenAccept
+                }
+
+                if (reason == "TRANSFER_DATA_RECEIVE_TIMEOUT") {
+                    player.sendMessage(Component.text("Transfer data could not be received in time."))
+                    return@thenAccept
+                }
+            }
     }
 
     @EventHandler

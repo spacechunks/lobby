@@ -58,7 +58,9 @@ class Plugin : JavaPlugin(), Listener {
         val request = ResourcePackRequest.resourcePackRequest()
             .packs(info)
             .required(true)
-            .callback { _, status, _ -> future.complete(status) }
+            .callback { _, status, _ ->
+                future.complete(status)
+            }
             .build()
 
         conn.audience.sendResourcePacks(request)
@@ -70,8 +72,9 @@ class Plugin : JavaPlugin(), Listener {
         }
 
         when (status) {
+            ResourcePackStatus.ACCEPTED,
             ResourcePackStatus.SUCCESSFULLY_LOADED,
-            ResourcePackStatus.ACCEPTED -> {
+            ResourcePackStatus.DOWNLOADED -> {
                 this.packService.setCurrentPack(conn.profile.id!!, hash)
                 return
             }
@@ -86,10 +89,6 @@ class Plugin : JavaPlugin(), Listener {
             ResourcePackStatus.DISCARDED,
             null -> {
                 conn.disconnect(Component.text("Resource pack failed to load. Please try again."))
-            }
-
-            else -> {
-                conn.disconnect(Component.text("Something went really wrong :/ -> $status"))
             }
         }
     }
