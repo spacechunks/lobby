@@ -99,7 +99,7 @@ class ChunkViewerModule(
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(
             ChunkViewerPlayerListener(
-                this.logger, this.plugin, this.sessionService, instanceClient, cfg.instancePollIntervalSeconds,
+                this.logger, this.plugin, this.sessionService, instanceClient, cfg,
             ),
             this.plugin,
         )
