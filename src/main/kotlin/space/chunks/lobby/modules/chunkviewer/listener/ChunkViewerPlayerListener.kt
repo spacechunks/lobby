@@ -13,6 +13,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 import org.bukkit.scheduler.BukkitTask
+import space.chunks.lobby.modules.chunkviewer.Config
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import java.util.*
@@ -25,7 +26,7 @@ class ChunkViewerPlayerListener(
     private val plugin: Plugin,
     private val sessionService: DisplaySessionService,
     private val instanceClient: InstanceServiceGrpcKt.InstanceServiceCoroutineStub,
-    private val instancePollInterval: Int,
+    private val config: Config
 ) : Listener {
     private val playerTasks = mutableMapOf<UUID, BukkitTask>()
 
@@ -69,7 +70,8 @@ class ChunkViewerPlayerListener(
 
         val data = "{\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
         player.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
-        player.transfer("localhost", 25577) // TODO: us ip of gateway
+
+        player.transfer(this.config.gatewayHost, this.config.gatewayPort)
     }
 
     private fun runFlavorVersion(chunkId: String, versionId: String): CompletableFuture<InstanceTypes.Instance> {
@@ -131,7 +133,7 @@ class ChunkViewerPlayerListener(
                     }
                 }
             }
-        }, 0L, 20 * this.instancePollInterval.toLong())
+        }, 0L, 20 * this.config.instancePollIntervalSeconds.toLong())
         return f
     }
 }
