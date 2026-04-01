@@ -17,7 +17,7 @@ import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 
-class SpawnPlayerListener(
+class PlayerListener(
     private val plugin: Plugin,
     private val config: Config,
     private val sessionService: DisplaySessionService,
@@ -54,7 +54,7 @@ class SpawnPlayerListener(
                     return@thenAccept
                 }
 
-                if (reason == "INVALID_TRANSFER_DATA") {
+                if (reason == "TRANSFER_DATA_INVALID") {
                     player.sendMessage(Component.text("You got pushed back due to invalid transfer data."))
                     return@thenAccept
                 }

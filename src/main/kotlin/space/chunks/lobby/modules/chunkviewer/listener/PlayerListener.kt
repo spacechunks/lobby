@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.logging.Logger
 import chunks.space.api.explorer.instance.v1alpha1.Types as InstanceTypes
 
-class ChunkViewerPlayerListener(
+class PlayerListener(
     private val logger: Logger,
     private val plugin: Plugin,
     private val sessionService: DisplaySessionService,

@@ -17,8 +17,8 @@ import space.chunks.lobby.modules.chunkviewer.display.ChunkDisplay
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.grpc.AuthCredentials
 import space.chunks.lobby.modules.chunkviewer.listener.CancelListener
-import space.chunks.lobby.modules.chunkviewer.listener.ChunkViewerPlayerListener
 import space.chunks.lobby.modules.chunkviewer.listener.ControlsListener
+import space.chunks.lobby.modules.chunkviewer.listener.PlayerListener
 import space.chunks.lobby.modules.chunkviewer.world.VoidWorldGenerator
 import space.chunks.lobby.pack.ResourcePackConfig
 import java.io.File
@@ -98,7 +98,7 @@ class ChunkViewerModule(
 
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(
-            ChunkViewerPlayerListener(
+            PlayerListener(
                 this.logger, this.plugin, this.sessionService, instanceClient, cfg,
             ),
             this.plugin,
