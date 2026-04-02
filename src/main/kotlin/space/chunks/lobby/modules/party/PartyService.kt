@@ -41,13 +41,6 @@ class PartyService {
     private val partyByPlayer = mutableMapOf<Player, Party>()
 
     fun invitePlayer(inviter: Player, invitee: Player) {
-        val inviteeParty = partyByPlayer[invitee]
-
-        // invitee is already part of a party, he has to leave first
-        if (inviteeParty != null) {
-            throw PartyException(PartyExceptionReason.INVITEE_ALREADY_PARTIED)
-        }
-
         val inviterParty = partyByPlayer[inviter]
 
         // inviter and invitee are not part of a party, so we can create a new one
@@ -72,13 +65,22 @@ class PartyService {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
-        inviterParty.members.add(invitee)
+        val invite = PartyInvite(inviterParty.id, invitee)
+        this.invites.put(invite.id, invite)
+
+        Bukkit.getPluginManager().callEvent(
+            PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING)
+        )
     }
 
     fun acceptInvite(inviteId: String) {
         val invite = this.invites.getIfPresent(inviteId) ?: throw PartyException(PartyExceptionReason.INVITE_GONE)
-
         val party = this.parties[invite.partyId] ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
+
+        // leave the party the player is currently part of, if they accept another invite
+        this.partyByPlayer[invite.player]?.let {
+            this.leaveParty(it.id, invite.player, invite.player)
+        }
 
         party.members.add(invite.player)
         this.invites.invalidate(inviteId)

@@ -26,13 +26,8 @@ class PartyCommands {
 
                     try {
                         partyService.invitePlayer(inviter, invitee)
-                    } catch (ex: PartyException) {
-                        if (ex.reason == PartyExceptionReason.INVITEE_ALREADY_PARTIED) {
-                            inviter.sendMessage("${invitee.name} is already part of a party.")
-                        }
-                        if (ex.reason == PartyExceptionReason.NOT_OWNER) {
-                            inviter.sendMessage("You have to be owner of the party to invite someone.")
-                        }
+                    } catch (_: PartyException) {
+                        inviter.sendMessage("You have to be owner of the party to invite someone.")
                     }
 
                     return@executes Command.SINGLE_SUCCESS

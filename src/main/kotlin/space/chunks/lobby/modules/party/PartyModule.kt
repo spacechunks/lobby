@@ -31,7 +31,7 @@ class PartyModule(plugin: Plugin) : LobbyModule(plugin, "party") {
     }
 
     @EventHandler
-    private fun onInvite(event: PartyInviteEvent) {
+    private fun onPartyInvite(event: PartyInviteEvent) {
         val invitee = event.player
         val inviter = event.inviter
 
