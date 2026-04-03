@@ -34,6 +34,14 @@ data class PartyInvite @OptIn(ExperimentalUuidApi::class) constructor(
 class PartyService {
     private val parties = CacheBuilder<String, Party>
         .newBuilder()
+        // the main reason for this is, that in order to have a very simple
+        // party implementation we just keep the party alive for x minutes,
+        // so that once the party leaves the server to join a chunk, the party
+        // will still be present when they return to the lobby. bummer, if they
+        // play for more than x minutes. the party will be gone, and they have to
+        // invite all people again.
+        //
+        // at some point we will implement a better system, but right now this suffices.
         .expireAfterAccess(60, TimeUnit.MINUTES)
         .removalListener<String, Party> {
             this.partyByPlayer.remove(it.value?.owner)
