@@ -6,3 +6,4 @@ api-version: 1.21.11
 commands:
   len:
   stack:
+  party:

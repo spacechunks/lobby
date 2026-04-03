@@ -12,6 +12,8 @@ import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
 import space.chunks.lobby.modules.chunkviewer.ChunkViewerModule
 import space.chunks.lobby.modules.chunkviewer.world.VoidWorldGenerator
+import space.chunks.lobby.modules.party.PartyModule
+import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.modules.spawn.SpawnModule
 import space.chunks.lobby.pack.PackService
 import space.chunks.lobby.pack.ResourcePackConfig
@@ -24,15 +26,18 @@ class Plugin : JavaPlugin(), Listener {
 
     private val packConfig = ResourcePackConfig.parse(this.config)
     private val packService = PackService(this.logger, this, packConfig)
+    private val partyService = PartyService()
 
     // modules
-    private val chunkViewerMod = ChunkViewerModule(this, packConfig)
+    private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService)
     private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this)
+    private val partyMod = PartyModule(this, partyService)
 
     override fun onEnable() {
         val modules = listOf(
             chunkViewerMod,
             spawnMod,
+            partyMod,
         )
 
         modules.forEach {
