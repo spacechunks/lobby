@@ -13,9 +13,10 @@ import space.chunks.lobby.modules.party.event.PartyInviteEvent
 import space.chunks.lobby.modules.party.event.PartyInviteStatus
 
 
-class PartyModule(plugin: Plugin) : LobbyModule(plugin, "party") {
-    val partyService = PartyService()
-
+class PartyModule(
+    plugin: Plugin,
+    private val partyService: PartyService,
+) : LobbyModule(plugin, "party") {
     override fun onEnable() {
         this.plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS, {
             commands -> commands.registrar().register(PartyCommands.root(this.partyService))
@@ -55,7 +56,7 @@ class PartyModule(plugin: Plugin) : LobbyModule(plugin, "party") {
                         .clickEvent(ClickEvent.runCommand("/party decline ${event.inviteId}"))
                 )
 
-                inviter?.sendMessage(msg)
+                invitee.sendMessage(msg)
             }
             PartyInviteStatus.DECLINED -> {
                 val msg = Component.text("${invitee.name} does not want to join your party :(")

@@ -26,10 +26,16 @@ class PartyCommands {
 
                     try {
                         partyService.invitePlayer(inviter, invitee)
-                    } catch (_: PartyException) {
-                        inviter.sendMessage("You have to be owner of the party to invite someone.")
+                    } catch (ex: PartyException) {
+                        if (ex.reason == PartyExceptionReason.INVITER_IS_INVITEE) {
+                            inviter.sendMessage("You cannot invite yourself to your own party.")
+                        }
+                        if (ex.reason == PartyExceptionReason.NOT_OWNER) {
+                            inviter.sendMessage("You have to be owner of the party to invite someone.")
+                        }
                     }
 
+                    inviter.sendMessage("You have invited ${invitee.name} to your party.")
                     return@executes Command.SINGLE_SUCCESS
                 }
             )
@@ -96,12 +102,24 @@ class PartyCommands {
 
                 try {
                     partyService.disbandParty(party.id, player)
-                } catch (_: PartyException) {
-                    player.sendMessage(
-                        Component
-                            .text("You must be owner of the party to disband it.")
-                            .color(NamedTextColor.RED)
-                    )
+                } catch (ex: PartyException) {
+
+                    if (ex.reason == PartyExceptionReason.PARTY_GONE) {
+                        player.sendMessage(
+                            Component
+                                .text("Party is already gone")
+                                .color(NamedTextColor.RED)
+                        )
+                    }
+
+                    if (ex.reason == PartyExceptionReason.NOT_OWNER) {
+                        player.sendMessage(
+                            Component
+                                .text("You must be owner of the party to disband it.")
+                                .color(NamedTextColor.RED)
+                        )
+                    }
+
                     return@executes Command.SINGLE_SUCCESS
                 }
 
@@ -118,7 +136,32 @@ class PartyCommands {
                     return@executes Command.SINGLE_SUCCESS
                 }
 
-                partyService.leaveParty(party.id, player, player)
+                try {
+                    partyService.leaveParty(party.id, player, player)
+                } catch (ex: PartyException) {
+                    if (ex.reason == PartyExceptionReason.PARTY_GONE) {
+                        player.sendMessage(
+                            Component
+                                .text("Party is already gone")
+                                .color(NamedTextColor.RED)
+                        )
+                    }
+
+                    if (ex.reason == PartyExceptionReason.NOT_OWNER) {
+                        player.sendMessage(
+                            Component
+                                .text("ADAWDAWDAWDAW")
+                                .color(NamedTextColor.RED)
+                        )
+                    }
+                    return@executes Command.SINGLE_SUCCESS
+                }
+
+                player.sendMessage(
+                    Component
+                        .text("You have left the party")
+                        .color(NamedTextColor.RED)
+                )
 
                 return@executes Command.SINGLE_SUCCESS
             }

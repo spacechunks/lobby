@@ -12,7 +12,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
-// TODO: party to audience to make sending messages easier????
 data class Party @OptIn(ExperimentalUuidApi::class) constructor(
     val owner: Player,
     val members: MutableSet<Player> = mutableSetOf(),
@@ -33,22 +32,34 @@ data class PartyInvite @OptIn(ExperimentalUuidApi::class) constructor(
 )
 
 class PartyService {
-    private val parties = mutableMapOf<String, Party>()
+    private val parties = CacheBuilder<String, Party>
+        .newBuilder()
+        .expireAfterAccess(60, TimeUnit.MINUTES)
+        .removalListener<String, Party> {
+            this.partyByPlayer.remove(it.value?.owner)
+            it.value?.members?.forEach { member ->
+                this.partyByPlayer.remove(member)
+            }
+        }
+        .build<String, Party>()
+
     private val invites = CacheBuilder<String, PartyInvite>
         .newBuilder()
         .expireAfterAccess(30, TimeUnit.SECONDS)
         .build<String, PartyInvite>()
+
     private val partyByPlayer = mutableMapOf<Player, Party>()
 
     fun invitePlayer(inviter: Player, invitee: Player) {
-        val inviterParty = partyByPlayer[inviter]
+        val inviterParty = this.getParty(inviter)
+        if (inviter == invitee) {
+            throw PartyException(PartyExceptionReason.INVITER_IS_INVITEE)
+        }
 
-        // inviter and invitee are not part of a party, so we can create a new one
-        // and add both to it.
         if (inviterParty == null) {
             val party = Party(inviter)
 
-            this.parties[party.id] = party
+            this.parties.put(party.id, party)
             this.partyByPlayer[inviter] = party
 
             val invite = PartyInvite(party.id, invitee)
@@ -75,14 +86,15 @@ class PartyService {
 
     fun acceptInvite(inviteId: String) {
         val invite = this.invites.getIfPresent(inviteId) ?: throw PartyException(PartyExceptionReason.INVITE_GONE)
-        val party = this.parties[invite.partyId] ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
+        val party = this.parties.getIfPresent(invite.partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
         // leave the party the player is currently part of, if they accept another invite
-        this.partyByPlayer[invite.player]?.let {
+        this.getParty(invite.player)?.let {
             this.leaveParty(it.id, invite.player, invite.player)
         }
 
         party.members.add(invite.player)
+        this.partyByPlayer[invite.player] = party
         this.invites.invalidate(inviteId)
 
         Bukkit.getPluginManager().callEvent(
@@ -91,10 +103,10 @@ class PartyService {
     }
 
     fun declineInvite(inviteId: String) {
-        val invite = this.invites.getIfPresent(inviteId) ?: return
+        val invite = this.invites.getIfPresent(inviteId) ?: throw PartyException(PartyExceptionReason.INVITE_GONE)
 
         // since the party is gone and the player declined the invite, there is no need to inform anyone
-        val party = this.parties[invite.partyId] ?: return
+        val party = this.parties.getIfPresent(invite.partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
         this.invites.invalidate(inviteId)
         Bukkit.getPluginManager().callEvent(
@@ -103,32 +115,45 @@ class PartyService {
     }
 
     fun getParty(player: Player): Party? {
-        return partyByPlayer[player]
+        val p1 = partyByPlayer[player] ?: return null
+
+        // the cache does not call the removal listener just because the entry is expired.
+        // we'd need to call parties.cleanUp() for this. but since we try to avoid having
+        // a repeating task for this, we try to check if the party is still present in the
+        // cache before returning it.
+        val p2 = this.parties.getIfPresent(p1.id)
+        if (p2 == null) {
+            // the party is gone so clean up
+            this.partyByPlayer.remove(player)
+            return null
+        }
+        return p2
     }
 
     fun disbandParty(partyId: String, actor: Player) {
-        val party  = this.parties[partyId] ?: return
+        val party = this.parties.getIfPresent(partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
         if (party.owner != actor) {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
+        this.partyByPlayer.remove(party.owner)
         party.members.forEach {
             this.partyByPlayer.remove(it.player)
         }
 
-        this.parties.remove(partyId)
+        this.parties.invalidate(partyId)
         Bukkit.getPluginManager().callEvent(PartyDisbandEvent(party))
     }
 
     fun leaveParty(partyId: String, actor: Player, toKick: Player) {
-        val party = this.parties[partyId] ?: return
+        val party = this.parties.getIfPresent(partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
         // we only want to check if the actor is able to kick someone
         // if the actor and the person to kick are different.
         // if they are the same, the person wants to remove itself, so
         // that is fine.
-        if (actor != toKick && actor != party.owner) {
+        if (actor.uniqueId != toKick.uniqueId && actor != party.owner) {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
@@ -138,10 +163,10 @@ class PartyService {
         }
 
         party.members.remove(toKick)
+        this.partyByPlayer.remove(toKick)
 
         if (party.members.isEmpty()) {
-            this.parties.remove(partyId)
-            Bukkit.getPluginManager().callEvent(PartyDisbandEvent(party))
+            this.disbandParty(partyId, party.owner)
         }
     }
 }
