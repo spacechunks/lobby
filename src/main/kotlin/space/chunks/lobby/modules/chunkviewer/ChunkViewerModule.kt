@@ -7,7 +7,7 @@ import io.grpc.ManagedChannelBuilder
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
-import org.bukkit.GameRule
+import org.bukkit.GameRules
 import org.bukkit.NamespacedKey
 import org.bukkit.WorldCreator
 import org.bukkit.plugin.Plugin
@@ -48,12 +48,12 @@ class ChunkViewerModule(
                 .generator(VoidWorldGenerator())
                 .generateStructures(false)
         )?.let { w ->
-            w.setGameRule(GameRule.DO_DAYLIGHT_CYCLE, false)
-            w.setGameRule(GameRule.DO_WEATHER_CYCLE, false)
-            w.setGameRule(GameRule.DO_MOB_SPAWNING, false)
-            w.setGameRule(GameRule.DO_FIRE_TICK, false)
-            w.setGameRule(GameRule.DO_MOB_LOOT, false)
-            w.setGameRule(GameRule.DO_TILE_DROPS, false)
+            w.setGameRule(GameRules.ADVANCE_TIME, false)
+            w.setGameRule(GameRules.ADVANCE_WEATHER, false)
+            w.setGameRule(GameRules.SPAWN_MOBS, false)
+            w.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0)
+            w.setGameRule(GameRules.BLOCK_DROPS, false)
+            w.setGameRule(GameRules.LOCATOR_BAR, false)
             w.time = 1000
             w.clearWeatherDuration = -1
         }
