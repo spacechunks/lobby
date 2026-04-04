@@ -2,6 +2,8 @@ package space.chunks.lobby.modules.chunkviewer.listener
 
 import chunks.space.api.explorer.instance.v1alpha1.Api
 import chunks.space.api.explorer.instance.v1alpha1.InstanceServiceGrpcKt
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -44,6 +46,20 @@ class PlayerListener(
                 player.sendMessage("You have to be party owner to start a game")
                 return
             }
+
+            val arr = JsonArray()
+            party.members
+                .map { it.uniqueId.toString() }
+                .toList()
+                .forEach { arr.add(it) }
+
+            val obj = JsonObject()
+            obj.add("members", arr)
+
+            party.owner.storeCookie(
+                NamespacedKey.fromString("spacechunks:party/members")!!,
+                obj.toString().toByteArray()
+            )
         }
 
         val players = listOf(player, *party?.members?.toTypedArray() ?: arrayOf())
