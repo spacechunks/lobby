@@ -49,12 +49,12 @@ class PackService(
 
                 val remoteHash = if (headResp.metadata == null) "" else headResp.metadata!!.getOrDefault("sha1", "")
 
-                logger.info("local_pack_hash=$localHash remote_pack_hash=$remoteHash")
+                logger.fine("local_pack_hash=$localHash remote_pack_hash=$remoteHash")
 
                 packHash.set(remoteHash)
 
                 if (localHash == remoteHash) {
-                    logger.info("hashes are the same skipping pack download")
+                    logger.fine("hashes are the same skipping pack download")
                     return@runBlocking
                 }
 
