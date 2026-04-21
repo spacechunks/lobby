@@ -19,6 +19,7 @@ import space.chunks.lobby.modules.chunkviewer.Config
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.modules.party.PartyService
+import space.chunks.lobby.util.LoadingTitle
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.logging.Logger
@@ -33,6 +34,7 @@ class PlayerListener(
     private val partyService: PartyService,
 ) : Listener {
     private val playerTasks = mutableMapOf<UUID, BukkitTask>()
+    private val loadingTitle = LoadingTitle(this.plugin, Component.text("Instance is loading..."))
 
     @EventHandler
     private fun onPlayerFlavorSelect(event: PlayerSelectFlavorEvent) {
@@ -63,6 +65,10 @@ class PlayerListener(
         }
 
         val players = listOf(player, *party?.members?.toTypedArray() ?: arrayOf())
+
+        players.forEach {
+            this.loadingTitle.run(it)
+        }
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 
@@ -96,6 +102,7 @@ class PlayerListener(
                 it.sendMessage(
                     Component.text("Instanced failed to be created: REASON: $state", NamedTextColor.RED)
                 )
+                this.loadingTitle.stop(it)
             }
             return
         }
@@ -104,6 +111,7 @@ class PlayerListener(
             val data = "{\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
             it.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
             it.transfer(this.config.gatewayHost, this.config.gatewayPort)
+            this.loadingTitle.stop(it)
         }
     }
 
