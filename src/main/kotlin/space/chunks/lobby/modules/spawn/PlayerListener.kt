@@ -16,6 +16,7 @@ import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
+import space.chunks.lobby.pack.Items
 
 class PlayerListener(
     private val plugin: Plugin,
@@ -28,7 +29,14 @@ class PlayerListener(
 
         val player = event.player
         player.gameMode = GameMode.ADVENTURE
-        player.inventory.setItem(4, ItemStack(Material.NETHER_STAR))
+
+        val item = ItemStack(Material.PAPER)
+        item.editMeta {
+            it.displayName(Component.text(""))
+            it.itemModel = Items.TELEPORTER
+        }
+
+        player.inventory.setItem(4, item)
 
         player.teleport(
             Location(

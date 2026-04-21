@@ -12,11 +12,6 @@ object Textures {
     val ARROW_DOWN = NamespacedKey.fromString("spacechunks:explorer/chunk_viewer/arrow_down")
     val ARROW_RIGHT = NamespacedKey.fromString("spacechunks:explorer/chunk_viewer/arrow_right")
     val SATELLITE = NamespacedKey.fromString("spacechunks:explorer/chunk_viewer/satellite")
-
-    // PLACEHOLDERS FOR TESTING
-    val PH_THUMBNAIL_1 = NamespacedKey.fromString("spacechunks:explorer/chunk_viewer/chunk_thumbnail")
-    val PH_THUMBNAIL_2 = NamespacedKey.fromString("spacechunks:explorer/chunk_viewer/chunk_thumbnail2")
-    val PH_THUMBNAIL_3 = NamespacedKey.fromString("spacechunks:explorer/chunk_viewer/chunk_thumbnail3")
 }
 
 object Sounds {
@@ -26,4 +21,8 @@ object Sounds {
 
 object Fonts {
     val CHUNK_VIEWER = NamespacedKey.fromString("spacechunks:chunk_viewer")
+}
+
+object Items {
+    val TELEPORTER = NamespacedKey.fromString("nexo:compass")
 }
