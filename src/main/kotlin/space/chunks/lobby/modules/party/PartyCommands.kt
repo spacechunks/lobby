@@ -8,34 +8,45 @@ import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 class PartyCommands {
     companion object {
+        val mm = MiniMessage.miniMessage()
+
         fun root(partyService: PartyService): LiteralCommandNode<CommandSourceStack> {
             val root = Commands.literal("party")
 
             val invite = Commands.literal("invite").then(
                 playerArg().executes { ctx ->
-                    val invitee = ctx.getArgument("player", PlayerSelectorArgumentResolver::class.java)
-                        .resolve(ctx.getSource()).first()
+                    val invitees = ctx.getArgument("players", PlayerSelectorArgumentResolver::class.java)
+                        .resolve(ctx.getSource())
                     val inviter = ctx.getSource().sender as Player
 
                     try {
-                        partyService.invitePlayer(inviter, invitee)
+                        invitees.forEach {
+                            partyService.invitePlayer(inviter, it)
+                            inviter.sendMessage(
+                                mm.deserialize(
+                                    "<#E2E8F0>You invited <white><head:${it.name}:true> <#7c3aed>${it.name} <#E2E8F0>to your party."
+                                )
+                            )
+                        }
                     } catch (ex: PartyException) {
                         if (ex.reason == PartyExceptionReason.INVITER_IS_INVITEE) {
-                            inviter.sendMessage("You cannot invite yourself to your own party.")
+                            inviter.sendMessage(
+                                mm.deserialize("<#DC2626>You cannot invite yourself to your own party.")
+                            )
                         }
                         if (ex.reason == PartyExceptionReason.NOT_OWNER) {
-                            inviter.sendMessage("You have to be owner of the party to invite someone.")
+                            inviter.sendMessage(
+                                mm.deserialize("<#DC2626>You must be the party owner to invite players.")
+                            )
                         }
+                        return@executes Command.SINGLE_SUCCESS
                     }
-
-                    inviter.sendMessage("You have invited ${invitee.name} to your party.")
                     return@executes Command.SINGLE_SUCCESS
                 }
             )
@@ -47,12 +58,19 @@ class PartyCommands {
 
                     try {
                         partyService.acceptInvite(id)
+                        player.sendMessage(
+                            mm.deserialize("<#A3E635>You joined the party.")
+                        )
                     } catch (ex: PartyException) {
                         if (ex.reason == PartyExceptionReason.INVITE_GONE) {
-                            player.sendMessage("Invite has already expired")
+                            player.sendMessage(
+                                mm.deserialize("<#DC2626>This party invite has already expired.")
+                            )
                         }
                         if (ex.reason == PartyExceptionReason.PARTY_GONE) {
-                            player.sendMessage("The party does not longer exist :/")
+                            player.sendMessage(
+                                mm.deserialize("<#DC2626>The party no longer exists.")
+                            )
                         }
                     }
 
@@ -65,9 +83,25 @@ class PartyCommands {
                     val id = ctx.getArgument("inviteId", String::class.java)
                     val player = ctx.getSource().sender as Player
 
-                    partyService.declineInvite(id)
+                    try {
+                        partyService.declineInvite(id)
+                    } catch (ex: PartyException) {
+                        if (ex.reason == PartyExceptionReason.INVITE_GONE) {
+                            player.sendMessage(
+                                mm.deserialize("<#DC2626>This party invite has already expired.")
+                            )
+                        }
+                        if (ex.reason == PartyExceptionReason.PARTY_GONE) {
+                            player.sendMessage(
+                                mm.deserialize("<#DC2626>The party no longer exists.")
+                            )
+                        }
+                        return@executes Command.SINGLE_SUCCESS
+                    }
 
-                    player.sendMessage("Party invite declined.")
+                    player.sendMessage(
+                        mm.deserialize("<#F59E0B>You declined the party invite.")
+                    )
 
                     return@executes Command.SINGLE_SUCCESS
                 },
@@ -78,14 +112,28 @@ class PartyCommands {
                 val party = partyService.getParty(player)
 
                 if (party == null) {
-                    player.sendMessage("Your are not part of a party.")
+                    player.sendMessage(
+                        mm.deserialize("<#DC2626>You are not part of a party.")
+                    )
                     return@executes Command.SINGLE_SUCCESS
                 }
 
-                player.sendMessage("Party members:")
-                player.sendMessage(party.owner.name)
+                player.sendMessage(
+                    mm.deserialize("<#94A3B8>Party Members")
+                )
+
+                player.sendMessage(
+                    mm.deserialize("   <#94A3B8>Leader<#475569>: <white><head:${party.owner.name}:true> <#7c3aed>${party.owner.name}")
+                )
+
+                player.sendMessage(
+                    mm.deserialize("   <#94A3B8>Members")
+                )
+
                 party.members.forEach { member ->
-                    player.sendMessage(member.name)
+                    player.sendMessage(
+                        mm.deserialize("      <#475569>- <white><head:${member.name}:true> <#7c3aed>${member.name}")
+                    )
                 }
 
                 return@executes Command.SINGLE_SUCCESS
@@ -96,34 +144,33 @@ class PartyCommands {
                 val party = partyService.getParty(player)
 
                 if (party == null) {
-                    player.sendMessage("You are not part of a party.")
+                    player.sendMessage(
+                        mm.deserialize("<#DC2626>You are not part of a party.")
+                    )
                     return@executes Command.SINGLE_SUCCESS
                 }
 
                 try {
                     partyService.disbandParty(party.id, player)
                 } catch (ex: PartyException) {
-
                     if (ex.reason == PartyExceptionReason.PARTY_GONE) {
                         player.sendMessage(
-                            Component
-                                .text("Party is already gone")
-                                .color(NamedTextColor.RED)
+                            mm.deserialize("<#DC2626>The party is already gone.")
                         )
                     }
 
                     if (ex.reason == PartyExceptionReason.NOT_OWNER) {
                         player.sendMessage(
-                            Component
-                                .text("You must be owner of the party to disband it.")
-                                .color(NamedTextColor.RED)
+                            mm.deserialize("<#DC2626>You must be the party owner to disband the party.")
                         )
                     }
 
                     return@executes Command.SINGLE_SUCCESS
                 }
 
-                player.sendMessage("Party disbanded.")
+                player.sendMessage(
+                    mm.deserialize("<#F59E0B>The party has been disbanded.")
+                )
                 return@executes Command.SINGLE_SUCCESS
             }
 
@@ -132,7 +179,9 @@ class PartyCommands {
                 val party = partyService.getParty(player)
 
                 if (party == null) {
-                    player.sendMessage("You are not part of a party.")
+                    player.sendMessage(
+                        mm.deserialize("<#DC2626>You are not part of a party.")
+                    )
                     return@executes Command.SINGLE_SUCCESS
                 }
 
@@ -141,63 +190,58 @@ class PartyCommands {
                 } catch (ex: PartyException) {
                     if (ex.reason == PartyExceptionReason.PARTY_GONE) {
                         player.sendMessage(
-                            Component
-                                .text("Party is already gone")
-                                .color(NamedTextColor.RED)
-                        )
-                    }
-
-                    if (ex.reason == PartyExceptionReason.NOT_OWNER) {
-                        player.sendMessage(
-                            Component
-                                .text("ADAWDAWDAWDAW")
-                                .color(NamedTextColor.RED)
+                            mm.deserialize("<#DC2626>The party is already gone.")
                         )
                     }
                     return@executes Command.SINGLE_SUCCESS
                 }
 
                 player.sendMessage(
-                    Component
-                        .text("You have left the party")
-                        .color(NamedTextColor.RED)
+                    mm.deserialize("<#F59E0B>You left the party.")
                 )
 
                 return@executes Command.SINGLE_SUCCESS
             }
 
             val kick = Commands.literal("kick").then(
-            Commands.argument("player", ArgumentTypes.player())
-                .suggests({ ctx, builder ->
-                    val party = partyService.getParty(ctx.getSource().sender as Player)
-                        ?: return@suggests builder.buildFuture()
+                Commands.argument("player", ArgumentTypes.player())
+                    .suggests({ ctx, builder ->
+                        val party = partyService.getParty(ctx.getSource().sender as Player)
+                            ?: return@suggests builder.buildFuture()
 
-                    party.members.stream()
-                        .map(Player::getName)
-                        .filter({ name -> name.lowercase().startsWith(builder.remainingLowerCase) })
-                        .forEach(builder::suggest);
+                        party.members.stream()
+                            .map(Player::getName)
+                            .filter { name -> name.lowercase().startsWith(builder.remainingLowerCase) }
+                            .forEach(builder::suggest)
 
-                    return@suggests builder.buildFuture();
-                })
-                .executes { ctx ->
-                    val toKick = ctx.getArgument("player", PlayerSelectorArgumentResolver::class.java)
-                        .resolve(ctx.getSource()).first()
+                        return@suggests builder.buildFuture()
+                    })
+                    .executes { ctx ->
+                        val toKick = ctx.getArgument("player", PlayerSelectorArgumentResolver::class.java)
+                            .resolve(ctx.getSource()).first()
 
-                val player = ctx.getSource().sender as Player
-                val party = partyService.getParty(player)
+                        val player = ctx.getSource().sender as Player
+                        val party = partyService.getParty(player)
 
-                if (party == null) {
-                    player.sendMessage("You are not part of a party.")
-                    return@executes Command.SINGLE_SUCCESS
-                }
+                        if (party == null) {
+                            player.sendMessage(
+                                mm.deserialize("<#DC2626>You are not part of a party.")
+                            )
+                            return@executes Command.SINGLE_SUCCESS
+                        }
 
-                    try {
-                        partyService.leaveParty(party.id, player, toKick)
-                    } catch (_: PartyException) {
-                        player.sendMessage("You must be the owner of the party to kick someone.")
+                        try {
+                            partyService.leaveParty(party.id, player, toKick)
+                            player.sendMessage(
+                                mm.deserialize("<#E2E8F0>You removed <white><head:${toKick.name}:true> <#7c3aed>${toKick.name} <#E2E8F0>from the party.")
+                            )
+                        } catch (_: PartyException) {
+                            player.sendMessage(
+                                mm.deserialize("<#DC2626>You must be the party owner to kick a player.")
+                            )
+                        }
+                        return@executes Command.SINGLE_SUCCESS
                     }
-                    return@executes Command.SINGLE_SUCCESS
-            }
             )
 
             root.then(invite)
@@ -213,12 +257,12 @@ class PartyCommands {
 }
 
 fun playerArg(): RequiredArgumentBuilder<CommandSourceStack, PlayerSelectorArgumentResolver> {
-    return Commands.argument("player", ArgumentTypes.player())
-        .suggests({ ctx, builder ->
+    return Commands.argument("players", ArgumentTypes.players())
+        .suggests { ctx, builder ->
             Bukkit.getOnlinePlayers().stream()
                 .map(Player::getName)
-                .filter({ name -> name.lowercase().startsWith(builder.remainingLowerCase) })
-                .forEach(builder::suggest);
-            return@suggests builder.buildFuture();
-        })
+                .filter { name -> name.lowercase().startsWith(builder.remainingLowerCase) }
+                .forEach(builder::suggest)
+            builder.buildFuture()
+        }
 }
