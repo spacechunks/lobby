@@ -66,6 +66,8 @@ class PlayerListener(
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 
+        player.sendMessage(Component.text("Starting instance for Chunk ").color(NamedTextColor.GRAY).append(Component.text(event.chunk.name).color(NamedTextColor.WHITE)))
+
         this.runFlavorVersion(event.chunk.id, ver.id)
             .thenCompose {
                 return@thenCompose this.waitForInstance(player.uniqueId, it.id)

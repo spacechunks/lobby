@@ -36,13 +36,14 @@ class ChunkDisplay(
     companion object {
         private val ICON_MATERIAL = Material.PAPER
         private const val ICON_SCALE = 3.5f
-        private const val ICON_FOCUS_SCALE = 3.2f //3.39f
+        private const val ICON_FOCUS_SCALE = 3.39f//3.2f //3.39f
         private const val ICON_OFFSET = 2.0
     }
 
     fun spawn() {
         val iconLocation = this.location!!.clone().add(0.0, 0.0, ICON_OFFSET)
         val world = iconLocation.world
+
             this.itemDisplay = world.spawn(iconLocation, ItemDisplay::class.java) { display ->
                 val iconItem = ItemStack(ICON_MATERIAL)
                 iconItem.editMeta { ii ->
@@ -80,28 +81,33 @@ class ChunkDisplay(
         // in german we call what comes next "kompletter einschiss"
 
         if (focused) {
-            this.stopBreathing = false
-            this.currScale = ICON_SCALE
+            this.itemDisplay?.isGlowing = true
             Bukkit.getScheduler().runTaskTimer(plugin!!, { t ->
-                if (this.stopBreathing) {
-                    t.cancel()
+                if (t.isCancelled) {
                     return@runTaskTimer
                 }
 
                 this.breathingTaskId = t.taskId
-                val scale = if (currScale == ICON_FOCUS_SCALE) ICON_SCALE else ICON_FOCUS_SCALE
-                this.currScale = scale
+                val curr = this.itemDisplay?.transformation?.scale?.x
+                val scale = if (curr == ICON_FOCUS_SCALE) ICON_SCALE else ICON_FOCUS_SCALE
+
                 this.itemDisplay?.setTransformationMatrix(Matrix4f().scale(scale))
                 this.itemDisplay?.interpolationDuration = 15
                 this.itemDisplay?.interpolationDelay = 0
             }, 0L, 15L)
         } else {
             Bukkit.getScheduler().cancelTask(this.breathingTaskId)
-            this.stopBreathing = true
+            this.itemDisplay?.isGlowing = false
+            this.currScale = ICON_FOCUS_SCALE
+
+            this.itemDisplay?.let { d ->
+                d.setTransformationMatrix(Matrix4f().scale(ICON_SCALE))
+                d.interpolationDuration = 0
+                d.interpolationDelay = 0
+            }
         }
 
         this.isFocused = focused
-        updateFocus()
 
         if (focused) {
             val loc = center!!.clone().subtract(0.0, 4.7, 3.0)
@@ -160,14 +166,5 @@ class ChunkDisplay(
         }
 
         return lines
-    }
-
-    fun updateFocus() {
-        val iconScale = if (isFocused) ICON_FOCUS_SCALE else ICON_SCALE
-        this.itemDisplay?.let { d ->
-            d.setTransformationMatrix(Matrix4f().scale(iconScale))
-            d.interpolationDuration = 0
-            d.interpolationDelay = 0
-        }
     }
 }
