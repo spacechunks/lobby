@@ -18,10 +18,12 @@ class PartyModule(
     private val mm = MiniMessage.miniMessage()
 
     override fun onEnable() {
-        this.plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
-            commands.registrar().register(PartyCommands.root(this.partyService))
+        PartyCommands.root(this.partyService).forEach {
+            this.plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
+                commands.registrar().register(it)
+            }
         }
-
+        
         Bukkit.getPluginManager().registerEvents(this, plugin)
         Bukkit.getPluginManager().registerEvents(PlayerListener(this.partyService), plugin)
     }

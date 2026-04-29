@@ -8,6 +8,7 @@ import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
@@ -16,9 +17,7 @@ class PartyCommands {
     companion object {
         val mm = MiniMessage.miniMessage()
 
-        fun root(partyService: PartyService): LiteralCommandNode<CommandSourceStack> {
-            val root = Commands.literal("party")
-
+        fun root(partyService: PartyService): List<LiteralCommandNode<CommandSourceStack>> {
             val invite = Commands.literal("invite").then(
                 playerArg().executes { ctx ->
                     val invitees = ctx.getArgument("players", PlayerSelectorArgumentResolver::class.java)
@@ -244,6 +243,25 @@ class PartyCommands {
                     }
             )
 
+            val chat = Commands.argument("message", StringArgumentType.greedyString())
+                .executes { ctx ->
+                    val player = ctx.getSource().sender as Player
+                    val party = partyService.getParty(player)
+                    val msg = ctx.getArgument("message", String::class.java)
+
+                    if (party == null) {
+                        player.sendMessage(
+                            PartyCommands.mm.deserialize("<#DC2626>You are not part of a party.")
+                        )
+                        return@executes Command.SINGLE_SUCCESS
+                    }
+
+                    party.sendMessage(Component.text("PARTY > ").append(Component.text(msg)))
+                    return@executes Command.SINGLE_SUCCESS
+                }
+
+
+            val root = Commands.literal("party")
             root.then(invite)
             root.then(accept)
             root.then(decline)
@@ -251,7 +269,19 @@ class PartyCommands {
             root.then(disband)
             root.then(leave)
             root.then(kick)
-            return root.build()
+            root.then(chat)
+
+            val p = Commands.literal("p")
+            p.then(invite)
+            p.then(accept)
+            p.then(decline)
+            p.then(list)
+            p.then(disband)
+            p.then(leave)
+            p.then(kick)
+            p.then(chat)
+
+            return listOf(root.build(), p.build())
         }
     }
 }
