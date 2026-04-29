@@ -23,6 +23,7 @@ class PartyModule(
         }
 
         Bukkit.getPluginManager().registerEvents(this, plugin)
+        Bukkit.getPluginManager().registerEvents(PlayerListener(this.partyService), plugin)
     }
 
     override fun onDisable() {}
