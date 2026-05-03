@@ -49,6 +49,8 @@ class PlayerListener(
             mm.deserialize("<br><gradient:#bcd4f8:#e2ecfd>  ᴄʜᴜɴᴋ ᴇxᴘʟᴏʀᴇʀ ʙʏ sᴘᴀᴄᴇ ᴄʜᴜɴᴋs  <br><gradient:#5cd9fd:#399cf5>  ᴄʜᴜɴᴋs.sᴘᴀᴄᴇ  <br>")
         )
 
+        player.playerListName(mm.deserialize("<!shadow> <font:chunkexplorer:tablist>\uE101</font></!shadow> <#ff008a>" + player.name()))
+
         val teleporter = ItemStack(Material.PAPER)
         teleporter.editMeta {
             it.itemModel = Items.TELEPORTER
