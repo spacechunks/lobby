@@ -2,12 +2,14 @@ package space.chunks.lobby.modules.spawn
 
 import com.google.gson.JsonParser
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.inventory.ItemStack
@@ -16,6 +18,7 @@ import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
+import space.chunks.lobby.pack.Items
 
 class PlayerListener(
     private val plugin: Plugin,
@@ -27,8 +30,10 @@ class PlayerListener(
         event.joinMessage(Component.text(""))
 
         val player = event.player
+        val mm = MiniMessage.miniMessage()
+
+        player.inventory.clear()
         player.gameMode = GameMode.ADVENTURE
-        player.inventory.setItem(4, ItemStack(Material.NETHER_STAR))
 
         player.teleport(
             Location(
@@ -38,6 +43,43 @@ class PlayerListener(
                 this.config.spawnLocation.z
             )
         )
+
+        player.sendPlayerListHeaderAndFooter(
+            mm.deserialize("<br><font:chunkexplorer:tablist>\uE100<br><br><br><br><br><br>"),
+            mm.deserialize("<br><gradient:#bcd4f8:#e2ecfd>  ᴄʜᴜɴᴋ ᴇxᴘʟᴏʀᴇʀ ʙʏ sᴘᴀᴄᴇ ᴄʜᴜɴᴋs  <br><gradient:#5cd9fd:#399cf5>  ᴄʜᴜɴᴋs.sᴘᴀᴄᴇ  <br>")
+        )
+
+        val teleporter = ItemStack(Material.PAPER)
+        teleporter.editMeta {
+            it.itemModel = Items.TELEPORTER
+            it.displayName(mm.deserialize("Teleporter"))
+        }
+        val map = ItemStack(Material.PAPER)
+        map.editMeta {
+            it.itemModel = Items.MAP
+            it.displayName(mm.deserialize("Warps"))
+        }
+        val inventory = ItemStack(Material.PAPER)
+        inventory.editMeta {
+            it.itemModel = Items.INVENTORY
+            it.displayName(mm.deserialize("Inventory"))
+        }
+        val party = ItemStack(Material.PAPER)
+        party.editMeta {
+            it.itemModel = Items.PARTY
+            it.displayName(mm.deserialize("Party"))
+        }
+        val settings = ItemStack(Material.PAPER)
+        settings.editMeta {
+            it.itemModel = Items.SETTINGS
+            it.displayName(mm.deserialize("Settings"))
+        }
+
+        player.inventory.setItem(0, teleporter)
+        player.inventory.setItem(1, map)
+        player.inventory.setItem(2, inventory)
+        player.inventory.setItem(3, party)
+        player.inventory.setItem(4, settings)
 
         player
             .retrieveCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/pushback")!!)
@@ -78,7 +120,8 @@ class PlayerListener(
         }
 
         if (event.action != Action.RIGHT_CLICK_BLOCK && event.action != Action.RIGHT_CLICK_AIR) return
-        if (player.inventory.itemInMainHand.type != Material.NETHER_STAR) return
+        if (player.inventory.itemInMainHand.type != Material.PAPER
+            && player.inventory.itemInMainHand.itemMeta.itemModel == Items.TELEPORTER) return
 
         player.addPotionEffect(
             PotionEffectType.DARKNESS
@@ -94,6 +137,11 @@ class PlayerListener(
 
     @EventHandler
     private fun onEntityDamage(event: EntityDamageEvent) {
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    private fun onDropItem(event: PlayerDropItemEvent) {
         event.isCancelled = true
     }
 

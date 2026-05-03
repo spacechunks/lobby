@@ -27,3 +27,11 @@ object Sounds {
 object Fonts {
     val CHUNK_VIEWER = NamespacedKey.fromString("spacechunks:chunk_viewer")
 }
+
+object Items {
+    val TELEPORTER = NamespacedKey.fromString("nexo:compass")
+    val PARTY = NamespacedKey.fromString("nexo:balloons")
+    val SETTINGS = NamespacedKey.fromString("nexo:gear")
+    val INVENTORY = NamespacedKey.fromString("nexo:crate")
+    val MAP = NamespacedKey.fromString("nexo:map")
+}
