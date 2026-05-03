@@ -4,6 +4,7 @@ import chunks.space.api.explorer.instance.v1alpha1.Api
 import chunks.space.api.explorer.instance.v1alpha1.InstanceServiceGrpcKt
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
+import io.grpc.StatusException
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -69,6 +70,14 @@ class PlayerListener(
         player.sendMessage(Component.text("Starting instance for Chunk ").color(NamedTextColor.GRAY).append(Component.text(event.chunk.name).color(NamedTextColor.WHITE)))
 
         this.runFlavorVersion(event.chunk.id, ver.id)
+            .exceptionally { e ->
+                players.forEach { player ->
+                    player.sendMessage(
+                        Component.text("Failed to run instance: ${e.message}").color(NamedTextColor.RED)
+                    )
+                }
+                return@exceptionally null
+            }
             .thenCompose {
                 return@thenCompose this.waitForInstance(player.uniqueId, it.id)
             }.thenAccept {
@@ -117,12 +126,20 @@ class PlayerListener(
         val f = CompletableFuture<InstanceTypes.Instance>()
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             runBlocking {
-                val req = Api.RunFlavorVersionRequest
-                    .newBuilder()
-                    .setFlavorVersionId(versionId)
-                    .setChunkId(chunkId)
-                    .build()
-                val resp = instanceClient.runFlavorVersion(req)
+                var resp: Api.RunFlavorVersionResponse?
+
+                try {
+                    val req = Api.RunFlavorVersionRequest
+                        .newBuilder()
+                        .setFlavorVersionId(versionId)
+                        .setChunkId(chunkId)
+                        .build()
+                    resp = instanceClient.runFlavorVersion(req)
+                } catch (e: StatusException) {
+                    f.completeExceptionally(e)
+                    return@runBlocking
+                }
+
                 f.complete(resp.instance)
             }
         })
