@@ -90,7 +90,7 @@ class ChunkSelectView(
 
     override fun close() {
         this.elements.forEach { it.remove() }
-        this.grid.clear()
+        this.grid.clearAll()
     }
 
     override fun handleInput(player: Player, input: Input) {

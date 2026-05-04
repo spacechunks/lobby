@@ -47,6 +47,10 @@ class DisplaySession(
         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             this.player.spectatorTarget = camera
         }, 10)
+        
+        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+            this.player.hideEntity(this.plugin, this.camera)
+        }, 20)
 
         // TODO: fetch chunks
         this.background = spawnWall(
@@ -54,6 +58,13 @@ class DisplaySession(
             100f,
             NamespacedKey.fromString("minecraft:black_concrete"),
         )
+
+        this.background = spawnWall(
+            this.location.clone().add(0.0, 0.0, -20.0),
+            100f,
+            NamespacedKey.fromString("minecraft:black_concrete"),
+        )
+
         this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid)
         this.activeView?.render()
     }
