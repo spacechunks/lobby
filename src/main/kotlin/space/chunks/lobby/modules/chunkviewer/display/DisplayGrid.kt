@@ -117,12 +117,16 @@ class DisplayGrid(
         focusedIndex = -1
     }
 
-//    fun clearAll() {
-//        clear()
-//        allGameItems.clear()
-//        totalItems = 0
-//        currentPage = 0
-//    }
+    fun clearAll() {
+        clear()
+        this.allGameItems.forEach {
+            it.remove()
+        }
+        this.allGameItems.clear()
+        allGameItems.clear()
+        totalItems = 0
+        currentPage = 0
+    }
 
     fun setInitialFocus(): Boolean {
         return setFocus(0)
