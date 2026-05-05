@@ -1,8 +1,8 @@
 package space.chunks.lobby.modules.party.event
 
-import org.bukkit.entity.Player
+import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
-import org.bukkit.event.player.PlayerEvent
+import space.chunks.lobby.modules.party.PartyPlayer
 
 enum class PartyInviteStatus {
     ACCEPTED,
@@ -11,11 +11,11 @@ enum class PartyInviteStatus {
 }
 
 class PartyInviteEvent(
-    player: Player,
-    val inviter: Player?,
+    val invitee: PartyPlayer,
+    val inviter: PartyPlayer,
     val inviteId: String,
     val status: PartyInviteStatus,
-): PlayerEvent(player) {
+) : Event() {
     override fun getHandlers(): HandlerList = HANDLERS
 
     companion object {

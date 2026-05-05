@@ -26,7 +26,10 @@ class PartyCommands {
 
                     try {
                         invitees.forEach {
-                            partyService.invitePlayer(inviter, it)
+                            partyService.invitePlayer(
+                                PartyPlayer(inviter.uniqueId, inviter.name),
+                                PartyPlayer(it.uniqueId, it.name)
+                            )
                             inviter.sendMessage(
                                 mm.deserialize(
                                     "<#E2E8F0>You invited <white><head:${it.name}:true> <#7c3aed>${it.name} <#E2E8F0>to your party."
@@ -108,7 +111,7 @@ class PartyCommands {
 
             val list = Commands.literal("list").executes { ctx ->
                 val player = ctx.getSource().sender as Player
-                val party = partyService.getParty(player)
+                val party = partyService.getParty(player.uniqueId)
 
                 if (party == null) {
                     player.sendMessage(
@@ -140,7 +143,7 @@ class PartyCommands {
 
             val disband = Commands.literal("disband").executes { ctx ->
                 val player = ctx.getSource().sender as Player
-                val party = partyService.getParty(player)
+                val party = partyService.getParty(player.uniqueId)
 
                 if (party == null) {
                     player.sendMessage(
@@ -150,7 +153,7 @@ class PartyCommands {
                 }
 
                 try {
-                    partyService.disbandParty(party.id, player)
+                    partyService.disbandParty(party.id, player.uniqueId)
                 } catch (ex: PartyException) {
                     if (ex.reason == PartyExceptionReason.PARTY_GONE) {
                         player.sendMessage(
@@ -175,7 +178,7 @@ class PartyCommands {
 
             val leave = Commands.literal("leave").executes { ctx ->
                 val player = ctx.getSource().sender as Player
-                val party = partyService.getParty(player)
+                val party = partyService.getParty(player.uniqueId)
 
                 if (party == null) {
                     player.sendMessage(
@@ -185,7 +188,7 @@ class PartyCommands {
                 }
 
                 try {
-                    partyService.leaveParty(party.id, player, player)
+                    partyService.leaveParty(party.id, player.uniqueId, player.uniqueId)
                 } catch (ex: PartyException) {
                     if (ex.reason == PartyExceptionReason.PARTY_GONE) {
                         player.sendMessage(
@@ -203,24 +206,23 @@ class PartyCommands {
             }
 
             val kick = Commands.literal("kick").then(
-                Commands.argument("player", ArgumentTypes.player())
+                Commands.argument("player", StringArgumentType.word())
                     .suggests({ ctx, builder ->
-                        val party = partyService.getParty(ctx.getSource().sender as Player)
+                        val party = partyService.getParty((ctx.getSource().sender as Player).uniqueId)
                             ?: return@suggests builder.buildFuture()
 
                         party.members.stream()
-                            .map(Player::getName)
+                            .map(PartyPlayer::name)
                             .filter { name -> name.lowercase().startsWith(builder.remainingLowerCase) }
                             .forEach(builder::suggest)
 
                         return@suggests builder.buildFuture()
                     })
                     .executes { ctx ->
-                        val toKick = ctx.getArgument("player", PlayerSelectorArgumentResolver::class.java)
-                            .resolve(ctx.getSource()).first()
+                        val toKick = ctx.getArgument("player", String::class.java)
 
                         val player = ctx.getSource().sender as Player
-                        val party = partyService.getParty(player)
+                        val party = partyService.getParty(player.uniqueId)
 
                         if (party == null) {
                             player.sendMessage(
@@ -230,9 +232,15 @@ class PartyCommands {
                         }
 
                         try {
-                            partyService.leaveParty(party.id, player, toKick)
+                            val p = party.members.find { it.name.equals(toKick, true) }
+                            if (p == null) {
+                                mm.deserialize("<#DC2626>$toKick not found.")
+                                return@executes Command.SINGLE_SUCCESS
+                            }
+
+                            partyService.leaveParty(party.id, player.uniqueId, p.id)
                             player.sendMessage(
-                                mm.deserialize("<#E2E8F0>You removed <white><head:${toKick.name}:true> <#7c3aed>${toKick.name} <#E2E8F0>from the party.")
+                                mm.deserialize("<#E2E8F0>You removed <white><head:${p.name}:true> <#7c3aed>${p.name} <#E2E8F0>from the party.")
                             )
                         } catch (_: PartyException) {
                             player.sendMessage(
@@ -246,7 +254,7 @@ class PartyCommands {
             val chat = Commands.argument("message", StringArgumentType.greedyString())
                 .executes { ctx ->
                     val player = ctx.getSource().sender as Player
-                    val party = partyService.getParty(player)
+                    val party = partyService.getParty(player.uniqueId)
                     val msg = ctx.getArgument("message", String::class.java)
 
                     if (party == null) {
