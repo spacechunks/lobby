@@ -4,32 +4,36 @@ import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
 import org.bukkit.Bukkit
-import org.bukkit.entity.Player
 import space.chunks.lobby.modules.party.event.PartyDisbandEvent
 import space.chunks.lobby.modules.party.event.PartyInviteEvent
 import space.chunks.lobby.modules.party.event.PartyInviteStatus
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 data class Party @OptIn(ExperimentalUuidApi::class) constructor(
-    val owner: Player,
-    val members: MutableSet<Player> = mutableSetOf(),
+    val owner: PartyPlayer,
+    val members: MutableSet<PartyPlayer> = mutableSetOf(),
     val id: String = Uuid.generateV7().toHexDashString()
 ) : ForwardingAudience {
-    override fun audiences(): Iterable<Audience> {
-        val l = mutableSetOf<Audience>()
-        l.addAll(members)
-        l.add(owner)
+    override fun audiences(): Iterable<Audience?> {
+        val l = mutableSetOf<Audience?>()
+        l.addAll(members.map { it.asPlayer() }.toSet())
+        l.add(owner.asPlayer())
         return l
     }
 }
 
 data class PartyInvite @OptIn(ExperimentalUuidApi::class) constructor(
     val partyId: String,
-    val player: Player,
+    val player: PartyPlayer,
     val id: String = Uuid.generateV7().toHexDashString()
 )
+
+data class PartyPlayer(val id: UUID, val name: String) {
+    fun asPlayer() = Bukkit.getPlayer(name)
+}
 
 class PartyService {
     private val parties = CacheBuilder<String, Party>
@@ -44,9 +48,9 @@ class PartyService {
         // at some point we will implement a better system, but right now this suffices.
         .expireAfterAccess(60, TimeUnit.MINUTES)
         .removalListener<String, Party> {
-            this.partyByPlayer.remove(it.value?.owner)
+            this.partyByPlayer.remove(it.value?.owner?.id)
             it.value?.members?.forEach { member ->
-                this.partyByPlayer.remove(member)
+                this.partyByPlayer.remove(member.id)
             }
         }
         .build<String, Party>()
@@ -56,11 +60,11 @@ class PartyService {
         .expireAfterAccess(30, TimeUnit.SECONDS)
         .build<String, PartyInvite>()
 
-    private val partyByPlayer = mutableMapOf<Player, Party>()
+    private val partyByPlayer = mutableMapOf<UUID, Party>()
 
-    fun invitePlayer(inviter: Player, invitee: Player) {
-        val inviterParty = this.getParty(inviter)
-        if (inviter == invitee) {
+    fun invitePlayer(inviter: PartyPlayer, invitee: PartyPlayer) {
+        val inviterParty = this.getParty(inviter.id)
+        if (inviter.id == invitee.id) {
             throw PartyException(PartyExceptionReason.INVITER_IS_INVITEE)
         }
 
@@ -68,7 +72,7 @@ class PartyService {
             val party = Party(inviter)
 
             this.parties.put(party.id, party)
-            this.partyByPlayer[inviter] = party
+            this.partyByPlayer[inviter.id] = party
 
             val invite = PartyInvite(party.id, invitee)
             this.invites.put(invite.id, invite)
@@ -80,7 +84,7 @@ class PartyService {
         }
 
         // the inviter must be the owner of the party to invite players
-        if (inviterParty.owner != inviter) {
+        if (inviterParty.owner.id != inviter.id) {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
@@ -97,12 +101,12 @@ class PartyService {
         val party = this.parties.getIfPresent(invite.partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
         // leave the party the player is currently part of, if they accept another invite
-        this.getParty(invite.player)?.let {
-            this.leaveParty(it.id, invite.player, invite.player)
+        this.getParty(invite.player.id)?.let {
+            this.leaveParty(it.id, invite.player.id, invite.player.id)
         }
 
         party.members.add(invite.player)
-        this.partyByPlayer[invite.player] = party
+        this.partyByPlayer[invite.player.id] = party
         this.invites.invalidate(inviteId)
 
         Bukkit.getPluginManager().callEvent(
@@ -122,8 +126,8 @@ class PartyService {
         )
     }
 
-    fun getParty(player: Player): Party? {
-        val p1 = partyByPlayer[player] ?: return null
+    fun getParty(playerId: UUID): Party? {
+        val p1 = partyByPlayer[playerId] ?: return null
 
         // the cache does not call the removal listener just because the entry is expired.
         // we'd need to call parties.cleanUp() for this. but since we try to avoid having
@@ -132,49 +136,49 @@ class PartyService {
         val p2 = this.parties.getIfPresent(p1.id)
         if (p2 == null) {
             // the party is gone so clean up
-            this.partyByPlayer.remove(player)
+            this.partyByPlayer.remove(playerId)
             return null
         }
         return p2
     }
 
-    fun disbandParty(partyId: String, actor: Player) {
+    fun disbandParty(partyId: String, actorId: UUID) {
         val party = this.parties.getIfPresent(partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
-        if (party.owner != actor) {
+        if (party.owner.id != actorId) {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
-        this.partyByPlayer.remove(party.owner)
+        this.partyByPlayer.remove(party.owner.id)
         party.members.forEach {
-            this.partyByPlayer.remove(it.player)
+            this.partyByPlayer.remove(it.id)
         }
 
         this.parties.invalidate(partyId)
         Bukkit.getPluginManager().callEvent(PartyDisbandEvent(party))
     }
 
-    fun leaveParty(partyId: String, actor: Player, toKick: Player) {
+    fun leaveParty(partyId: String, actorId: UUID, toKick: UUID) {
         val party = this.parties.getIfPresent(partyId) ?: throw PartyException(PartyExceptionReason.PARTY_GONE)
 
         // we only want to check if the actor is able to kick someone
         // if the actor and the person to kick are different.
         // if they are the same, the person wants to remove itself, so
         // that is fine.
-        if (actor.uniqueId != toKick.uniqueId && actor != party.owner) {
+        if (actorId != toKick && actorId != party.owner.id) {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
-        if (party.owner == toKick) {
-            this.disbandParty(partyId, actor)
+        if (party.owner.id == toKick) {
+            this.disbandParty(partyId, actorId)
             return
         }
 
-        party.members.remove(toKick)
+        party.members.removeIf { it.id == toKick }
         this.partyByPlayer.remove(toKick)
 
         if (party.members.isEmpty()) {
-            this.disbandParty(partyId, party.owner)
+            this.disbandParty(partyId, party.owner.id)
         }
     }
 }

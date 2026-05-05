@@ -41,7 +41,7 @@ class PlayerListener(
         val flavor = event.flavor
         val ver = flavor.versionsList.first()
 
-        val party = this.partyService.getParty(player)
+        val party = this.partyService.getParty(player.uniqueId)
         if (party != null) {
             if (party.owner != player) {
                 player.sendMessage("You have to be party owner to start a game")
@@ -50,20 +50,20 @@ class PlayerListener(
 
             val arr = JsonArray()
             party.members
-                .map { it.uniqueId.toString() }
+                .map { it.id.toString() }
                 .toList()
                 .forEach { arr.add(it) }
 
             val obj = JsonObject()
             obj.add("members", arr)
 
-            party.owner.storeCookie(
+            party.owner.asPlayer()!!.storeCookie(
                 NamespacedKey.fromString("spacechunks:party/members")!!,
                 obj.toString().toByteArray()
             )
         }
 
-        val players = listOf(player, *party?.members?.toTypedArray() ?: arrayOf())
+        val players = listOf(player, *party?.members?.map { it.asPlayer() }?.toTypedArray() ?: arrayOf())
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 
@@ -72,7 +72,7 @@ class PlayerListener(
         this.runFlavorVersion(event.chunk.id, ver.id)
             .exceptionally { e ->
                 players.forEach { player ->
-                    player.sendMessage(
+                    player?.sendMessage(
                         Component.text("Failed to run instance: ${e.message}").color(NamedTextColor.RED)
                     )
                 }
@@ -94,7 +94,7 @@ class PlayerListener(
         this.playerTasks.remove(player.uniqueId)
     }
 
-    private fun instanceCreationCompleted(players: List<Player>, instance: InstanceTypes.Instance) {
+    private fun instanceCreationCompleted(players: List<Player?>, instance: InstanceTypes.Instance) {
         val state = instance.state
 
         if (state == InstanceTypes.InstanceState.CREATION_FAILED
@@ -102,7 +102,7 @@ class PlayerListener(
             || state == InstanceTypes.InstanceState.DELETED
         ) {
             players.forEach {
-                it.sendMessage(
+                it?.sendMessage(
                     Component.text("Instanced failed to be created: REASON: $state", NamedTextColor.RED)
                 )
             }
@@ -111,13 +111,13 @@ class PlayerListener(
 
         players.forEach {
             val data = "{\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
-            it.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
-            it.clearResourcePacks()
+            it?.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
+            it?.clearResourcePacks()
             
             // as usual, we have to wait before transferring the player to the
             // instance, otherwise the resource pack won't unload
             Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
-                it.transfer(this.config.gatewayHost, this.config.gatewayPort)
+                it?.transfer(this.config.gatewayHost, this.config.gatewayPort)
             }, 10L)
         }
     }

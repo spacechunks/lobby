@@ -38,8 +38,8 @@ class PartyModule(
 
     @EventHandler
     private fun onPartyInvite(event: PartyInviteEvent) {
-        val invitee = event.player
-        val inviter = event.inviter
+        val invitee = Bukkit.getPlayer(event.invitee.id)!!
+        val inviter = Bukkit.getPlayer(event.inviter.id)!!
 
         when (event.status) {
 
@@ -48,13 +48,13 @@ class PartyModule(
                     "<white><head:${invitee.name}:true> <#7c3aed>${invitee.name} <#E2E8F0>joined the party."
                 )
 
-                this.partyService.getParty(invitee)?.sendMessage(msg)
+                this.partyService.getParty(invitee.uniqueId)?.sendMessage(msg)
             }
 
             PartyInviteStatus.PENDING -> {
                 val msg = mm.deserialize(
                     "<#0EA5E9>You received a party invite from " +
-                            "<white><head:${inviter?.name}:true> <#F8FAFC>${inviter?.name}<#0EA5E9>." +
+                            "<white><head:${inviter.name}:true> <#F8FAFC>${inviter.name}<#0EA5E9>." +
                             "<br>   <click:run_command:'/party accept ${event.inviteId}'>" +
                             "<hover:show_text:'<#E2E8F0>Join the player\\'s party.<br><bold><#A3E635>Click to accept'>" +
                             "<#A3E635>[ACCEPT]</hover></click> " +
