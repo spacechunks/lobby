@@ -43,7 +43,7 @@ class PlayerListener(
 
         val party = this.partyService.getParty(player.uniqueId)
         if (party != null) {
-            if (party.owner != player) {
+            if (party.owner.id != player.uniqueId) {
                 player.sendMessage("You have to be party owner to start a game")
                 return
             }
@@ -112,7 +112,6 @@ class PlayerListener(
         players.forEach {
             val data = "{\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
             it?.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
-            it?.clearResourcePacks()
             
             // as usual, we have to wait before transferring the player to the
             // instance, otherwise the resource pack won't unload

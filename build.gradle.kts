@@ -62,7 +62,7 @@ tasks.named("shadowJar", ShadowJar::class) {
 tasks {
     runServer {
         downloadPlugins {
-            modrinth("ViaVersion", "5.7.0")
+            modrinth("ViaVersion", "5.9.1")
         }
         minecraftVersion("1.21.11")
     }
