@@ -2,6 +2,7 @@ package space.chunks.lobby.modules.spawn
 
 import com.google.gson.JsonParser
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -19,6 +20,7 @@ import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Items
+import space.chunks.lobby.ui.Hotbar
 
 class PlayerListener(
     private val plugin: Plugin,
@@ -49,39 +51,9 @@ class PlayerListener(
             mm.deserialize("<br><gradient:#bcd4f8:#e2ecfd>  ᴄʜᴜɴᴋ ᴇxᴘʟᴏʀᴇʀ ʙʏ sᴘᴀᴄᴇ ᴄʜᴜɴᴋs  <br><gradient:#5cd9fd:#399cf5>  ᴄʜᴜɴᴋs.sᴘᴀᴄᴇ  <br>")
         )
 
-        player.playerListName(mm.deserialize("<!shadow> <font:chunkexplorer:tablist>\uE101</font></!shadow> <#ff008a>" + player.name()))
+        player.playerListName(mm.deserialize("<!shadow> <font:chunkexplorer:tablist>\uE101</font></!shadow> <#ff008a>").append(player.name()).color(TextColor.fromHexString("#ff008a")))
 
-        val teleporter = ItemStack(Material.PAPER)
-        teleporter.editMeta {
-            it.itemModel = Items.TELEPORTER
-            it.displayName(mm.deserialize("Teleporter"))
-        }
-        val map = ItemStack(Material.PAPER)
-        map.editMeta {
-            it.itemModel = Items.MAP
-            it.displayName(mm.deserialize("Warps"))
-        }
-        val inventory = ItemStack(Material.PAPER)
-        inventory.editMeta {
-            it.itemModel = Items.INVENTORY
-            it.displayName(mm.deserialize("Inventory"))
-        }
-        val party = ItemStack(Material.PAPER)
-        party.editMeta {
-            it.itemModel = Items.PARTY
-            it.displayName(mm.deserialize("Party"))
-        }
-        val settings = ItemStack(Material.PAPER)
-        settings.editMeta {
-            it.itemModel = Items.SETTINGS
-            it.displayName(mm.deserialize("Settings"))
-        }
-
-        player.inventory.setItem(0, teleporter)
-        player.inventory.setItem(1, map)
-        player.inventory.setItem(2, inventory)
-        player.inventory.setItem(3, party)
-        player.inventory.setItem(4, settings)
+        Hotbar.give(player)
 
         player
             .retrieveCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/pushback")!!)
