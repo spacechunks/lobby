@@ -54,7 +54,7 @@ class ChunkViewerModule(
             w.setGameRule(GameRules.FIRE_SPREAD_RADIUS_AROUND_PLAYER, 0)
             w.setGameRule(GameRules.BLOCK_DROPS, false)
             w.setGameRule(GameRules.LOCATOR_BAR, false)
-            w.time = 1000
+            w.time = 14000
             w.clearWeatherDuration = -1
         }
 

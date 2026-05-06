@@ -4,6 +4,7 @@ import com.google.gson.JsonParser
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -13,7 +14,6 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
@@ -21,6 +21,7 @@ import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySess
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Items
 import space.chunks.lobby.ui.Hotbar
+import java.time.Duration
 
 class PlayerListener(
     private val plugin: Plugin,
@@ -50,6 +51,17 @@ class PlayerListener(
             mm.deserialize("<br><font:chunkexplorer:tablist>\uE100<br><br><br><br><br><br>"),
             mm.deserialize("<br><gradient:#bcd4f8:#e2ecfd>  ᴄʜᴜɴᴋ ᴇxᴘʟᴏʀᴇʀ ʙʏ sᴘᴀᴄᴇ ᴄʜᴜɴᴋs  <br><gradient:#5cd9fd:#399cf5>  ᴄʜᴜɴᴋs.sᴘᴀᴄᴇ  <br>")
         )
+
+        val title = Title.title(
+            mm.deserialize("<black><font:chunkexplorer:title>\uE200"),
+            mm.deserialize(""),
+            Title.Times.times(
+                Duration.ofMillis(0),
+                Duration.ofMillis(2000),
+                Duration.ofMillis(1000)
+            )
+        )
+        player.showTitle(title)
 
         player.playerListName(mm.deserialize("<!shadow> <font:chunkexplorer:tablist>\uE101</font></!shadow> <#ff008a>").append(player.name()).color(TextColor.fromHexString("#ff008a")))
 
@@ -85,6 +97,7 @@ class PlayerListener(
     @EventHandler
     private fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
+        val mm = MiniMessage.miniMessage()
     
         // nexo uses note blocks to display custom blocks.
         // interacting with them will change the block.
@@ -102,6 +115,16 @@ class PlayerListener(
                 .createEffect(60, Int.MAX_VALUE)
                 .withParticles(false)
         )
+        val title = Title.title(
+            mm.deserialize("<black><font:chunkexplorer:title>\uE200"),
+            mm.deserialize(""),
+            Title.Times.times(
+                Duration.ofMillis(1000),
+                Duration.ofMillis(1000),
+                Duration.ofMillis(1000)
+            )
+        )
+        player.showTitle(title)
 
         // timing is set so that once the darkness almost reaches the player, we teleport them
         Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
