@@ -69,7 +69,7 @@ class PlayerListener(
 
         player.sendMessage(Component.text("Starting instance for Chunk ").color(NamedTextColor.GRAY).append(Component.text(event.chunk.name).color(NamedTextColor.WHITE)))
 
-        this.runFlavorVersion(event.chunk.id, ver.id)
+        this.runFlavorVersion(player.uniqueId.toString(), event.chunk.id, ver.id)
             .exceptionally { e ->
                 players.forEach { player ->
                     player?.sendMessage(
@@ -121,7 +121,11 @@ class PlayerListener(
         }
     }
 
-    private fun runFlavorVersion(chunkId: String, versionId: String): CompletableFuture<InstanceTypes.Instance> {
+    private fun runFlavorVersion(
+        orderedBy: String,
+        chunkId: String,
+        versionId: String
+    ): CompletableFuture<InstanceTypes.Instance> {
         val f = CompletableFuture<InstanceTypes.Instance>()
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             runBlocking {
@@ -132,6 +136,7 @@ class PlayerListener(
                         .newBuilder()
                         .setFlavorVersionId(versionId)
                         .setChunkId(chunkId)
+                        .setOrderedBy(orderedBy)
                         .build()
                     resp = instanceClient.runFlavorVersion(req)
                 } catch (e: StatusException) {

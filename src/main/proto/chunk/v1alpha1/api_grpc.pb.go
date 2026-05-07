@@ -1,17 +1,14 @@
 //
 //Chunk Explorer, a platform for hosting and discovering Minecraft servers.
 //Copyright (C) 2025 Yannic Rieger <oss@76k.io>
-//
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU Lesser General Public
 //License as published by the Free Software Foundation; either
 //version 3 of the License, or (at your option) any later version.
-//
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 //Lesser General Public License for more details.
-//
 //You should have received a copy of the GNU Lesser General Public License
 //along with this program; if not, write to the Free Software Foundation,
 //Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
@@ -46,6 +43,9 @@ const (
 	ChunkService_BuildFlavorVersion_FullMethodName            = "/chunk.v1alpha1.ChunkService/BuildFlavorVersion"
 	ChunkService_GetUploadURL_FullMethodName                  = "/chunk.v1alpha1.ChunkService/GetUploadURL"
 	ChunkService_GetSupportedMinecraftVersions_FullMethodName = "/chunk.v1alpha1.ChunkService/GetSupportedMinecraftVersions"
+	ChunkService_UploadThumbnail_FullMethodName               = "/chunk.v1alpha1.ChunkService/UploadThumbnail"
+	ChunkService_DeleteFlavor_FullMethodName                  = "/chunk.v1alpha1.ChunkService/DeleteFlavor"
+	ChunkService_DeleteChunk_FullMethodName                   = "/chunk.v1alpha1.ChunkService/DeleteChunk"
 )
 
 // ChunkServiceClient is the client API for ChunkService service.
@@ -81,7 +81,7 @@ type ChunkServiceClient interface {
 	//
 	// Defined error codes:
 	// - NOT_FOUND:
-	//   - chunk with the provided id does not exist
+	//   - chunk with the provided id does not exist or is deleted
 	//
 	// - INVALID_ARGUMENT:
 	//   - chunk id is invalid
@@ -96,7 +96,9 @@ type ChunkServiceClient interface {
 	//
 	// Defined error codes:
 	// - ALREADY_EXISTS:
-	//   - a flavor with the given name already exists for this chunk
+	//   - a flavor with the given name already exists for this chunk.
+	//     this error will also be returned if the flavor is currently
+	//     in the process of being deleted.
 	//
 	// - INVALID_ARGUMENT:
 	//   - the provided chunk id is invalid
@@ -109,6 +111,9 @@ type ChunkServiceClient interface {
 	// an already existing version.
 	//
 	// Defined error codes:
+	// - NOT_FOUND
+	//   - the affected flavor does not exist
+	//
 	// - ALREADY_EXISTS:
 	//   - the flavor version about to be created is already present
 	//   - a version with the exact same set of files already exists
@@ -144,6 +149,40 @@ type ChunkServiceClient interface {
 	//     documentation of GetUploadURLRequest
 	GetUploadURL(ctx context.Context, in *GetUploadURLRequest, opts ...grpc.CallOption) (*GetUploadURLResponse, error)
 	GetSupportedMinecraftVersions(ctx context.Context, in *GetSupportedMinecraftVersionsRequest, opts ...grpc.CallOption) (*GetSupportedMinecraftVersionsResponse, error)
+	// UploadThumbnail uploads the given PNG image. Formats other than PNG are not supported.
+	//
+	// Defined error codes:
+	// - NOT_FOUND:
+	//   - the targeted chunk does not exist
+	//
+	// - INVALID_ARGUMENT:
+	//   - chunk id is invalid
+	//   - thumbnail image must be PNG
+	//   - thumbnail size must be 512x512 pixels
+	//   - thumbnail size too big
+	UploadThumbnail(ctx context.Context, in *UploadThumbnailRequest, opts ...grpc.CallOption) (*UploadThumbnailResponse, error)
+	// DeleteFlavor initiates the process for a Flavor to be deleted. Deletion does not happen
+	// instantaneously, it can take a few minutes for a Flavor to be fully deleted. During this
+	// time any interaction with the flavor is blocked. This means that updates are no longer
+	// possible and creating Instances based on the Flavors versions is also not possible.
+	//
+	// Defined error codes:
+	// - INVALID_ARGUMENT:
+	//   - flavor id is invalid
+	DeleteFlavor(ctx context.Context, in *DeleteFlavorRequest, opts ...grpc.CallOption) (*DeleteFlavorResponse, error)
+	// DeleteChunk initiates the process for a Chunk to be deleted. This will also delete all
+	// Flavors associated with this Chunk. Deletion does not happen instantaneously, it can take
+	// a few minutes for a Chunk to be fully deleted. During this time any interaction with the
+	// Chunk and its Flavors is blocked. This means that updates are no longer possible and creating
+	// Instances based on the Flavors versions is also not possible.
+	//
+	// Defined error codes:
+	// - NOT_FOUND:
+	//   - the targeted chunk does not exist
+	//
+	// - INVALID_ARGUMENT:
+	//   - chunk id is invalid
+	DeleteChunk(ctx context.Context, in *DeleteChunkRequest, opts ...grpc.CallOption) (*DeleteChunkResponse, error)
 }
 
 type chunkServiceClient struct {
@@ -244,6 +283,36 @@ func (c *chunkServiceClient) GetSupportedMinecraftVersions(ctx context.Context, 
 	return out, nil
 }
 
+func (c *chunkServiceClient) UploadThumbnail(ctx context.Context, in *UploadThumbnailRequest, opts ...grpc.CallOption) (*UploadThumbnailResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadThumbnailResponse)
+	err := c.cc.Invoke(ctx, ChunkService_UploadThumbnail_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chunkServiceClient) DeleteFlavor(ctx context.Context, in *DeleteFlavorRequest, opts ...grpc.CallOption) (*DeleteFlavorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteFlavorResponse)
+	err := c.cc.Invoke(ctx, ChunkService_DeleteFlavor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chunkServiceClient) DeleteChunk(ctx context.Context, in *DeleteChunkRequest, opts ...grpc.CallOption) (*DeleteChunkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteChunkResponse)
+	err := c.cc.Invoke(ctx, ChunkService_DeleteChunk_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChunkServiceServer is the server API for ChunkService service.
 // All implementations must embed UnimplementedChunkServiceServer
 // for forward compatibility.
@@ -277,7 +346,7 @@ type ChunkServiceServer interface {
 	//
 	// Defined error codes:
 	// - NOT_FOUND:
-	//   - chunk with the provided id does not exist
+	//   - chunk with the provided id does not exist or is deleted
 	//
 	// - INVALID_ARGUMENT:
 	//   - chunk id is invalid
@@ -292,7 +361,9 @@ type ChunkServiceServer interface {
 	//
 	// Defined error codes:
 	// - ALREADY_EXISTS:
-	//   - a flavor with the given name already exists for this chunk
+	//   - a flavor with the given name already exists for this chunk.
+	//     this error will also be returned if the flavor is currently
+	//     in the process of being deleted.
 	//
 	// - INVALID_ARGUMENT:
 	//   - the provided chunk id is invalid
@@ -305,6 +376,9 @@ type ChunkServiceServer interface {
 	// an already existing version.
 	//
 	// Defined error codes:
+	// - NOT_FOUND
+	//   - the affected flavor does not exist
+	//
 	// - ALREADY_EXISTS:
 	//   - the flavor version about to be created is already present
 	//   - a version with the exact same set of files already exists
@@ -340,6 +414,40 @@ type ChunkServiceServer interface {
 	//     documentation of GetUploadURLRequest
 	GetUploadURL(context.Context, *GetUploadURLRequest) (*GetUploadURLResponse, error)
 	GetSupportedMinecraftVersions(context.Context, *GetSupportedMinecraftVersionsRequest) (*GetSupportedMinecraftVersionsResponse, error)
+	// UploadThumbnail uploads the given PNG image. Formats other than PNG are not supported.
+	//
+	// Defined error codes:
+	// - NOT_FOUND:
+	//   - the targeted chunk does not exist
+	//
+	// - INVALID_ARGUMENT:
+	//   - chunk id is invalid
+	//   - thumbnail image must be PNG
+	//   - thumbnail size must be 512x512 pixels
+	//   - thumbnail size too big
+	UploadThumbnail(context.Context, *UploadThumbnailRequest) (*UploadThumbnailResponse, error)
+	// DeleteFlavor initiates the process for a Flavor to be deleted. Deletion does not happen
+	// instantaneously, it can take a few minutes for a Flavor to be fully deleted. During this
+	// time any interaction with the flavor is blocked. This means that updates are no longer
+	// possible and creating Instances based on the Flavors versions is also not possible.
+	//
+	// Defined error codes:
+	// - INVALID_ARGUMENT:
+	//   - flavor id is invalid
+	DeleteFlavor(context.Context, *DeleteFlavorRequest) (*DeleteFlavorResponse, error)
+	// DeleteChunk initiates the process for a Chunk to be deleted. This will also delete all
+	// Flavors associated with this Chunk. Deletion does not happen instantaneously, it can take
+	// a few minutes for a Chunk to be fully deleted. During this time any interaction with the
+	// Chunk and its Flavors is blocked. This means that updates are no longer possible and creating
+	// Instances based on the Flavors versions is also not possible.
+	//
+	// Defined error codes:
+	// - NOT_FOUND:
+	//   - the targeted chunk does not exist
+	//
+	// - INVALID_ARGUMENT:
+	//   - chunk id is invalid
+	DeleteChunk(context.Context, *DeleteChunkRequest) (*DeleteChunkResponse, error)
 	mustEmbedUnimplementedChunkServiceServer()
 }
 
@@ -376,6 +484,15 @@ func (UnimplementedChunkServiceServer) GetUploadURL(context.Context, *GetUploadU
 }
 func (UnimplementedChunkServiceServer) GetSupportedMinecraftVersions(context.Context, *GetSupportedMinecraftVersionsRequest) (*GetSupportedMinecraftVersionsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSupportedMinecraftVersions not implemented")
+}
+func (UnimplementedChunkServiceServer) UploadThumbnail(context.Context, *UploadThumbnailRequest) (*UploadThumbnailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadThumbnail not implemented")
+}
+func (UnimplementedChunkServiceServer) DeleteFlavor(context.Context, *DeleteFlavorRequest) (*DeleteFlavorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteFlavor not implemented")
+}
+func (UnimplementedChunkServiceServer) DeleteChunk(context.Context, *DeleteChunkRequest) (*DeleteChunkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteChunk not implemented")
 }
 func (UnimplementedChunkServiceServer) mustEmbedUnimplementedChunkServiceServer() {}
 func (UnimplementedChunkServiceServer) testEmbeddedByValue()                      {}
@@ -560,6 +677,60 @@ func _ChunkService_GetSupportedMinecraftVersions_Handler(srv interface{}, ctx co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChunkService_UploadThumbnail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadThumbnailRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChunkServiceServer).UploadThumbnail(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChunkService_UploadThumbnail_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChunkServiceServer).UploadThumbnail(ctx, req.(*UploadThumbnailRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChunkService_DeleteFlavor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteFlavorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChunkServiceServer).DeleteFlavor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChunkService_DeleteFlavor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChunkServiceServer).DeleteFlavor(ctx, req.(*DeleteFlavorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ChunkService_DeleteChunk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteChunkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChunkServiceServer).DeleteChunk(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChunkService_DeleteChunk_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChunkServiceServer).DeleteChunk(ctx, req.(*DeleteChunkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChunkService_ServiceDesc is the grpc.ServiceDesc for ChunkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -602,6 +773,18 @@ var ChunkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSupportedMinecraftVersions",
 			Handler:    _ChunkService_GetSupportedMinecraftVersions_Handler,
+		},
+		{
+			MethodName: "UploadThumbnail",
+			Handler:    _ChunkService_UploadThumbnail_Handler,
+		},
+		{
+			MethodName: "DeleteFlavor",
+			Handler:    _ChunkService_DeleteFlavor_Handler,
+		},
+		{
+			MethodName: "DeleteChunk",
+			Handler:    _ChunkService_DeleteChunk_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
