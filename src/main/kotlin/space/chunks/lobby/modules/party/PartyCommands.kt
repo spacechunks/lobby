@@ -12,13 +12,13 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import space.chunks.lobby.ui.Messages
+import space.chunks.lobby.ui.Texts
 
 class PartyCommands {
     companion object {
-        fun root(partyService: PartyService, messages: Messages): List<LiteralCommandNode<CommandSourceStack>> {
+        fun root(partyService: PartyService, texts: Texts): List<LiteralCommandNode<CommandSourceStack>> {
             val root = Commands.literal("party").executes { ctx ->
-                messages.send(ctx.getSource().sender as Player, "messages.party.help")
+                texts.send(ctx.getSource().sender as Player, "party.help")
                 Command.SINGLE_SUCCESS
             }
 
@@ -35,18 +35,18 @@ class PartyCommands {
                                 PartyPlayer(it.uniqueId, it.name)
                             )
 
-                            messages.send(
+                            texts.send(
                                 inviter,
-                                "messages.party.invite.sent",
-                                mapOf("target" to messages.player(it.name))
+                                "party.invite.sent",
+                                mapOf("target" to texts.player(it.name))
                             )
                         }
                     } catch (ex: PartyException) {
                         if (ex.reason == PartyExceptionReason.INVITER_IS_INVITEE) {
-                            messages.send(inviter, "messages.party.invite.self-error")
+                            texts.send(inviter, "party.invite.self-error")
                         }
                         if (ex.reason == PartyExceptionReason.NOT_OWNER) {
-                            messages.send(inviter, "messages.party.invite.not-owner-error")
+                            texts.send(inviter, "party.invite.not-owner-error")
                         }
                         return@executes Command.SINGLE_SUCCESS
                     }
@@ -63,33 +63,33 @@ class PartyCommands {
                         partyService.acceptInvite(id)
                         val party = partyService.getParty(player)
                         if (party == null) {
-                            messages.send(player, "messages.party.invite.party-gone-error")
+                            texts.send(player, "party.invite.party-gone-error")
                             return@executes Command.SINGLE_SUCCESS
                         }
 
-                        messages.send(
+                        texts.send(
                             player,
-                            "messages.party.invite.accepted",
-                            mapOf("owner" to messages.player(party.owner.name))
+                            "party.invite.accepted",
+                            mapOf("owner" to texts.player(party.owner.name))
                         )
-                        messages.send(
+                        texts.send(
                             player,
-                            "messages.party.list.leader",
-                            mapOf("member" to messages.player(party.owner.name))
+                            "party.list.leader",
+                            mapOf("member" to texts.player(party.owner.name))
                         )
                         party.members.forEach { member ->
-                            messages.send(
+                            texts.send(
                                 player,
-                                "messages.party.list.member",
-                                mapOf("member" to messages.player(member.name))
+                                "party.list.member",
+                                mapOf("member" to texts.player(member.name))
                             )
                         }
                     } catch (ex: PartyException) {
                         if (ex.reason == PartyExceptionReason.INVITE_GONE) {
-                            messages.send(player, "messages.party.invite.expired-error")
+                            texts.send(player, "party.invite.expired-error")
                         }
                         if (ex.reason == PartyExceptionReason.PARTY_GONE) {
-                            messages.send(player, "messages.party.invite.party-gone-error")
+                            texts.send(player, "party.invite.party-gone-error")
                         }
                     }
 
@@ -106,15 +106,15 @@ class PartyCommands {
                         partyService.declineInvite(id)
                     } catch (ex: PartyException) {
                         if (ex.reason == PartyExceptionReason.INVITE_GONE) {
-                            messages.send(player, "messages.party.invite.expired-error")
+                            texts.send(player, "party.invite.expired-error")
                         }
                         if (ex.reason == PartyExceptionReason.PARTY_GONE) {
-                            messages.send(player, "messages.party.invite.party-gone-error")
+                            texts.send(player, "party.invite.party-gone-error")
                         }
                         return@executes Command.SINGLE_SUCCESS
                     }
 
-                    messages.send(player, "messages.party.invite.declined-self")
+                    texts.send(player, "party.invite.declined-self")
 
                     return@executes Command.SINGLE_SUCCESS
                 },
@@ -125,21 +125,21 @@ class PartyCommands {
                 val party = partyService.getParty(player.uniqueId)
 
                 if (party == null) {
-                    messages.send(player, "messages.party.list.not-in-party")
+                    texts.send(player, "party.list.not-in-party")
                     return@executes Command.SINGLE_SUCCESS
                 }
 
-                messages.send(player, "messages.party.list.header")
-                messages.send(
+                texts.send(player, "party.list.header")
+                texts.send(
                     player,
-                    "messages.party.list.leader",
-                    mapOf("member" to messages.player(party.owner.name))
+                    "party.list.leader",
+                    mapOf("member" to texts.player(party.owner.name))
                 )
                 party.members.forEach { member ->
-                    messages.send(
+                    texts.send(
                         player,
-                        "messages.party.list.member",
-                        mapOf("member" to messages.player(member.name))
+                        "party.list.member",
+                        mapOf("member" to texts.player(member.name))
                     )
                 }
 
@@ -151,7 +151,7 @@ class PartyCommands {
                 val party = partyService.getParty(player.uniqueId)
 
                 if (party == null) {
-                    messages.send(player, "messages.party.list.not-in-party")
+                    texts.send(player, "party.list.not-in-party")
                     return@executes Command.SINGLE_SUCCESS
                 }
 
@@ -159,17 +159,17 @@ class PartyCommands {
                     partyService.disbandParty(party.id, player.uniqueId)
                 } catch (ex: PartyException) {
                     if (ex.reason == PartyExceptionReason.PARTY_GONE) {
-                        messages.send(player, "messages.party.disband.gone-error")
+                        texts.send(player, "party.disband.gone-error")
                     }
 
                     if (ex.reason == PartyExceptionReason.NOT_OWNER) {
-                        messages.send(player, "messages.party.disband.not-owner-error")
+                        texts.send(player, "party.disband.not-owner-error")
                     }
 
                     return@executes Command.SINGLE_SUCCESS
                 }
 
-                messages.send(player, "messages.party.disband.self")
+                texts.send(player, "party.disband.self")
                 return@executes Command.SINGLE_SUCCESS
             }
 
@@ -178,7 +178,7 @@ class PartyCommands {
                 val party = partyService.getParty(player.uniqueId)
 
                 if (party == null) {
-                    messages.send(player, "messages.party.list.not-in-party")
+                    texts.send(player, "party.list.not-in-party")
                     return@executes Command.SINGLE_SUCCESS
                 }
 
@@ -186,12 +186,12 @@ class PartyCommands {
                     partyService.leaveParty(party.id, player.uniqueId, player.uniqueId)
                 } catch (ex: PartyException) {
                     if (ex.reason == PartyExceptionReason.PARTY_GONE) {
-                        messages.send(player, "messages.party.leave.gone-error")
+                        texts.send(player, "party.leave.gone-error")
                     }
                     return@executes Command.SINGLE_SUCCESS
                 }
 
-                messages.send(player, "messages.party.leave.self")
+                texts.send(player, "party.leave.self")
 
                 return@executes Command.SINGLE_SUCCESS
             }
@@ -216,25 +216,25 @@ class PartyCommands {
                         val party = partyService.getParty(player.uniqueId)
 
                         if (party == null) {
-                            messages.send(player, "messages.party.list.not-in-party")
+                            texts.send(player, "party.list.not-in-party")
                             return@executes Command.SINGLE_SUCCESS
                         }
 
                         try {
                             val p = party.members.find { it.name.equals(toKick, true) }
                             if (p == null) {
-                                mm.deserialize("<#DC2626>$toKick not found.")
+                                //mm.deserialize("<#DC2626>$toKick not found.")
                                 return@executes Command.SINGLE_SUCCESS
                             }
 
                             partyService.leaveParty(party.id, player.uniqueId, p.id)
-                            messages.send(
+                            texts.send(
                                 player,
-                                "messages.party.kick.self",
-                                mapOf("target" to messages.player(toKick.name))
+                                "party.kick.self",
+                                mapOf("target" to texts.player(toKick.name))
                             )
                         } catch (_: PartyException) {
-                            messages.send(player, "messages.party.kick.not-owner-error")
+                            texts.send(player, "party.kick.not-owner-error")
                         }
                         return@executes Command.SINGLE_SUCCESS
                     }

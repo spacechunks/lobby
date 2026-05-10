@@ -4,7 +4,6 @@ import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConf
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
 import net.kyori.adventure.resource.ResourcePackStatus
-import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -17,6 +16,7 @@ import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.modules.spawn.SpawnModule
 import space.chunks.lobby.pack.PackService
 import space.chunks.lobby.pack.ResourcePackConfig
+import space.chunks.lobby.ui.Texts
 import java.net.URI
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -27,11 +27,12 @@ class Plugin : JavaPlugin(), Listener {
     private val packConfig = ResourcePackConfig.parse(this.config)
     private val packService = PackService(this.logger, this, packConfig)
     private val partyService = PartyService()
+    private val texts = Texts(this)
 
     // modules
-    private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService)
-    private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this)
-    private val partyMod = PartyModule(this, partyService)
+    private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService, texts)
+    private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this, texts)
+    private val partyMod = PartyModule(this, partyService, texts)
 
     override fun onEnable() {
         val modules = listOf(
@@ -85,7 +86,7 @@ class Plugin : JavaPlugin(), Listener {
             }
 
             ResourcePackStatus.DECLINED -> {
-                conn.disconnect(Component.text("You must accept the resource pack to play."))
+                conn.disconnect(this.texts.component("common.resource-pack.declined"))
             }
 
             ResourcePackStatus.FAILED_DOWNLOAD,
@@ -93,7 +94,7 @@ class Plugin : JavaPlugin(), Listener {
             ResourcePackStatus.INVALID_URL,
             ResourcePackStatus.DISCARDED,
             null -> {
-                conn.disconnect(Component.text("Resource pack failed to load. Please try again."))
+                conn.disconnect(this.texts.component("common.resource-pack.failed"))
             }
         }
     }

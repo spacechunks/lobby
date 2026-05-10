@@ -4,23 +4,22 @@ import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.plugin.Plugin
-import space.chunks.lobby.ui.Messages
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.party.event.PartyDisbandEvent
 import space.chunks.lobby.modules.party.event.PartyInviteEvent
 import space.chunks.lobby.modules.party.event.PartyInviteStatus
+import space.chunks.lobby.ui.Texts
 
 class PartyModule(
     plugin: Plugin,
     private val partyService: PartyService,
+    private val texts: Texts,
 ) : LobbyModule(plugin, "party") {
-
-    private val messages = Messages(plugin)
 
     override fun onEnable() {
         PartyCommands.root(this.partyService).forEach {
             this.plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
-                commands.registrar().register(PartyCommands.root(this.partyService, this.messages)
+                commands.registrar().register(PartyCommands.root(this.partyService, this.texts))
             }
         }
 
@@ -31,10 +30,10 @@ class PartyModule(
 
     @EventHandler
     private fun onPartyDisband(event: PartyDisbandEvent) {
-        this.messages.send(
+        this.texts.send(
             event.party,
-            "messages.party.disband.broadcast",
-            mapOf("actor" to this.messages.player(event.party.owner.name))
+            "party.disband.broadcast",
+            mapOf("actor" to this.texts.player(event.party.owner.name))
         )
     }
 
@@ -46,10 +45,10 @@ class PartyModule(
         when (event.status) {
 
             PartyInviteStatus.ACCEPTED -> {
-                this.messages.send(
+                this.texts.send(
                     this.partyService.getParty(invitee) ?: return,
-                    "messages.party.invite.accepted-broadcast",
-                    mapOf("member" to this.messages.player(invitee.name))
+                    "party.invite.accepted-broadcast",
+                    mapOf("member" to this.texts.player(invitee.name))
                 )
 
                 this.partyService.getParty(invitee.uniqueId)?.sendMessage(msg)
@@ -59,16 +58,16 @@ class PartyModule(
                 val party = inviter?.let(this.partyService::getParty)
                 val extraPlayers = party?.members?.size ?: 0
 
-                this.messages.send(
+                this.texts.send(
                     invitee,
-                    "messages.party.invite.received",
+                    "party.invite.received",
                     mapOf(
-                        "inviter" to this.messages.player(inviter?.name ?: "Unknown"),
+                        "inviter" to this.texts.player(inviter?.name ?: this.texts.raw("common.player.unknown")),
                         "invite_id" to event.inviteId,
                         "party_count_line" to if (extraPlayers > 0) {
-                            "<prefix2> <subtle>... with $extraPlayers more players!"
+                            this.texts.raw("party.invite.party-count-line", mapOf("count" to extraPlayers))
                         } else {
-                            "<prefix2>"
+                            this.texts.raw("party.invite.party-count-empty")
                         }
                     )
                 )
@@ -76,10 +75,10 @@ class PartyModule(
 
             PartyInviteStatus.DECLINED -> {
                 inviter?.let {
-                    this.messages.send(
+                    this.texts.send(
                         it,
-                        "messages.party.invite.declined-target",
-                        mapOf("member" to this.messages.player(invitee.name))
+                        "party.invite.declined-target",
+                        mapOf("member" to this.texts.player(invitee.name))
                     )
                 }
             }

@@ -6,17 +6,18 @@ import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import org.joml.Matrix4f
 import org.joml.Vector3f
+import space.chunks.lobby.ui.Texts
 
 class DisplaySession(
     val player: Player,
     val plugin: Plugin,
     val location: Location,
-    val chunks: List<ChunkDisplay>
+    val chunks: List<ChunkDisplay>,
+    private val texts: Texts,
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)
     val grid = DisplayGrid(
@@ -48,7 +49,7 @@ class DisplaySession(
         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             this.player.spectatorTarget = camera
         }, 10)
-        
+
         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
             this.player.hideEntity(this.plugin, this.camera)
         }, 20)
@@ -58,14 +59,7 @@ class DisplaySession(
             this.location.clone().add(0.0, 0.0, 20.0).addRotation(180f,0f),
             1f,
         )
-
-        this.background = spawnWall(
-            this.location.clone().add(0.0, 0.0, -20.0),
-            100f,
-            NamespacedKey.fromString("minecraft:black_concrete"),
-        )
-
-        this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid)
+        this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid, this.texts)
         this.activeView?.render()
     }
 
@@ -88,7 +82,7 @@ class DisplaySession(
     private fun spawnWall(location: Location, scale: Float): TextDisplay {
         return location.world.spawn(location, TextDisplay::class.java) {
             it.brightness = Display.Brightness(0, 0)
-            it.text(MiniMessage.miniMessage().deserialize("<black><font:chunkexplorer:title>\uE200"))
+            it.text(this.texts.component("chunkviewer.display.background"))
             it.billboard = Display.Billboard.FIXED
             it.lineWidth = 1
             it.isDefaultBackground = false

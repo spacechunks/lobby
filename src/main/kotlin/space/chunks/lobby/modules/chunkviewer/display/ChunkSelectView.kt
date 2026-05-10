@@ -9,12 +9,14 @@ import org.joml.Vector3f
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.pack.Sounds
 import space.chunks.lobby.pack.Textures
+import space.chunks.lobby.ui.Texts
 
 class ChunkSelectView(
     plugin: Plugin,
     center: Location,
     session: DisplaySession,
     val grid: DisplayGrid,
+    private val texts: Texts,
 ) : View(plugin, center, session) {
     private val arrowUpLoc = center.clone().add(8.0, -1.55, 0.0)
     private val arrowDownLoc = this.arrowUpLoc.clone().subtract(0.0, .6, 0.0)
@@ -125,7 +127,7 @@ class ChunkSelectView(
                 )
                 player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
                 this.session.switchWindow(
-                    FlavorSelectView(this.plugin, this.center, this.session, focused.chunk, m),
+                    FlavorSelectView(this.plugin, this.center, this.session, focused.chunk, m, this.texts),
                 )
                 return
             }

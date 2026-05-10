@@ -1,0 +1,27 @@
+spawn:
+  tablist:
+    header: '<br><font:chunkexplorer:tablist><br><br><br><br><br><br>'
+    footer: '<br><gradient:#bcd4f8:#e2ecfd>  ᴄʜᴜɴᴋ ᴇxᴘʟᴏʀᴇʀ ʙʏ sᴘᴀᴄᴇ ᴄʜᴜɴᴋs  <br><gradient:#5cd9fd:#399cf5>  ᴄʜᴜɴᴋs.sᴘᴀᴄᴇ  <br>'
+  player:
+    # First matching section wins. `default` is always used as fallback.
+    default:
+      player-name: '<!shadow> <font:chunkexplorer:text></font></!shadow> <accent><name>'
+      chat-format: '<!shadow><head:<name>:true> <font:chunkexplorer:text></font></!shadow> <accent><player_name><subtle>: <white><message>'
+  title:
+    logo: '<black><font:chunkexplorer:title>'
+  pushback:
+    connection-error:
+      - ' '
+      - '<prefix> <error>You got pushed back to the lobby because an error occurred while connecting to the server.'
+    transfer-data-invalid:
+      - ' '
+      - '<prefix> <error>You got pushed back due to invalid transfer data.'
+    transfer-data-timeout:
+      - ' '
+      - '<prefix> <error>Transfer data could not be received in time.'
+  hotbar:
+    teleporter: '<header>Teleporter'
+    warps: '<header>Warps'
+    inventory: '<header>Inventory'
+    party: '<header>Party'
+    settings: '<header>Settings'

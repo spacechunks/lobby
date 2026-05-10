@@ -1,9 +1,8 @@
 package space.chunks.lobby.modules.spawn
 
 import com.google.gson.JsonParser
+import io.papermc.paper.event.player.AsyncChatEvent
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.TextColor
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.entity.Player
@@ -21,19 +20,20 @@ import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySess
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Items
 import space.chunks.lobby.ui.Hotbar
+import space.chunks.lobby.ui.Texts
 import java.time.Duration
 
 class PlayerListener(
     private val plugin: Plugin,
     private val config: Config,
     private val sessionService: DisplaySessionService,
+    private val texts: Texts,
 ) : Listener {
     @EventHandler
     private fun onPlayerJoin(event: PlayerJoinEvent) {
-        event.joinMessage(Component.text(""))
+        event.joinMessage(Component.empty())
 
         val player = event.player
-        val mm = MiniMessage.miniMessage()
 
         player.inventory.clear()
         player.gameMode = GameMode.ADVENTURE
@@ -48,13 +48,13 @@ class PlayerListener(
         )
 
         player.sendPlayerListHeaderAndFooter(
-            mm.deserialize("<br><font:chunkexplorer:tablist>\uE100<br><br><br><br><br><br>"),
-            mm.deserialize("<br><gradient:#bcd4f8:#e2ecfd>  ᴄʜᴜɴᴋ ᴇxᴘʟᴏʀᴇʀ ʙʏ sᴘᴀᴄᴇ ᴄʜᴜɴᴋs  <br><gradient:#5cd9fd:#399cf5>  ᴄʜᴜɴᴋs.sᴘᴀᴄᴇ  <br>")
+            this.texts.component("spawn.tablist.header"),
+            this.texts.component("spawn.tablist.footer")
         )
 
         val title = Title.title(
-            mm.deserialize("<black><font:chunkexplorer:title>\uE200"),
-            mm.deserialize(""),
+            this.texts.component("spawn.title.logo"),
+            Component.empty(),
             Title.Times.times(
                 Duration.ofMillis(0),
                 Duration.ofMillis(2000),
@@ -63,9 +63,10 @@ class PlayerListener(
         )
         player.showTitle(title)
 
-        player.playerListName(mm.deserialize("<!shadow> <font:chunkexplorer:tablist>\uE101</font></!shadow> <#ff008a>").append(player.name()).color(TextColor.fromHexString("#ff008a")))
+        val playerName = this.playerName(player)
+        player.playerListName(playerName)
 
-        Hotbar.give(player)
+        Hotbar.give(player, this.texts)
 
         player
             .retrieveCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/pushback")!!)
@@ -78,27 +79,40 @@ class PlayerListener(
                 val reason = obj["reason"].asString
 
                 if (reason == "CONNECTION_ERROR") {
-                    player.sendMessage(Component.text("You got pushed back to the lobby, because an error while connecting to the server occurred."))
+                    this.texts.send(player, "spawn.pushback.connection-error")
                     return@thenAccept
                 }
 
                 if (reason == "TRANSFER_DATA_INVALID") {
-                    player.sendMessage(Component.text("You got pushed back due to invalid transfer data."))
+                    this.texts.send(player, "spawn.pushback.transfer-data-invalid")
                     return@thenAccept
                 }
 
                 if (reason == "TRANSFER_DATA_RECEIVE_TIMEOUT") {
-                    player.sendMessage(Component.text("Transfer data could not be received in time."))
+                    this.texts.send(player, "spawn.pushback.transfer-data-timeout")
                     return@thenAccept
                 }
             }
     }
 
     @EventHandler
+    private fun onAsyncChat(event: AsyncChatEvent) {
+        event.renderer { source, _, message, _ ->
+            this.texts.component(
+                "${this.playerTextPath(source)}.chat-format",
+                mapOf(
+                    "name" to source.name,
+                    "playerName" to event.player.name,
+                    "message" to message,
+                )
+            )
+        }
+    }
+
+    @EventHandler
     private fun onPlayerInteract(event: PlayerInteractEvent) {
         val player = event.player
-        val mm = MiniMessage.miniMessage()
-    
+
         // nexo uses note blocks to display custom blocks.
         // interacting with them will change the block.
         if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
@@ -116,8 +130,8 @@ class PlayerListener(
                 .withParticles(false)
         )
         val title = Title.title(
-            mm.deserialize("<black><font:chunkexplorer:title>\uE200"),
-            mm.deserialize(""),
+            this.texts.component("spawn.title.logo"),
+            Component.empty(),
             Title.Times.times(
                 Duration.ofMillis(1000),
                 Duration.ofMillis(1000),
@@ -170,5 +184,28 @@ class PlayerListener(
         )
 
         this.sessionService.closeSession(player)
+    }
+
+    private fun playerName(player: Player): Component =
+        this.texts.component(
+            "${this.playerTextPath(player)}.player-name",
+            mapOf("name" to player.name)
+        )
+
+    private fun playerTextPath(player: Player): String {
+        val sections = this.texts.sectionKeys("spawn.player")
+
+        sections.forEach { section ->
+            if (section == "default") {
+                return@forEach
+            }
+
+            val permission = this.texts.stringOrNull("spawn.player.$section.permission") ?: return@forEach
+            if (permission.isNotBlank() && player.hasPermission(permission)) {
+                return "spawn.player.$section"
+            }
+        }
+
+        return "spawn.player.default"
     }
 }

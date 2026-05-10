@@ -1,0 +1,91 @@
+party:
+  help:
+    - ' '
+    - '<party-prefix> <header>Use the following commands:'
+    - '<party-prefix-extender>  <subtle>- <body>/party list'
+    - '<party-prefix-extender>  <subtle>- <body>/party accept <highlight>\<<body>invite_id<highlight>\>'
+    - '<party-prefix-extender>  <subtle>- <body>/party decline <highlight>\<<body>invite_id<highlight>\>'
+    - '<party-prefix-extender>  <subtle>- <body>/party disband'
+    - '<party-prefix-extender>  <subtle>- <body>/party leave'
+    - '<party-prefix-extender>  <subtle>- <body>/party invite <highlight>\<<body>player_name<highlight>\>'
+    - '<party-prefix-extender>  <subtle>- <body>/party kick <highlight>\<<body>player_name<highlight>\>'
+  invite:
+    party-count-line: '<party-prefix-extender> <subtle>... with <count> more players!'
+    party-count-empty: '<party-prefix-extender>'
+    sent:
+      - ' '
+      - '<party-prefix> <header>An invitation has been sent to <target>.'
+    received:
+      - ' '
+      - '<party-prefix> <header><inviter> invited you to play in a party.'
+      - '<party_count_line>'
+      - '<party-prefix-extender>'
+      - '<party-prefix-extender> <click:run_command:"/party accept <invite_id>"><hover:show_text:"<success>Accept this party invitation"><font:chunkexplorer:chat><white></font></hover></click> <body>- <click:run_command:"/party decline <invite_id>"><hover:show_text:"<error>Decline this party invitation"><white><font:chunkexplorer:chat></font></hover></click>'
+    self-error:
+      - ' '
+      - '<party-prefix> <error>You cannot invite yourself to your own party.'
+    not-owner-error:
+      - ' '
+      - '<party-prefix> <error>You must be the party owner to invite players.'
+    expired-error:
+      - ' '
+      - '<party-prefix> <error>This party invite has already expired.'
+    party-gone-error:
+      - ' '
+      - '<party-prefix> <error>The party no longer exists.'
+    accepted:
+      - ' '
+      - '<party-prefix> <header>The invitation from <owner> has been <success>accepted<header>.'
+      - '<party-prefix-extender>'
+      - '<party-prefix-extender> <header>Current Party Members:'
+    accepted-broadcast:
+      - ' '
+      - '<subtle><member> has joined the party.'
+    declined-self:
+      - ' '
+      - '<party-prefix> <header>The invitation has been <error>declined<header>.'
+    declined-target:
+      - ' '
+      - '<party-prefix> <header>Your party invitation was <error>declined <header>by <member><header>.'
+  list:
+    header:
+      - ' '
+      - '<party-prefix> <header>Current Party Members:'
+    leader:
+      - '<party-prefix-extender>  <subtle>- <member> <subtle>(Leader)'
+    member:
+      - '<party-prefix-extender>  <subtle>- <member>'
+    not-in-party:
+      - ' '
+      - '<party-prefix> <error>You are not part of a party.'
+  disband:
+    self:
+      - ' '
+      - '<party-prefix> <header>The party has been <error>disbanded<header>.'
+    broadcast:
+      - ' '
+      - '<party-prefix> <header><actor> has <error>disbanded<header> the party.'
+      - '<party-prefix-extender> <body>Create your own party with /party invite <highlight>\<<body>player_name<highlight>\>'
+    not-owner-error:
+      - ' '
+      - '<party-prefix> <error>You must be the party owner to disband the party.'
+    gone-error:
+      - ' '
+      - '<party-prefix> <error>The party is already gone.'
+  leave:
+    self:
+      - ' '
+      - '<party-prefix> <header>You left the party.'
+    gone-error:
+      - ' '
+      - '<party-prefix> <error>The party is already gone.'
+  kick:
+    self:
+      - ' '
+      - '<party-prefix> <header><target> has been <error>removed <header>from the party.'
+    broadcast:
+      - ' '
+      - '<party-prefix> <header><actor> has <error>kicked <header><target> <header>from the party.'
+    not-owner-error:
+      - ' '
+      - '<party-prefix> <error>You must be the party owner to kick a player.'
