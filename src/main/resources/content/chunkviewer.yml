@@ -5,6 +5,6 @@ chunkviewer:
     title: '<gradient:#E3ECFD:#C1D7F9>Choose your flavor!</gradient>'
     page-indicator: '<color:#53d0fd><font:spacechunks:ui></font> <font:spacechunks:chunk_viewer><white><current_page>/<total_pages></font> <color:#53d0fd><font:spacechunks:ui></font>'
   instance:
-    owner-required: '<prefix> <error>You have to be the party owner to start a game.'
-    starting: '<body>Starting instance for Chunk <white><chunk_name>'
+    owner-required: '<party-prefix> <error>You have to be the party owner to start a game.'
+    starting: '<prefix> <body>Starting instance for Chunk <white><chunk_name>'
     creation-failed: '<prefix> <error>Instance failed to be created. Reason: <highlight><state>'

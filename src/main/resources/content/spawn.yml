@@ -6,7 +6,7 @@ spawn:
     # First matching section wins. `default` is always used as fallback.
     default:
       player-name: '<!shadow> <font:chunkexplorer:text></font></!shadow> <accent><name>'
-      chat-format: '<!shadow><head:<name>:true> <font:chunkexplorer:text></font></!shadow> <accent><player_name><subtle>: <white><message>'
+      chat-format: '<head:<name>:true> <!shadow><font:chunkexplorer:text></font></!shadow> <accent><player_name><subtle>: <white><message>'
   title:
     logo: '<black><font:chunkexplorer:title>'
   pushback:

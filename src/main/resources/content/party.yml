@@ -3,12 +3,12 @@ party:
     - ' '
     - '<party-prefix> <header>Use the following commands:'
     - '<party-prefix-extender>  <subtle>- <body>/party list'
-    - '<party-prefix-extender>  <subtle>- <body>/party accept <highlight>\<<body>invite_id<highlight>\>'
-    - '<party-prefix-extender>  <subtle>- <body>/party decline <highlight>\<<body>invite_id<highlight>\>'
+    - '<party-prefix-extender>  <subtle>- <body>/party accept <highlight><Player>'
+    - '<party-prefix-extender>  <subtle>- <body>/party decline <highlight><Player>'
     - '<party-prefix-extender>  <subtle>- <body>/party disband'
     - '<party-prefix-extender>  <subtle>- <body>/party leave'
-    - '<party-prefix-extender>  <subtle>- <body>/party invite <highlight>\<<body>player_name<highlight>\>'
-    - '<party-prefix-extender>  <subtle>- <body>/party kick <highlight>\<<body>player_name<highlight>\>'
+    - '<party-prefix-extender>  <subtle>- <body>/party invite <highlight><Player>'
+    - '<party-prefix-extender>  <subtle>- <body>/party kick <highlight><Player>'
   invite:
     party-count-line: '<party-prefix-extender> <subtle>... with <count> more players!'
     party-count-empty: '<party-prefix-extender>'
@@ -20,7 +20,7 @@ party:
       - '<party-prefix> <header><inviter> invited you to play in a party.'
       - '<party_count_line>'
       - '<party-prefix-extender>'
-      - '<party-prefix-extender> <click:run_command:"/party accept <invite_id>"><hover:show_text:"<success>Accept this party invitation"><font:chunkexplorer:chat><white></font></hover></click> <body>- <click:run_command:"/party decline <invite_id>"><hover:show_text:"<error>Decline this party invitation"><white><font:chunkexplorer:chat></font></hover></click>'
+      - '<party-prefix-extender> <click:run_command:"/party accept <invite_id>"><hover:show_text:"<success>Accept this party invitation"><font:chunkexplorer:text><white></font></hover></click> <body>- <click:run_command:"/party decline <invite_id>"><hover:show_text:"<error>Decline this party invitation"><white><font:chunkexplorer:text></font></hover></click>'
     self-error:
       - ' '
       - '<party-prefix> <error>You cannot invite yourself to your own party.'
@@ -65,7 +65,7 @@ party:
     broadcast:
       - ' '
       - '<party-prefix> <header><actor> has <error>disbanded<header> the party.'
-      - '<party-prefix-extender> <body>Create your own party with /party invite <highlight>\<<body>player_name<highlight>\>'
+      - '<party-prefix-extender> <body>Create your own party with /party invite <highlight><Player>'
     not-owner-error:
       - ' '
       - '<party-prefix> <error>You must be the party owner to disband the party.'
