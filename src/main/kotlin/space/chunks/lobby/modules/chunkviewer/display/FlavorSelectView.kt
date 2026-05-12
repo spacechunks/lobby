@@ -3,7 +3,6 @@ package space.chunks.lobby.modules.chunkviewer.display
 import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ItemDisplay
@@ -15,6 +14,7 @@ import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Fonts
 import space.chunks.lobby.pack.Sounds
 import space.chunks.lobby.pack.Textures
+import space.chunks.lobby.ui.Texts
 
 class FlavorSelectView(
     plugin: Plugin,
@@ -22,8 +22,8 @@ class FlavorSelectView(
     session: DisplaySession,
     private val chunk: Types.Chunk,
     private val flavors: PaginatedList<Types.Flavor>,
+    private val textsContent: Texts,
 ) : View(plugin, center, session) {
-    private val mini = MiniMessage.miniMessage()
     private val texts = mutableMapOf<Int, TextDisplay>()
 
     private var pageIndicator: TextDisplay? = null
@@ -71,8 +71,7 @@ class FlavorSelectView(
         )
 
         this.spawnTextElement(
-            this.mini.deserialize("<gradient:#E3ECFD:#C1D7F9>Choose your flavor!</gradient>")
-                .font(Fonts.CHUNK_VIEWER),
+            this.textsContent.component("chunkviewer.flavor-select.title").font(Fonts.CHUNK_VIEWER),
             this.center.clone().add(0.0, 1.0, 0.0), 3.5f,
         )
 
@@ -139,7 +138,9 @@ class FlavorSelectView(
             }
             Input.SNEAK -> {
                 player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
-                this.session.switchWindow(ChunkSelectView(this.plugin, this.center, this.session, this.session.grid))
+                this.session.switchWindow(
+                    ChunkSelectView(this.plugin, this.center, this.session, this.session.grid, this.textsContent)
+                )
             }
         }
 
@@ -223,7 +224,13 @@ class FlavorSelectView(
     // this is called everytime we receive an input
     private fun updatePageIndicator() {
         val txt =
-            this.mini.deserialize("<color:#53d0fd><font:spacechunks:ui>\uE102</font> <font:spacechunks:chunk_viewer><white>${this.currPage + 1}/${this.flavors.totalPages}</font> <color:#53d0fd><font:spacechunks:ui>\uE101</font>")
+            this.textsContent.component(
+                "chunkviewer.flavor-select.page-indicator",
+                mapOf(
+                    "currentPage" to this.currPage + 1,
+                    "totalPages" to this.flavors.totalPages,
+                )
+            )
         if (this.pageIndicator == null) {
             this.pageIndicator =
                 this.spawnTextElement(

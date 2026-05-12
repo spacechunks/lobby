@@ -4,12 +4,14 @@ import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.util.Vector
+import space.chunks.lobby.ui.Texts
 
 class DisplaySessionService(
     private val plugin: Plugin,
     private val chunks: List<ChunkDisplay>,
     private val spawn: Vector,
     private val worldName: String,
+    private val texts: Texts,
 ) {
     private val sessions = mutableMapOf<Player, DisplaySession>()
     private val slots = mutableListOf(this.spawn)
@@ -34,7 +36,7 @@ class DisplaySessionService(
 
         val loc = slot.toLocation(w)
 
-        val sess = DisplaySession(player, this.plugin, loc, this.chunks)
+        val sess = DisplaySession(player, this.plugin, loc, this.chunks, this.texts)
         this.sessions[player] = sess
 
         loc.chunk.load()

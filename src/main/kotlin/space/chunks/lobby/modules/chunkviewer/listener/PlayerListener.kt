@@ -20,6 +20,7 @@ import space.chunks.lobby.modules.chunkviewer.Config
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.modules.party.PartyService
+import space.chunks.lobby.ui.Texts
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.logging.Logger
@@ -32,6 +33,7 @@ class PlayerListener(
     private val instanceClient: InstanceServiceGrpcKt.InstanceServiceCoroutineStub,
     private val config: Config,
     private val partyService: PartyService,
+    private val texts: Texts,
 ) : Listener {
     private val playerTasks = mutableMapOf<UUID, BukkitTask>()
 
@@ -44,7 +46,7 @@ class PlayerListener(
         val party = this.partyService.getParty(player.uniqueId)
         if (party != null) {
             if (party.owner.id != player.uniqueId) {
-                player.sendMessage("You have to be party owner to start a game")
+                player.sendMessage(this.texts.component("chunkviewer.instance.owner-required"))
                 return
             }
 
@@ -67,7 +69,12 @@ class PlayerListener(
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 
-        player.sendMessage(Component.text("Starting instance for Chunk ").color(NamedTextColor.GRAY).append(Component.text(event.chunk.name).color(NamedTextColor.WHITE)))
+        player.sendMessage(
+            this.texts.component(
+                "chunkviewer.instance.starting",
+                mapOf("chunkName" to event.chunk.name)
+            )
+        )
 
         this.runFlavorVersion(player.uniqueId.toString(), event.chunk.id, ver.id)
             .exceptionally { e ->
@@ -102,9 +109,7 @@ class PlayerListener(
             || state == InstanceTypes.InstanceState.DELETED
         ) {
             players.forEach {
-                it?.sendMessage(
-                    Component.text("Instanced failed to be created: REASON: $state", NamedTextColor.RED)
-                )
+                it?.sendMessage(this.texts.component("chunkviewer.instance.creation-failed", mapOf("state" to state)))
             }
             return
         }
@@ -112,7 +117,7 @@ class PlayerListener(
         players.forEach {
             val data = "{\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
             it?.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
-            
+
             // as usual, we have to wait before transferring the player to the
             // instance, otherwise the resource pack won't unload
             Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {

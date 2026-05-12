@@ -1,0 +1,26 @@
+# ==========================================
+# Content sources
+# ==========================================
+# Central index for bundled text content files.
+# Keeps load order explicit and avoids relying on resource folder scanning.
+sources:
+  - content/common.yml
+  - content/chunkviewer.yml
+  - content/party.yml
+  - content/spawn.yml
+
+# ==========================================
+# MiniMessage tags
+# ==========================================
+tags:
+  prefix: <!shadow><white><font:chunkexplorer:text></font></!shadow>
+  prefix-extender: <!shadow><#024de7><font:chunkexplorer:text></font></!shadow>
+  party-prefix: <!shadow><white><font:chunkexplorer:text></font></!shadow>
+  party-prefix-extender: <!shadow><#9000ff><font:chunkexplorer:text></font></!shadow>
+  header: <#CAD5E2>
+  body: <#90A1B9>
+  subtle: <#45556C>
+  highlight: <#FFDF21>
+  success: <#99E603>
+  error: <#E7020C>
+  accent: <#ff008a>

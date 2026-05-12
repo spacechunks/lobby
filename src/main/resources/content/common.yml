@@ -1,0 +1,6 @@
+common:
+  player:
+    unknown: Unknown
+  resource-pack:
+    declined: <error>You must accept the resource pack to play.
+    failed: <error>Resource pack failed to load. Please try again.

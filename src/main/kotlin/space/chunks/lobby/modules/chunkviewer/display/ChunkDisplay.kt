@@ -120,8 +120,8 @@ class ChunkDisplay(
                 Matrix4f().scale(1.5f).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
             )
 
-            val txt = this.chunk.description
-            val lines = wrapText(txt, 30)
+            val lines = wrapText(this.chunk.description, 30)
+
             var space = 0.0
 
             lines.forEach { l ->
