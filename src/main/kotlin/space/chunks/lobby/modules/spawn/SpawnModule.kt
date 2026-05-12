@@ -19,8 +19,8 @@ class SpawnModule(
             PlayerListener(this.plugin, cfg, this.sessSvc, this.texts),
             this.plugin,
         )
-        
-        Bukkit.getServer().getWorld(cfg.world)?.setGameRule(GameRules.LOCATOR_BAR, true)
+
+        Bukkit.getServer().getWorld(cfg.world)?.setGameRule(GameRules.LOCATOR_BAR, false)
     }
 
     override fun onDisable() {}
