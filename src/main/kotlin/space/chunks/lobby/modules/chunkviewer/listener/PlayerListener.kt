@@ -109,7 +109,7 @@ class PlayerListener(
             || state == InstanceTypes.InstanceState.DELETED
         ) {
             players.forEach {
-                it.sendMessage(this.texts.component("chunkviewer.instance.creation-failed", mapOf("state" to state)))
+                it?.sendMessage(this.texts.component("chunkviewer.instance.creation-failed", mapOf("state" to state)))
             }
             return
         }

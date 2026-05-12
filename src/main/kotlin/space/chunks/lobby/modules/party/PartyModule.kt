@@ -17,9 +17,9 @@ class PartyModule(
 ) : LobbyModule(plugin, "party") {
 
     override fun onEnable() {
-        PartyCommands.root(this.partyService).forEach {
+        PartyCommands.root(this.partyService, this.texts).forEach {
             this.plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { commands ->
-                commands.registrar().register(PartyCommands.root(this.partyService, this.texts))
+                commands.registrar().register(it)
             }
         }
 
@@ -46,23 +46,21 @@ class PartyModule(
 
             PartyInviteStatus.ACCEPTED -> {
                 this.texts.send(
-                    this.partyService.getParty(invitee) ?: return,
+                    this.partyService.getParty(invitee.uniqueId) ?: return,
                     "party.invite.accepted-broadcast",
                     mapOf("member" to this.texts.player(invitee.name))
                 )
-
-                this.partyService.getParty(invitee.uniqueId)?.sendMessage(msg)
             }
 
             PartyInviteStatus.PENDING -> {
-                val party = inviter?.let(this.partyService::getParty)
+                val party = this.partyService.getParty(inviter.uniqueId)
                 val extraPlayers = party?.members?.size ?: 0
 
                 this.texts.send(
                     invitee,
                     "party.invite.received",
                     mapOf(
-                        "inviter" to this.texts.player(inviter?.name ?: this.texts.raw("common.player.unknown")),
+                        "inviter" to this.texts.player(inviter.name),
                         "invite_id" to event.inviteId,
                         "party_count_line" to if (extraPlayers > 0) {
                             this.texts.raw("party.invite.party-count-line", mapOf("count" to extraPlayers))
@@ -74,7 +72,7 @@ class PartyModule(
             }
 
             PartyInviteStatus.DECLINED -> {
-                inviter?.let {
+                inviter.let {
                     this.texts.send(
                         it,
                         "party.invite.declined-target",

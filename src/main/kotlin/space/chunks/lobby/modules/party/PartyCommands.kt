@@ -9,7 +9,6 @@ import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import space.chunks.lobby.ui.Texts
@@ -61,7 +60,7 @@ class PartyCommands {
 
                     try {
                         partyService.acceptInvite(id)
-                        val party = partyService.getParty(player)
+                        val party = partyService.getParty(player.uniqueId)
                         if (party == null) {
                             texts.send(player, "party.invite.party-gone-error")
                             return@executes Command.SINGLE_SUCCESS
@@ -231,7 +230,7 @@ class PartyCommands {
                             texts.send(
                                 player,
                                 "party.kick.self",
-                                mapOf("target" to texts.player(toKick.name))
+                                mapOf("target" to texts.player(toKick))
                             )
                         } catch (_: PartyException) {
                             texts.send(player, "party.kick.not-owner-error")
@@ -247,9 +246,7 @@ class PartyCommands {
                     val msg = ctx.getArgument("message", String::class.java)
 
                     if (party == null) {
-                        player.sendMessage(
-                            PartyCommands.mm.deserialize("<#DC2626>You are not part of a party.")
-                        )
+                        texts.send(player, "party.list.not-in-party")
                         return@executes Command.SINGLE_SUCCESS
                     }
 
