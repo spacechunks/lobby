@@ -1,6 +1,7 @@
 package space.chunks.lobby.modules.spawn
 
 import org.bukkit.Bukkit
+import org.bukkit.GameRules
 import org.bukkit.plugin.Plugin
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
@@ -18,6 +19,8 @@ class SpawnModule(
             PlayerListener(this.plugin, cfg, this.sessSvc, this.texts),
             this.plugin,
         )
+        
+        Bukkit.getServer().getWorld(cfg.world)?.setGameRule(GameRules.LOCATOR_BAR, true)
     }
 
     override fun onDisable() {}
