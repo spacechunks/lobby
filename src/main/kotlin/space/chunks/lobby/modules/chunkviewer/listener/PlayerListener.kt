@@ -115,7 +115,7 @@ class PlayerListener(
         }
 
         players.forEach {
-            val data = "{\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
+            val data = "{\"id\":\"${instance.id}\",\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
             it?.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
 
             // as usual, we have to wait before transferring the player to the
