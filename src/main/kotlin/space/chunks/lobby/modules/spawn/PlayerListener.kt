@@ -13,6 +13,7 @@ import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
@@ -154,6 +155,10 @@ class PlayerListener(
     @EventHandler
     private fun onDropItem(event: PlayerDropItemEvent) {
         event.isCancelled = true
+    }
+    @EventHandler
+    private fun onQuit(event: PlayerQuitEvent) {
+        event.quitMessage(Component.empty())
     }
 
     @EventHandler

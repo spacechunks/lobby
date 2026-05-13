@@ -12,7 +12,7 @@ object PartyBossBar {
     fun buildString(p: Party): Component {
         val content = StringBuilder()
 
-        val padding = "<!shadow><font:spacechunks-visualkit:bossbar/bossbar-fix>\uE131" + Space.asString(1, true) + "</font>"
+        val padding = "<!shadow><font:spacechunks-visualkit:bossbar/bossbar-fix>\uE111</font>"
 
         content.append(padding)
         content.append(Space.asString(-1, true))
@@ -23,14 +23,16 @@ object PartyBossBar {
             content.append(this.head(it, false))
         }
 
+        content.append(placeholder())
+
         content.append(Space.asString(-1, true))
-        content.append(padding)
+        content.append("<!shadow><font:spacechunks-visualkit:bossbar/bossbar-fix>\uE110</font>")
 
         return this.miniMessage.deserialize(content.toString())
     }
 
     private fun head(player: PartyPlayer, leader: Boolean): String {
-        val background = "<!shadow><font:spacechunks-visualkit:bossbar/bossbar-fix>\uE133" + Space.asString(1, true) +  "<font:spacechunks-visualkit:bossbar/bossbar-fix>\uE132" + Space.asString(1, true) + "<font:spacechunks-visualkit:bossbar/bossbar-fix>\uE131" + Space.asString(1, true) + "</font>"
+        val background = "<!shadow><font:spacechunks-visualkit:bossbar/bossbar-fix>\uE113" + Space.asString(-1, true) +  "<font:spacechunks-visualkit:bossbar/bossbar-fix>\uE112" + Space.asString(-1, true) + "<font:spacechunks-visualkit:bossbar/bossbar-fix>\uE111" + Space.asString(-1, true) + "</font>"
         val head = "<!shadow><color:#FF1234><head:${player.name}:true></color>"
         val statusOnline = "<!shadow><font:chunkexplorer:bossbar/party>\uE110</font>"
         val statusPending = "<!shadow><font:chunkexplorer:bossbar/party>\uE111</font>"
@@ -48,9 +50,22 @@ object PartyBossBar {
         }
 
         content.append(head)
-        content.append(Space.asString(-3, true))
+        content.append(Space.asString(-2, true))
         content.append(statusOnline) // TODO: based on actual status
+        content.append(Space.asString(2, true))
 
+        return content.toString()
+    }
+
+    private fun placeholder(): String {
+        val background = "<!shadow><font:spacechunks-visualkit:bossbar/bossbar-fix>\uE113" + Space.asString(-1, true) +  "<font:spacechunks-visualkit:bossbar/bossbar-fix>\uE112" + Space.asString(-1, true) + "<font:spacechunks-visualkit:bossbar/bossbar-fix>\uE111" + Space.asString(-1, true) + "</font>"
+
+        val content = StringBuilder()
+        content.append(Space.asString(-1, true))
+        content.append(background)
+        content.append(Space.asString(-12, true))
+        content.append("<!shadow><font:chunkexplorer:bossbar/party>\uE130</font>")
+        content.append(Space.asString(4, true))
         return content.toString()
     }
 }
