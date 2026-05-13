@@ -1,6 +1,29 @@
+import aws.sdk.kotlin.services.s3.S3Client
+import aws.sdk.kotlin.services.s3.putObject
+import aws.smithy.kotlin.runtime.content.ByteStream
+import aws.smithy.kotlin.runtime.content.fromFile
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    configurations.all {
+        resolutionStrategy {
+            force("org.jetbrains.kotlin:kotlin-stdlib:2.3.10")
+            force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+            force("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
+        }
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-stdlib:2.3.10")
+        classpath("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+        classpath("aws.sdk.kotlin:s3:1.6.26")
+    }
+}
 
 plugins {
     kotlin("jvm") version "2.3.10"
@@ -10,7 +33,9 @@ plugins {
 }
 
 group = "space.chunks"
-version = "1.0-SNAPSHOT"
+version = "2026.20.1"
+
+val pluginName = project.property("plugin.name").toString()
 
 repositories {
     mavenCentral()
@@ -57,6 +82,40 @@ tasks.named("shadowJar", ShadowJar::class) {
         "space.chunks.shadow.protobuf"
     )
     archiveFileName.set("${project.name}.jar")
+}
+
+tasks.processResources {
+    filesMatching("plugin.yml") {
+        expand(
+            "version" to project.version,
+            "name" to pluginName,
+        )
+    }
+}
+
+tasks.register("uploadToS3") {
+    dependsOn("shadowJar")
+    group = "release"
+    description = "uploads the fat jar to s3"
+
+    doLast {
+        val jarFile = tasks.named("shadowJar", ShadowJar::class).get().archiveFile.get().asFile
+
+        runBlocking {
+            val s3 = S3Client.fromEnvironment()
+            val bucketName = System.getenv("BUCKET_NAME") ?: error("BUCKET_NAME env var not set")
+            val key = "plugins/paper/$pluginName-${project.version}"
+
+            s3.putObject {
+                bucket = bucketName
+                this.key = key
+                body = ByteStream.fromFile(jarFile)
+                contentLength = jarFile.length()
+            }
+
+            println("uploaded ${jarFile.name} to s3://$bucketName/$key")
+        }
+    }
 }
 
 tasks {

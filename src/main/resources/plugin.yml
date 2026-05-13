@@ -1,9 +1,9 @@
-name: lobby
-version: 1.0.0
+name: ${name}
+version: ${version}
 main: space.chunks.lobby.Plugin
 api-version: 1.21.11
 #load: STARTUP # needed, so it can make use of the world generator that we set in bukkit.yml
 commands:
-  len:
-  stack:
-  party:
+  len: { }
+  stack: { }
+  party: { }
