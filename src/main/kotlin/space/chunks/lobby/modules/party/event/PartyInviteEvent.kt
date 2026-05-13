@@ -2,6 +2,7 @@ package space.chunks.lobby.modules.party.event
 
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList
+import space.chunks.lobby.modules.party.Party
 import space.chunks.lobby.modules.party.PartyPlayer
 
 enum class PartyInviteStatus {
@@ -15,6 +16,7 @@ class PartyInviteEvent(
     val inviter: PartyPlayer,
     val inviteId: String,
     val status: PartyInviteStatus,
+    val party: Party,
 ) : Event() {
     override fun getHandlers(): HandlerList = HANDLERS
 

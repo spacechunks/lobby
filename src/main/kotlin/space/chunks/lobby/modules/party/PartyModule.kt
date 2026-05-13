@@ -41,9 +41,10 @@ class PartyModule(
     private fun onPartyInvite(event: PartyInviteEvent) {
         val invitee = Bukkit.getPlayer(event.invitee.id)!!
         val inviter = Bukkit.getPlayer(event.inviter.id)!!
+        
+        event.party.updateBossBar()
 
         when (event.status) {
-
             PartyInviteStatus.ACCEPTED -> {
                 this.texts.send(
                     this.partyService.getParty(invitee.uniqueId) ?: return,

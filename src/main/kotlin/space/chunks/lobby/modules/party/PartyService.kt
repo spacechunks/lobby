@@ -3,10 +3,14 @@ package space.chunks.lobby.modules.party
 import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
+import net.kyori.adventure.bossbar.BossBar
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import space.chunks.lobby.modules.party.event.PartyDisbandEvent
 import space.chunks.lobby.modules.party.event.PartyInviteEvent
 import space.chunks.lobby.modules.party.event.PartyInviteStatus
+import space.chunks.lobby.ui.PartyBossBar
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.uuid.ExperimentalUuidApi
@@ -17,11 +21,25 @@ data class Party @OptIn(ExperimentalUuidApi::class) constructor(
     val members: MutableSet<PartyPlayer> = mutableSetOf(),
     val id: String = Uuid.generateV7().toHexDashString()
 ) : ForwardingAudience {
+    private val mm = MiniMessage.miniMessage()
+
+    private val bb: BossBar = BossBar.bossBar(
+        Component.text(),
+        0f,
+        BossBar.Color.BLUE,
+        BossBar.Overlay.PROGRESS
+    )
+
     override fun audiences(): Iterable<Audience?> {
         val l = mutableSetOf<Audience?>()
         l.addAll(members.map { it.asPlayer() }.toSet())
         l.add(owner.asPlayer())
         return l
+    }
+
+    fun updateBossBar() {
+        bb.name(PartyBossBar.buildString(this))
+        bb.addViewer(this)
     }
 }
 
@@ -78,7 +96,7 @@ class PartyService {
             this.invites.put(invite.id, invite)
 
             Bukkit.getPluginManager().callEvent(
-                PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING)
+                PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING, party)
             )
             return
         }
@@ -92,7 +110,7 @@ class PartyService {
         this.invites.put(invite.id, invite)
 
         Bukkit.getPluginManager().callEvent(
-            PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING)
+            PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING, inviterParty)
         )
     }
 
@@ -110,7 +128,7 @@ class PartyService {
         this.invites.invalidate(inviteId)
 
         Bukkit.getPluginManager().callEvent(
-            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.ACCEPTED)
+            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.ACCEPTED, party)
         )
     }
 
@@ -122,7 +140,7 @@ class PartyService {
 
         this.invites.invalidate(inviteId)
         Bukkit.getPluginManager().callEvent(
-            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.DECLINED)
+            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.DECLINED, party)
         )
     }
 
