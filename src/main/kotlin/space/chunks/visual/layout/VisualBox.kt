@@ -32,13 +32,15 @@ class VisualBox private constructor(
         val content = mutableListOf<VisualElement>()
 
         ordered.forEach { child ->
-            content.add(VisualSpace.pixels(child.x - cursor))
+            val advanceCorrection = if (content.isEmpty()) 0 else 1
+            content.add(VisualSpace.pixels(child.x - cursor - advanceCorrection))
             content.add(child.element)
             cursor = child.x + child.width
         }
 
         if (width != null) {
-            content.add(VisualSpace.pixels(width - cursor))
+            val advanceCorrection = if (content.isEmpty()) 0 else 1
+            content.add(VisualSpace.pixels(width - cursor - advanceCorrection))
         }
 
         return VisualText.of(*content.toTypedArray())

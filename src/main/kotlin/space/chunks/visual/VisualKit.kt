@@ -1,7 +1,10 @@
 package space.chunks.visual
 
+import space.chunks.visual.layout.VisualBackground
 import space.chunks.visual.layout.VisualComponent
+import space.chunks.visual.layout.VisualRow
 import space.chunks.visual.text.VisualFonts
+import space.chunks.visual.text.VisualSpace
 import space.chunks.visual.text.VisualText
 
 object VisualKit {
@@ -31,9 +34,36 @@ object VisualKit {
                 center,
                 right,
             )
+            val stretchBackground: VisualBackground = VisualBackground { width -> background(width) }
+
+            private val parts = listOf(128, 64, 32, 16, 8, 4, 2, 1)
+
+            private fun background(width: Int): VisualComponent {
+                var remaining = width
+                val elements = mutableListOf<VisualText>()
+
+                for (partWidth in parts) {
+                    while (remaining >= partWidth) {
+                        if (elements.isNotEmpty()) {
+                            elements.add(VisualSpace.pixels(-1))
+                        }
+
+                        elements.add(backgroundPart(partWidth).asVisualText())
+                        remaining -= partWidth
+                    }
+                }
+
+                return VisualComponent.of(width, VisualText.of(*elements.toTypedArray()))
+            }
 
             private fun part(index: Int): VisualComponent =
                 VisualComponent.glyph(15, VisualFonts.SpaceChunksVisualKit.bossBarFix, 0xE110 + index)
+
+            private fun backgroundPart(width: Int): VisualComponent =
+                VisualComponent.glyph(width, VisualFonts.SpaceChunksVisualKit.bossBarFix, 0xE110 + Integer.numberOfTrailingZeros(width))
+
+            private fun VisualComponent.asVisualText(): VisualText =
+                VisualText.of(this)
         }
     }
 }
