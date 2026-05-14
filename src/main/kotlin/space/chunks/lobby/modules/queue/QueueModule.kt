@@ -39,7 +39,7 @@ class QueueModule(
                     uiService.set(
                         player,
                         queueBar,
-                        QueueBossBar.component("Example Queue", players = 3, maxPlayers = 8),
+                        QueueBossBar.component("Chefs", "default", QueueBossBar.QueueState.WAITING_FOR_PLAYERS, players = 3, maxPlayers = 8),
                     )
                     player.sendMessage(Component.text("Queue bossbar enabled."))
                 }

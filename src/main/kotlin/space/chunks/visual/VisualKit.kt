@@ -65,5 +65,49 @@ object VisualKit {
             private fun VisualComponent.asVisualText(): VisualText =
                 VisualText.of(this)
         }
+
+        object Translucent28 {
+            val end: VisualComponent = part(0)
+            val start: VisualComponent = part(1)
+            val right: VisualComponent = part(1)
+            val center: VisualComponent = part(2)
+            val left: VisualComponent = part(3)
+            val threePartBackground: VisualComponent = VisualComponent.row(
+                gap = -1,
+                left,
+                center,
+                right,
+            )
+            val stretchBackground: VisualBackground = VisualBackground { width -> background(width) }
+
+            private val parts = listOf(128, 64, 32, 16, 8, 4, 2, 1)
+
+            private fun background(width: Int): VisualComponent {
+                var remaining = width
+                val elements = mutableListOf<VisualText>()
+
+                for (partWidth in parts) {
+                    while (remaining >= partWidth) {
+                        if (elements.isNotEmpty()) {
+                            elements.add(VisualSpace.pixels(-1))
+                        }
+
+                        elements.add(backgroundPart(partWidth).asVisualText())
+                        remaining -= partWidth
+                    }
+                }
+
+                return VisualComponent.of(width, VisualText.of(*elements.toTypedArray()))
+            }
+
+            private fun part(index: Int): VisualComponent =
+                VisualComponent.glyph(28, VisualFonts.SpaceChunksVisualKit.bossBarFix, 0xE120 + index)
+
+            private fun backgroundPart(width: Int): VisualComponent =
+                VisualComponent.glyph(width, VisualFonts.SpaceChunksVisualKit.bossBarFix, 0xE120 + Integer.numberOfTrailingZeros(width))
+
+            private fun VisualComponent.asVisualText(): VisualText =
+                VisualText.of(this)
+        }
     }
 }
