@@ -27,9 +27,11 @@ object QueueBossBar {
         val action = VisualFonts.SpaceChunksVisualKit.bossBarLine2
             .formattedComponent("<#009cff>${queueState.string}.")
 
-        val text2 = VisualBox().place(0, label)
+        val text2 = VisualBox()
+            .place(0, label)
             .place(0, action)
-            .placeEnd(200, count).toComponent()
+            .placeEnd(200, count)
+            .toComponent()
 
         val text = VisualComponent.row(
             gap = countGap,
