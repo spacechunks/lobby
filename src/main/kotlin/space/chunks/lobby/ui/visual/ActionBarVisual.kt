@@ -29,7 +29,7 @@ object ActionBarVisual {
     ): VisualComponent =
         VisualComponent(
             VisualKit.Hud.Hotbar.width,
-            VisualLayer(width = VisualKit.Hud.Hotbar.width)
+            element = VisualLayer(width = VisualKit.Hud.Hotbar.width)
                 .child(x = 0, ActionBarGlyphs.health(health))
                 .childEnd(ActionBarGlyphs.gravity(gravity))
                 .child(x = VisualKit.Hud.Hotbar.width, chatChannel.component)

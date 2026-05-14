@@ -10,7 +10,7 @@ import space.chunks.visual.text.VisualText
 object VisualKit {
     object Player {
         fun head(name: String, color: String = "#FFFFFF"): VisualComponent =
-            VisualComponent(8, VisualText.raw("<!shadow><color:$color><head:$name:true></color>"))
+            VisualComponent(8, element = VisualText.raw("<!shadow><color:$color><head:$name:true></color>"))
     }
 
     object Hud {
@@ -22,6 +22,17 @@ object VisualKit {
     }
 
     object BossBar {
+        object LoadingSpinner {
+            const val width = 20
+            const val frameCount = 8
+
+            fun frame(index: Int): VisualComponent =
+                VisualComponent.glyph(width, VisualFonts.SpaceChunksVisualKit.bossBarFix, 0xE300 + index.floorMod(frameCount))
+
+            private fun Int.floorMod(other: Int): Int =
+                Math.floorMod(this, other)
+        }
+
         object Translucent15 {
             val end: VisualComponent = part(0)
             val start: VisualComponent = part(1)
@@ -51,7 +62,7 @@ object VisualKit {
                     }
                 }
 
-                return VisualComponent(width, VisualText.of(*elements.toTypedArray()))
+                return VisualComponent(width, advance = width + 1, element = VisualText.of(*elements.toTypedArray()))
             }
 
             private fun part(index: Int): VisualComponent =
@@ -93,7 +104,7 @@ object VisualKit {
                     }
                 }
 
-                return VisualComponent(width, VisualText.of(*elements.toTypedArray()))
+                return VisualComponent(width, advance = width + 1, element = VisualText.of(*elements.toTypedArray()))
             }
 
             private fun part(index: Int): VisualComponent =

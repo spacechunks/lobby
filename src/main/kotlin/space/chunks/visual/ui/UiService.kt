@@ -18,15 +18,20 @@ class UiService(
 
     private val players = mutableMapOf<UUID, PlayerUi>()
     private var actionBarTask: BukkitTask? = null
+    private var tick = 0L
 
     fun start(plugin: Plugin) {
         Bukkit.getOnlinePlayers().forEach(::ensure)
 
         this.actionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
+            this.tick++
             Bukkit.getOnlinePlayers()
                 .filter(::isVisible)
-                .forEach(this.renderActionBar)
-        }, 0L, 20L)
+                .forEach { player ->
+                    this.renderActionBar(player)
+                    ensure(player).render(this.tick)
+                }
+        }, 0L, 1L)
     }
 
     fun stop() {
@@ -38,7 +43,15 @@ class UiService(
         ensure(player).set(slot, content)
     }
 
+    fun set(player: Player, slot: BossBarSlot, content: UiRenderable) {
+        ensure(player).set(slot, content)
+    }
+
     fun set(players: Iterable<Player>, slot: BossBarSlot, content: Component) {
+        players.forEach { set(it, slot, content) }
+    }
+
+    fun set(players: Iterable<Player>, slot: BossBarSlot, content: UiRenderable) {
         players.forEach { set(it, slot, content) }
     }
 

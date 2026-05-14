@@ -12,7 +12,7 @@ fun interface VisualBackground {
         fun repeat(tile: VisualComponent, gap: Int = 0): VisualBackground =
             VisualBackground { width ->
                 if (width == 0 || tile.width == 0) {
-                    return@VisualBackground VisualComponent(width, VisualText.empty)
+                    return@VisualBackground VisualComponent(width, element = VisualText.empty)
                 }
 
                 val step = tile.width + gap
@@ -26,7 +26,7 @@ fun interface VisualBackground {
                     row = row.child(tile)
                 }
 
-                VisualComponent(width, VisualText.of(row.toComponent()))
+                VisualComponent(width, element = VisualText.of(row.toComponent()))
             }
     }
 }

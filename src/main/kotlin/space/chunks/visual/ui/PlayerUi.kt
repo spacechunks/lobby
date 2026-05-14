@@ -9,6 +9,7 @@ class PlayerUi(
     private val registry: BossBarRegistry,
 ) {
     private val bossBars = mutableMapOf<BossBarSlot, BossBar>()
+    private val bossBarContent = mutableMapOf<BossBarSlot, UiRenderable>()
     private var visible = true
 
     fun sync() {
@@ -24,12 +25,18 @@ class PlayerUi(
     }
 
     fun set(slot: BossBarSlot, content: Component) {
+        set(slot, UiRenderable.static(content))
+    }
+
+    fun set(slot: BossBarSlot, content: UiRenderable) {
         sync()
-        bossBars.getValue(slot).name(content)
+        bossBarContent[slot] = content
+        bossBars.getValue(slot).name(content.render(UiRenderContext(this.player, 0L)))
     }
 
     fun clear(slot: BossBarSlot) {
         sync()
+        bossBarContent.remove(slot)
         bossBars.getValue(slot).name(Component.empty())
     }
 
@@ -46,6 +53,18 @@ class PlayerUi(
 
     fun isVisible(): Boolean =
         this.visible
+
+    fun render(tick: Long) {
+        if (!this.visible) {
+            return
+        }
+
+        sync()
+        val context = UiRenderContext(this.player, tick)
+        bossBarContent.forEach { (slot, content) ->
+            bossBars.getValue(slot).name(content.render(context))
+        }
+    }
 
     fun dispose() {
         bossBars.values.forEach(player::hideBossBar)

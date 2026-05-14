@@ -84,7 +84,7 @@ object PartyBossBarVisual {
     ): VisualComponent =
         VisualComponent(
             slotContentWidth,
-            VisualLayer(width = slotContentWidth)
+            element = VisualLayer(width = slotContentWidth)
                 .child(x = 0, PartyBossBarGlyphs.leaderFrame)
                 .child(x = leaderFramePadding, head)
                 .child(x = statusX, status.component)

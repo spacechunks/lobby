@@ -35,7 +35,7 @@ class VisualView(
             layer = layer.child(x = contentX(viewWidth, it.width), it)
         }
 
-        return VisualComponent(viewWidth, layer.toText())
+        return VisualComponent(viewWidth, element = layer.toText())
     }
 
     fun toText(): VisualText =

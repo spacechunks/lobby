@@ -16,7 +16,7 @@ class VisualLayer private constructor(
     }
 
     fun child(x: Int, component: VisualComponent): VisualLayer =
-        child(x, component, component.width)
+        child(x, component, component.advance)
 
     fun childEnd(x: Int, component: VisualComponent): VisualLayer =
         child(x - component.width, component)
@@ -27,7 +27,7 @@ class VisualLayer private constructor(
     }
 
     fun toComponent(): VisualComponent =
-        VisualComponent(measuredWidth(), toText())
+        VisualComponent(measuredWidth(), element = toText())
 
     fun toText(): VisualText {
         val ordered = children.sortedBy { it.x }

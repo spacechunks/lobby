@@ -25,6 +25,6 @@ class VisualFlexRow private constructor(
             cursor += child.width
         }
 
-        return VisualComponent(cursor, layer.toText())
+        return VisualComponent(cursor, element = layer.toText())
     }
 }
