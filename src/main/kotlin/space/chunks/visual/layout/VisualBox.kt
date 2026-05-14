@@ -26,6 +26,9 @@ class VisualBox private constructor(
         return placeEnd(width, component)
     }
 
+    fun toComponent(): VisualComponent =
+        VisualComponent.of(measuredWidth(), render())
+
     fun render(): VisualText {
         val ordered = children.sortedBy { it.x }
         var cursor = 0
@@ -45,6 +48,9 @@ class VisualBox private constructor(
 
         return VisualText.of(*content.toTypedArray())
     }
+
+    private fun measuredWidth(): Int =
+        width ?: children.maxOfOrNull { it.x + it.width } ?: 0
 
     private data class Child(
         val x: Int,
