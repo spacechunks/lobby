@@ -20,8 +20,10 @@ import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Items
+import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.Hotbar
 import space.chunks.lobby.ui.Texts
+import space.chunks.visual.ui.UiService
 import java.time.Duration
 
 class PlayerListener(
@@ -29,6 +31,7 @@ class PlayerListener(
     private val config: Config,
     private val sessionService: DisplaySessionService,
     private val texts: Texts,
+    private val uiService: UiService,
 ) : Listener {
     @EventHandler
     private fun onPlayerJoin(event: PlayerJoinEvent) {
@@ -36,6 +39,8 @@ class PlayerListener(
 
         val player = event.player
 
+        this.uiService.show(player)
+        ActionBar.clear(player)
         player.inventory.clear()
         player.gameMode = GameMode.ADVENTURE
 
@@ -122,8 +127,13 @@ class PlayerListener(
         }
 
         if (event.action != Action.RIGHT_CLICK_BLOCK && event.action != Action.RIGHT_CLICK_AIR) return
-        if (player.inventory.itemInMainHand.type != Material.PAPER
-            && player.inventory.itemInMainHand.itemMeta.itemModel == Items.TELEPORTER) return
+        val item = player.inventory.itemInMainHand
+        if (item.type != Material.PAPER || item.itemMeta.itemModel != Items.TELEPORTER) return
+
+        event.isCancelled = true
+        this.uiService.hide(player)
+        ActionBar.clear(player)
+        player.inventory.clear()
 
         player.addPotionEffect(
             PotionEffectType.DARKNESS
@@ -189,6 +199,9 @@ class PlayerListener(
         )
 
         this.sessionService.closeSession(player)
+        this.uiService.show(player)
+        ActionBar.clear(player)
+        Hotbar.give(player, this.texts)
     }
 
     private fun playerName(player: Player): Component =

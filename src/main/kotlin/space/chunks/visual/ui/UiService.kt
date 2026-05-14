@@ -7,15 +7,31 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.plugin.Plugin
+import org.bukkit.scheduler.BukkitTask
 import java.util.UUID
 
-class UiService : Listener {
+class UiService(
+    private val renderActionBar: (Player) -> Unit,
+) : Listener {
     val bossBars = BossBarRegistry()
 
     private val players = mutableMapOf<UUID, PlayerUi>()
+    private var actionBarTask: BukkitTask? = null
 
-    fun start() {
+    fun start(plugin: Plugin) {
         Bukkit.getOnlinePlayers().forEach(::ensure)
+
+        this.actionBarTask = Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
+            Bukkit.getOnlinePlayers()
+                .filter(::isVisible)
+                .forEach(this.renderActionBar)
+        }, 0L, 20L)
+    }
+
+    fun stop() {
+        this.actionBarTask?.cancel()
+        this.actionBarTask = null
     }
 
     fun set(player: Player, slot: BossBarSlot, content: Component) {
@@ -33,6 +49,17 @@ class UiService : Listener {
     fun clear(players: Iterable<Player>, slot: BossBarSlot) {
         players.forEach { clear(it, slot) }
     }
+
+    fun show(player: Player) {
+        ensure(player).show()
+    }
+
+    fun hide(player: Player) {
+        ensure(player).hide()
+    }
+
+    fun isVisible(player: Player): Boolean =
+        ensure(player).isVisible()
 
     fun ensure(player: Player): PlayerUi =
         players.getOrPut(player.uniqueId) {

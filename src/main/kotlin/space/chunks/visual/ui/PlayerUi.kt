@@ -9,11 +9,16 @@ class PlayerUi(
     private val registry: BossBarRegistry,
 ) {
     private val bossBars = mutableMapOf<BossBarSlot, BossBar>()
+    private var visible = true
 
     fun sync() {
         registry.all().forEach { slot ->
             bossBars.getOrPut(slot) {
-                bossBar().also(player::showBossBar)
+                bossBar().also {
+                    if (this.visible) {
+                        player.showBossBar(it)
+                    }
+                }
             }
         }
     }
@@ -27,6 +32,20 @@ class PlayerUi(
         sync()
         bossBars.getValue(slot).name(Component.empty())
     }
+
+    fun show() {
+        this.visible = true
+        sync()
+        bossBars.values.forEach(player::showBossBar)
+    }
+
+    fun hide() {
+        this.visible = false
+        bossBars.values.forEach(player::hideBossBar)
+    }
+
+    fun isVisible(): Boolean =
+        this.visible
 
     fun dispose() {
         bossBars.values.forEach(player::hideBossBar)

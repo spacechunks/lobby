@@ -1,5 +1,6 @@
 package space.chunks.lobby.ui
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.entity.Player
 import space.chunks.lobby.ui.visual.ActionBarGlyphs
@@ -42,5 +43,9 @@ object ActionBar {
         )
 
         player.sendActionBar(miniMessage.deserialize(content.asMiniMessage()))
+    }
+
+    fun clear(player: Player) {
+        player.sendActionBar(Component.empty())
     }
 }
