@@ -39,8 +39,6 @@ class Hotbar {
             player.inventory.setItem(2, inventory)
             player.inventory.setItem(3, party)
             player.inventory.setItem(4, settings)
-
         }
     }
-
 }

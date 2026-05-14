@@ -24,6 +24,15 @@ party:
     self-error:
       - ' '
       - '<party-prefix> <error>You cannot invite yourself to your own party.'
+    unknown-player-error:
+      - ' '
+      - '<party-prefix> <error>Could not find <target>.'
+    already-pending-error:
+      - ' '
+      - '<party-prefix> <error><target> already has a pending party invite.'
+    already-member-error:
+      - ' '
+      - '<party-prefix> <error><target> is already in your party.'
     not-owner-error:
       - ' '
       - '<party-prefix> <error>You must be the party owner to invite players.'
@@ -89,3 +98,5 @@ party:
     not-owner-error:
       - ' '
       - '<party-prefix> <error>You must be the party owner to kick a player.'
+  chat:
+    message: '<party-prefix> <sender><subtle>: <message>'

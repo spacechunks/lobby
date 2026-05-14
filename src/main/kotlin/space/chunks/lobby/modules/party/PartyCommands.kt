@@ -6,9 +6,8 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.tree.LiteralCommandNode
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
-import io.papermc.paper.command.brigadier.argument.ArgumentTypes
-import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import space.chunks.lobby.ui.Texts
@@ -23,29 +22,50 @@ class PartyCommands {
 
             val invite = Commands.literal("invite").then(
                 playerArg().executes { ctx ->
-                    val invitees = ctx.getArgument("players", PlayerSelectorArgumentResolver::class.java)
-                        .resolve(ctx.getSource())
+                    val inviteeName = ctx.getArgument("player", String::class.java)
+                    val invitee = resolvePartyPlayer(inviteeName)
                     val inviter = ctx.getSource().sender as Player
 
-                    try {
-                        invitees.forEach {
-                            partyService.invitePlayer(
-                                PartyPlayer(inviter.uniqueId, inviter.name),
-                                PartyPlayer(it.uniqueId, it.name)
-                            )
+                    if (invitee == null) {
+                        texts.send(
+                            inviter,
+                            "party.invite.unknown-player-error",
+                            mapOf("target" to texts.player(inviteeName))
+                        )
+                        return@executes Command.SINGLE_SUCCESS
+                    }
 
-                            texts.send(
-                                inviter,
-                                "party.invite.sent",
-                                mapOf("target" to texts.player(it.name))
-                            )
-                        }
+                    try {
+                        partyService.invitePlayer(
+                            PartyPlayer(inviter.uniqueId, inviter.name),
+                            invitee
+                        )
+
+                        texts.send(
+                            inviter,
+                            "party.invite.sent",
+                            mapOf("target" to texts.player(invitee.name))
+                        )
                     } catch (ex: PartyException) {
                         if (ex.reason == PartyExceptionReason.INVITER_IS_INVITEE) {
                             texts.send(inviter, "party.invite.self-error")
                         }
                         if (ex.reason == PartyExceptionReason.NOT_OWNER) {
                             texts.send(inviter, "party.invite.not-owner-error")
+                        }
+                        if (ex.reason == PartyExceptionReason.INVITE_ALREADY_PENDING) {
+                            texts.send(
+                                inviter,
+                                "party.invite.already-pending-error",
+                                mapOf("target" to texts.player(invitee.name))
+                            )
+                        }
+                        if (ex.reason == PartyExceptionReason.PLAYER_ALREADY_IN_PARTY) {
+                            texts.send(
+                                inviter,
+                                "party.invite.already-member-error",
+                                mapOf("target" to texts.player(invitee.name))
+                            )
                         }
                         return@executes Command.SINGLE_SUCCESS
                     }
@@ -250,7 +270,15 @@ class PartyCommands {
                         return@executes Command.SINGLE_SUCCESS
                     }
 
-                    party.sendMessage(Component.text("PARTY > ").append(Component.text(msg)))
+                    party.sendMessage(
+                        texts.component(
+                            "party.chat.message",
+                            mapOf(
+                                "sender" to texts.player(player.name),
+                                "message" to Component.text(msg, NamedTextColor.WHITE)
+                            )
+                        )
+                    )
                     return@executes Command.SINGLE_SUCCESS
                 }
 
@@ -279,13 +307,33 @@ class PartyCommands {
     }
 }
 
-fun playerArg(): RequiredArgumentBuilder<CommandSourceStack, PlayerSelectorArgumentResolver> {
-    return Commands.argument("players", ArgumentTypes.players())
+fun playerArg(): RequiredArgumentBuilder<CommandSourceStack, String> {
+    return Commands.argument("player", StringArgumentType.word())
         .suggests { ctx, builder ->
-            Bukkit.getOnlinePlayers().stream()
+            val suggested = mutableSetOf<String>()
+
+            Bukkit.getOnlinePlayers()
                 .map(Player::getName)
-                .filter { name -> name.lowercase().startsWith(builder.remainingLowerCase) }
-                .forEach(builder::suggest)
+                .filterTo(suggested) { name -> name.lowercase().startsWith(builder.remainingLowerCase) }
+
+            Bukkit.getOfflinePlayers()
+                .mapNotNull { it.name }
+                .filterTo(suggested) { name -> name.lowercase().startsWith(builder.remainingLowerCase) }
+
+            suggested.forEach(builder::suggest)
             builder.buildFuture()
         }
+}
+
+private fun resolvePartyPlayer(name: String): PartyPlayer? {
+    Bukkit.getPlayerExact(name)?.let {
+        return PartyPlayer(it.uniqueId, it.name)
+    }
+
+    Bukkit.getOfflinePlayerIfCached(name)?.let {
+        return PartyPlayer(it.uniqueId, it.name ?: name)
+    }
+
+    val uuid = Bukkit.getPlayerUniqueId(name) ?: return null
+    return PartyPlayer(uuid, name)
 }
