@@ -1,9 +1,11 @@
 package space.chunks.lobby.ui.visual
 
-import space.chunks.visual.layout.VisualBox
 import space.chunks.visual.layout.VisualComponent
 import space.chunks.visual.VisualKit
-import space.chunks.visual.layout.VisualRow
+import space.chunks.visual.layout.VisualFlexRow
+import space.chunks.visual.layout.VisualLayer
+import space.chunks.visual.layout.VisualPadding
+import space.chunks.visual.layout.VisualView
 import space.chunks.visual.text.VisualText
 
 object PartyBossBarVisual {
@@ -20,13 +22,14 @@ object PartyBossBarVisual {
     private val barStart = VisualKit.BossBar.Translucent15.start
     private val barEnd = VisualKit.BossBar.Translucent15.end
     private val slotBackground = VisualKit.BossBar.Translucent15.threePartBackground
+    private val slotPadding = VisualPadding(left = slotPaddingLeft)
 
     fun party(ownerName: String, memberNames: Iterable<String>): VisualText =
         VisualText.of(
-            VisualRow(gap = slotGap)
-                .item(barStart)
-                .items(slots(ownerName, memberNames))
-                .item(barEnd)
+            VisualFlexRow(gap = slotGap)
+                .child(barStart)
+                .children(slots(ownerName, memberNames))
+                .child(barEnd)
                 .toComponent()
         )
 
@@ -51,43 +54,41 @@ object PartyBossBarVisual {
             if (leader) leaderContent(head, status)
             else memberContent(head, status)
 
-        return VisualComponent.panel(
+        return VisualView(
             background = slotBackground,
             content = content,
             minWidth = playerSlotWidth,
-            paddingLeft = slotPaddingLeft,
-        )
+            padding = slotPadding,
+        ).toComponent()
     }
 
     fun placeholderSlot(): VisualComponent =
-        VisualComponent.panel(
+        VisualView(
             background = slotBackground,
             content = PartyBossBarGlyphs.emptySlot,
             minWidth = placeholderSlotWidth,
-            paddingLeft = slotPaddingLeft,
-        )
+            padding = slotPadding,
+        ).toComponent()
 
     private fun memberContent(
         head: VisualComponent,
         status: PartyBossBarGlyphs.Status,
     ): VisualComponent =
-        VisualComponent.row(
-            gap = statusGap,
-            head,
-            status.component,
-        )
+        VisualFlexRow(gap = statusGap)
+            .children(listOf(head, status.component))
+            .toComponent()
 
     private fun leaderContent(
         head: VisualComponent,
         status: PartyBossBarGlyphs.Status,
     ): VisualComponent =
-        VisualComponent.of(
+        VisualComponent(
             slotContentWidth,
-            VisualBox(width = slotContentWidth)
-                .place(x = 0, PartyBossBarGlyphs.leaderFrame)
-                .place(x = leaderFramePadding, head)
-                .place(x = statusX, status.component)
-                .render()
+            VisualLayer(width = slotContentWidth)
+                .child(x = 0, PartyBossBarGlyphs.leaderFrame)
+                .child(x = leaderFramePadding, head)
+                .child(x = statusX, status.component)
+                .toText()
         )
 
 }

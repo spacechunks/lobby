@@ -20,10 +20,10 @@ data class VisualFont(
         VisualText(wrapFormatted(content, shadow))
 
     fun component(content: String, shadow: Boolean = false): VisualComponent =
-        VisualComponent.of(width(content), text(content, shadow))
+        VisualComponent(width(content), text(content, shadow))
 
     fun formattedComponent(content: String, shadow: Boolean = false): VisualComponent =
-        VisualComponent.of(formattedWidth(content), formattedText(content, shadow))
+        VisualComponent(formattedWidth(content), formattedText(content, shadow))
 
     fun width(content: String): Int =
         requireNotNull(metrics) { "Font $key does not have metrics configured." }

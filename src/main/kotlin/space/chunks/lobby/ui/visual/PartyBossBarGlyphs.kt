@@ -12,15 +12,15 @@ object PartyBossBarGlyphs {
         AFK(VisualFonts.ChunkExplorer.bossBarParty.glyph(0xE112));
 
         val component: VisualComponent =
-            VisualComponent.of(2, glyph)
+            VisualComponent(2, glyph)
 
         override fun asMiniMessage(): String =
             glyph.asMiniMessage()
     }
 
     val leaderFrame: VisualComponent =
-        VisualComponent.of(11, VisualFonts.ChunkExplorer.bossBarParty.glyph(0xE120))
+        VisualComponent(11, VisualFonts.ChunkExplorer.bossBarParty.glyph(0xE120))
 
     val emptySlot: VisualComponent =
-        VisualComponent.of(4, VisualFonts.ChunkExplorer.bossBarParty.glyph(0xE130))
+        VisualComponent(4, VisualFonts.ChunkExplorer.bossBarParty.glyph(0xE130))
 }

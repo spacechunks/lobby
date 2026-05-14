@@ -2,7 +2,7 @@ package space.chunks.visual
 
 import space.chunks.visual.layout.VisualBackground
 import space.chunks.visual.layout.VisualComponent
-import space.chunks.visual.layout.VisualRow
+import space.chunks.visual.layout.VisualFlexRow
 import space.chunks.visual.text.VisualFonts
 import space.chunks.visual.text.VisualSpace
 import space.chunks.visual.text.VisualText
@@ -10,7 +10,7 @@ import space.chunks.visual.text.VisualText
 object VisualKit {
     object Player {
         fun head(name: String, color: String = "#FFFFFF"): VisualComponent =
-            VisualComponent.of(8, VisualText.raw("<!shadow><color:$color><head:$name:true></color>"))
+            VisualComponent(8, VisualText.raw("<!shadow><color:$color><head:$name:true></color>"))
     }
 
     object Hud {
@@ -28,12 +28,10 @@ object VisualKit {
             val right: VisualComponent = part(1)
             val center: VisualComponent = part(2)
             val left: VisualComponent = part(3)
-            val threePartBackground: VisualComponent = VisualComponent.row(
-                gap = -1,
-                left,
-                center,
-                right,
-            )
+            val threePartBackground: VisualComponent =
+                VisualFlexRow(gap = -1)
+                    .children(listOf(left, center, right))
+                    .toComponent()
             val stretchBackground: VisualBackground = VisualBackground { width -> background(width) }
 
             private val parts = listOf(128, 64, 32, 16, 8, 4, 2, 1)
@@ -53,7 +51,7 @@ object VisualKit {
                     }
                 }
 
-                return VisualComponent.of(width, VisualText.of(*elements.toTypedArray()))
+                return VisualComponent(width, VisualText.of(*elements.toTypedArray()))
             }
 
             private fun part(index: Int): VisualComponent =
@@ -72,12 +70,10 @@ object VisualKit {
             val right: VisualComponent = part(1)
             val center: VisualComponent = part(2)
             val left: VisualComponent = part(3)
-            val threePartBackground: VisualComponent = VisualComponent.row(
-                gap = -1,
-                left,
-                center,
-                right,
-            )
+            val threePartBackground: VisualComponent =
+                VisualFlexRow(gap = -1)
+                    .children(listOf(left, center, right))
+                    .toComponent()
             val stretchBackground: VisualBackground = VisualBackground { width -> background(width) }
 
             private val parts = listOf(128, 64, 32, 16, 8, 4, 2, 1)
@@ -97,7 +93,7 @@ object VisualKit {
                     }
                 }
 
-                return VisualComponent.of(width, VisualText.of(*elements.toTypedArray()))
+                return VisualComponent(width, VisualText.of(*elements.toTypedArray()))
             }
 
             private fun part(index: Int): VisualComponent =

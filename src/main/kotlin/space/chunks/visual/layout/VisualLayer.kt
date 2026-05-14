@@ -4,32 +4,32 @@ import space.chunks.visual.text.VisualElement
 import space.chunks.visual.text.VisualSpace
 import space.chunks.visual.text.VisualText
 
-class VisualBox private constructor(
+class VisualLayer private constructor(
     private val width: Int?,
     private val children: List<Child> = emptyList(),
 ) {
     constructor(width: Int? = null) : this(width, emptyList())
 
-    fun place(x: Int, element: VisualElement, width: Int = 0): VisualBox {
+    fun child(x: Int, element: VisualElement, width: Int = 0): VisualLayer {
         require(width >= 0) { "width must be zero or positive." }
-        return VisualBox(this.width, children + Child(x, width, element))
+        return VisualLayer(this.width, children + Child(x, width, element))
     }
 
-    fun place(x: Int, component: VisualComponent): VisualBox =
-        place(x, component, component.width)
+    fun child(x: Int, component: VisualComponent): VisualLayer =
+        child(x, component, component.width)
 
-    fun placeEnd(x: Int, component: VisualComponent): VisualBox =
-        place(x - component.width, component)
+    fun childEnd(x: Int, component: VisualComponent): VisualLayer =
+        child(x - component.width, component)
 
-    fun placeEnd(component: VisualComponent): VisualBox {
-        require(width != null) { "Cannot place at the end of a box without a width." }
-        return placeEnd(width, component)
+    fun childEnd(component: VisualComponent): VisualLayer {
+        require(width != null) { "Cannot place at the end of a layer without a width." }
+        return childEnd(width, component)
     }
 
     fun toComponent(): VisualComponent =
-        VisualComponent.of(measuredWidth(), render())
+        VisualComponent(measuredWidth(), toText())
 
-    fun render(): VisualText {
+    fun toText(): VisualText {
         val ordered = children.sortedBy { it.x }
         var cursor = 0
         val content = mutableListOf<VisualElement>()

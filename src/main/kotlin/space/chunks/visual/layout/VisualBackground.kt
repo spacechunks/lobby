@@ -12,7 +12,7 @@ fun interface VisualBackground {
         fun repeat(tile: VisualComponent, gap: Int = 0): VisualBackground =
             VisualBackground { width ->
                 if (width == 0 || tile.width == 0) {
-                    return@VisualBackground VisualComponent.of(width, VisualText.empty)
+                    return@VisualBackground VisualComponent(width, VisualText.empty)
                 }
 
                 val step = tile.width + gap
@@ -21,12 +21,12 @@ fun interface VisualBackground {
                 val count = generateSequence(1) { it + 1 }
                     .first { it * tile.width + (it - 1) * gap >= width }
 
-                var row = VisualRow(gap = gap)
+                var row = VisualFlexRow(gap = gap)
                 kotlin.repeat(count) {
-                    row = row.item(tile)
+                    row = row.child(tile)
                 }
 
-                VisualComponent.of(width, VisualText.of(row.toComponent()))
+                VisualComponent(width, VisualText.of(row.toComponent()))
             }
     }
 }

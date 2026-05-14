@@ -1,6 +1,6 @@
 package space.chunks.lobby.ui.visual
 
-import space.chunks.visual.layout.VisualBox
+import space.chunks.visual.layout.VisualLayer
 import space.chunks.visual.layout.VisualComponent
 import space.chunks.visual.VisualKit
 import space.chunks.visual.text.VisualText
@@ -12,14 +12,14 @@ object ActionBarVisual {
         voiceChatEnabled: Boolean,
         chatChannel: ActionBarGlyphs.ChatChannel,
     ): VisualText {
-        var actionBar = VisualBox()
-            .place(x = Position.hotbar, hotbar(health, gravity, chatChannel))
+        var actionBar = VisualLayer()
+            .child(x = Position.hotbar, hotbar(health, gravity, chatChannel))
 
         if (!voiceChatEnabled) {
-            actionBar = actionBar.place(x = Position.voiceChatDisabled, ActionBarGlyphs.voiceChatDisabled)
+            actionBar = actionBar.child(x = Position.voiceChatDisabled, ActionBarGlyphs.voiceChatDisabled)
         }
 
-        return actionBar.render()
+        return actionBar.toText()
     }
 
     private fun hotbar(
@@ -27,13 +27,13 @@ object ActionBarVisual {
         gravity: Int,
         chatChannel: ActionBarGlyphs.ChatChannel,
     ): VisualComponent =
-        VisualComponent.of(
+        VisualComponent(
             VisualKit.Hud.Hotbar.width,
-            VisualBox(width = VisualKit.Hud.Hotbar.width)
-                .place(x = 0, ActionBarGlyphs.health(health))
-                .placeEnd(ActionBarGlyphs.gravity(gravity))
-                .place(x = VisualKit.Hud.Hotbar.width, chatChannel.component)
-                .render()
+            VisualLayer(width = VisualKit.Hud.Hotbar.width)
+                .child(x = 0, ActionBarGlyphs.health(health))
+                .childEnd(ActionBarGlyphs.gravity(gravity))
+                .child(x = VisualKit.Hud.Hotbar.width, chatChannel.component)
+                .toText()
         )
 
     private object Position {

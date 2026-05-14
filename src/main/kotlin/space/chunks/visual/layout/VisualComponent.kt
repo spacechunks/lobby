@@ -15,51 +15,7 @@ data class VisualComponent(
         element.asMiniMessage()
 
     companion object {
-        fun of(width: Int, element: VisualElement): VisualComponent =
-            VisualComponent(width, element)
-
         fun glyph(width: Int, font: VisualFont, codePoint: Int, shadow: Boolean = false): VisualComponent =
-            of(width, font.glyph(codePoint, shadow))
-
-        fun row(gap: Int = 0, vararg components: VisualComponent): VisualComponent =
-            VisualRow(gap = gap)
-                .items(components.asIterable())
-                .toComponent()
-
-        fun panel(
-            background: VisualComponent,
-            content: VisualComponent,
-            width: Int? = null,
-            minWidth: Int = 0,
-            paddingLeft: Int = 0,
-            paddingRight: Int = 0,
-            align: VisualAlignment = VisualAlignment.START,
-        ): VisualComponent =
-            VisualPanel(
-                background = background,
-                width = width,
-                minWidth = minWidth,
-                paddingLeft = paddingLeft,
-                paddingRight = paddingRight,
-                align = align,
-            ).content(content).toComponent()
-
-        fun panel(
-            background: VisualBackground,
-            content: VisualComponent,
-            width: Int? = null,
-            minWidth: Int = 0,
-            paddingLeft: Int = 0,
-            paddingRight: Int = 0,
-            align: VisualAlignment = VisualAlignment.START,
-        ): VisualComponent =
-            VisualPanel(
-                background = background,
-                width = width,
-                minWidth = minWidth,
-                paddingLeft = paddingLeft,
-                paddingRight = paddingRight,
-                align = align,
-            ).content(content).toComponent()
+            VisualComponent(width, font.glyph(codePoint, shadow))
     }
 }
