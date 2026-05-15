@@ -1,7 +1,7 @@
 package space.chunks.visual.layout
 
 /**
- * Horizontal layout for a known-width visual area.
+ * Horizontal layout for a known-width or minimum-width visual area.
  *
  * Use [edgeStart]/[edgeEnd] for balanced side content like an icon and a counter,
  * [center] or [fill] for the middle content, and [fixed] only when a cell really
@@ -9,13 +9,15 @@ package space.chunks.visual.layout
  */
 class VisualRow private constructor(
     private val width: Int?,
+    private val minWidth: Int,
     private val gap: Int,
     private val cells: List<Cell>,
 ) {
-    constructor(width: Int? = null, gap: Int = 0) : this(width, gap, emptyList())
+    constructor(width: Int? = null, gap: Int = 0, minWidth: Int = 0) : this(width, minWidth, gap, emptyList())
 
     init {
         require(width == null || width >= 0) { "width must be zero or positive." }
+        require(minWidth >= 0) { "minWidth must be zero or positive." }
         require(gap >= 0) { "gap must be zero or positive." }
     }
 
@@ -26,7 +28,7 @@ class VisualRow private constructor(
         padding: VisualPadding = VisualPadding.none,
     ): VisualRow {
         require(width >= 0) { "width must be zero or positive." }
-        return VisualRow(this.width, this.gap, this.cells + Cell.Fixed(component, width, align, padding))
+        return VisualRow(this.width, this.minWidth, this.gap, this.cells + Cell.Fixed(component, width, align, padding))
     }
 
     /**
@@ -49,7 +51,7 @@ class VisualRow private constructor(
         align: VisualAlignment = VisualAlignment.START,
     ): VisualRow {
         require(weight > 0) { "weight must be positive." }
-        return VisualRow(this.width, this.gap, this.cells + Cell.Fill(component, weight, align))
+        return VisualRow(this.width, this.minWidth, this.gap, this.cells + Cell.Fill(component, weight, align))
     }
 
     /**
@@ -60,7 +62,8 @@ class VisualRow private constructor(
 
     fun toComponent(): VisualComponent {
         if (cells.isEmpty()) {
-            return VisualComponent(0, element = VisualLayer().toText())
+            val rowWidth = width ?: minWidth
+            return VisualComponent(rowWidth, element = VisualLayer(width = rowWidth).toText())
         }
 
         val gapWidth = gap * (cells.size - 1)
@@ -71,14 +74,18 @@ class VisualRow private constructor(
             when (it) {
                 is Cell.Fixed -> it.outerWidth
                 is Cell.Edge -> edgeWidth
-                is Cell.Fill -> if (width == null) it.component.width else 0
+                is Cell.Fill -> 0
             }
         }
-        val rowWidth = width ?: fixedWidth + gapWidth
+        val fillIntrinsicWidth = cells.sumOf {
+            if (it is Cell.Fill) it.component.width else 0
+        }
+        val rowWidth = width ?: maxOf(minWidth, fixedWidth + fillIntrinsicWidth + gapWidth)
         val fillWidth = (rowWidth - fixedWidth - gapWidth).coerceAtLeast(0)
-        val fillWeight = cells.sumOf { if (it is Cell.Fill && width != null) it.weight else 0 }
+        val fillWeight = cells.sumOf { if (it is Cell.Fill) it.weight else 0 }
+        val extraFillWidth = (fillWidth - fillIntrinsicWidth).coerceAtLeast(0)
 
-        var remainingFillWidth = fillWidth
+        var remainingFillWidth = if (width == null) extraFillWidth else fillWidth
         var remainingFillWeight = fillWeight
         var cursor = 0
         var layer = VisualLayer(width = rowWidth)
@@ -92,18 +99,15 @@ class VisualRow private constructor(
                 is Cell.Fixed -> cell.outerWidth
                 is Cell.Edge -> edgeWidth
                 is Cell.Fill -> {
-                    if (width == null) {
-                        cell.component.width
+                    val allocated = if (remainingFillWeight == cell.weight) {
+                        remainingFillWidth
                     } else {
-                        val allocated = if (remainingFillWeight == cell.weight) {
-                            remainingFillWidth
-                        } else {
-                            (remainingFillWidth * cell.weight) / remainingFillWeight
-                        }
-                        remainingFillWidth -= allocated
-                        remainingFillWeight -= cell.weight
-                        allocated
+                        (remainingFillWidth * cell.weight) / remainingFillWeight
                     }
+                    remainingFillWidth -= allocated
+                    remainingFillWeight -= cell.weight
+
+                    if (width == null) cell.component.width + allocated else allocated
                 }
             }
 
@@ -137,7 +141,7 @@ class VisualRow private constructor(
         }
 
     private fun edge(component: VisualComponent, align: VisualAlignment): VisualRow =
-        VisualRow(this.width, this.gap, this.cells + Cell.Edge(component, align))
+        VisualRow(this.width, this.minWidth, this.gap, this.cells + Cell.Edge(component, align))
 
     private sealed class Cell {
         abstract val component: VisualComponent

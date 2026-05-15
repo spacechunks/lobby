@@ -39,21 +39,12 @@ class QueueModule(
                     uiService.set(
                         player,
                         queueBar,
-                        QueueBossBar.waitingForPlayers("Chefs", "default", players = 3, maxPlayers = 8),
+                         QueueBossBar.waitingForPlayers("Chefs", "default", players = 3, maxPlayers = 8),
                     )
                     player.sendMessage(Component.text("Queue bossbar enabled."))
                 }
 
                 Command.SINGLE_SUCCESS
             }
-            .then(
-                Commands.literal("debug")
-                    .executes { ctx ->
-                        val player = ctx.source.sender as Player
-                        QueueBossBar.debugLines("Chefs", "default", players = 3, maxPlayers = 8)
-                            .forEach { player.sendMessage(Component.text(it)) }
-                        Command.SINGLE_SUCCESS
-                    }
-            )
             .build()
 }

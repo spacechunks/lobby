@@ -14,7 +14,7 @@ import space.chunks.visual.ui.animation.LoadingFrames
 
 object QueueBossBar {
     private val miniMessage = MiniMessage.miniMessage()
-    private const val contentWidth = 200
+    private const val minimumContentWidth = 200
     private const val columnGap = 8
     private val panelPadding = VisualPadding.horizontal(6)
 
@@ -67,7 +67,7 @@ object QueueBossBar {
             .child(0, action)
             .toComponent()
 
-        val content = VisualRow(width = contentWidth, gap = columnGap)
+        val content = VisualRow(minWidth = minimumContentWidth, gap = columnGap)
             .edgeStart(loadingIndicator)
             .center(textColumn)
             .edgeEnd(count)
@@ -78,32 +78,6 @@ object QueueBossBar {
             content = content,
             padding = panelPadding,
         ).toText()
-    }
-
-    fun debugLines(chunk: String, flavor: String, players: Int, maxPlayers: Int): List<String> {
-        val label = VisualFonts.SpaceChunksVisualKit.bossBarSmallLine1
-            .formattedComponent("<#dde8f6>QUEUE FOR <#D8E7FF>${escapeMiniMessage(chunk)} (${escapeMiniMessage(flavor)})")
-        val count = VisualFonts.SpaceChunksVisualKit.bossBarLine1Half
-            .formattedComponent("<#dde8f6>$players/$maxPlayers")
-        val action = VisualFonts.SpaceChunksVisualKit.bossBarLine2
-            .formattedComponent("<#009cff>${QueueState.WAITING_FOR_PLAYERS.string}")
-        val loading = VisualKit.BossBar.LoadingSpinner.frame(0)
-        val textWidth = maxOf(label.width, action.width)
-        val edgeWidth = maxOf(loading.advance, count.advance)
-        val fillWidth = contentWidth - edgeWidth - edgeWidth - columnGap - columnGap
-        val textCellStart = edgeWidth + columnGap
-        val textStart = textCellStart + ((fillWidth - textWidth).coerceAtLeast(0) / 2)
-        val countCellStart = contentWidth - edgeWidth
-        val countStart = countCellStart + edgeWidth - count.width
-
-        return listOf(
-            "view width=${panelPadding.left + contentWidth + panelPadding.right}, padding=${panelPadding.left}/${panelPadding.right}, content=0..$contentWidth",
-            "loading width=${loading.width}, advance=${loading.advance}, visual=0..${loading.width}, edgeCell=0..$edgeWidth",
-            "label width=${label.width}, advance=${label.advance}; action width=${action.width}, advance=${action.advance}",
-            "text fill=$textCellStart..${textCellStart + fillWidth}, text visual=$textStart..${textStart + textWidth}",
-            "count width=${count.width}, advance=${count.advance}, edgeCell=$countCellStart..$contentWidth, visual=$countStart..${countStart + count.width}",
-            "left visual padding=0, right visual padding=${contentWidth - (countStart + count.width)}",
-        )
     }
 
     private fun escapeMiniMessage(content: String): String =
