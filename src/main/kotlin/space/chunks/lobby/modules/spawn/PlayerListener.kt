@@ -1,26 +1,29 @@
 package space.chunks.lobby.modules.spawn
 
 import com.google.gson.JsonParser
+import com.noxcrew.interfaces.InterfacesConstants
 import io.papermc.paper.event.player.AsyncChatEvent
+import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
 import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.block.Action
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
-import space.chunks.lobby.pack.Items
-import space.chunks.lobby.ui.Hotbar
+import space.chunks.lobby.ui.ActionBar
+import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
+import space.chunks.visual.ui.UiService
 import java.time.Duration
 
 class PlayerListener(
@@ -28,13 +31,20 @@ class PlayerListener(
     private val config: Config,
     private val sessionService: DisplaySessionService,
     private val texts: Texts,
+    private val uiService: UiService,
 ) : Listener {
+
+    private val transition = ScreenTransition(this.plugin, this.texts)
+    private val hotbar = Hotbar(this.sessionService, this.texts, this.uiService, this.transition)
+
     @EventHandler
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         event.joinMessage(Component.empty())
 
         val player = event.player
 
+        this.uiService.show(player)
+        ActionBar.clear(player)
         player.inventory.clear()
         player.gameMode = GameMode.ADVENTURE
 
@@ -66,7 +76,9 @@ class PlayerListener(
         val playerName = this.playerName(player)
         player.playerListName(playerName)
 
-        Hotbar.give(player, this.texts)
+        InterfacesConstants.SCOPE.launch {
+            hotbar.open(player)
+        }
 
         player
             .retrieveCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/pushback")!!)
@@ -109,41 +121,13 @@ class PlayerListener(
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     private fun onPlayerInteract(event: PlayerInteractEvent) {
-        val player = event.player
-
         // nexo uses note blocks to display custom blocks.
         // interacting with them will change the block.
         if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
             event.isCancelled = true
-            return
         }
-
-        if (event.action != Action.RIGHT_CLICK_BLOCK && event.action != Action.RIGHT_CLICK_AIR) return
-        if (player.inventory.itemInMainHand.type != Material.PAPER
-            && player.inventory.itemInMainHand.itemMeta.itemModel == Items.TELEPORTER) return
-
-        player.addPotionEffect(
-            PotionEffectType.DARKNESS
-                .createEffect(60, Int.MAX_VALUE)
-                .withParticles(false)
-        )
-        val title = Title.title(
-            this.texts.component("spawn.title.logo"),
-            Component.empty(),
-            Title.Times.times(
-                Duration.ofMillis(1000),
-                Duration.ofMillis(1000),
-                Duration.ofMillis(1000)
-            )
-        )
-        player.showTitle(title)
-
-        // timing is set so that once the darkness almost reaches the player, we teleport them
-        Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
-            this.sessionService.startSession(player)
-        }, 13)
     }
 
     @EventHandler
@@ -154,6 +138,11 @@ class PlayerListener(
     @EventHandler
     private fun onDropItem(event: PlayerDropItemEvent) {
         event.isCancelled = true
+    }
+
+    @EventHandler
+    private fun onQuit(event: PlayerQuitEvent) {
+        event.quitMessage(Component.empty())
     }
 
     @EventHandler
@@ -184,6 +173,9 @@ class PlayerListener(
         )
 
         this.sessionService.closeSession(player)
+        this.uiService.show(player)
+        ActionBar.clear(player)
+        this.hotbar.open(player)
     }
 
     private fun playerName(player: Player): Component =

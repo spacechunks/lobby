@@ -1,5 +1,6 @@
 package space.chunks.lobby
 
+import com.noxcrew.interfaces.InterfacesListeners
 import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
@@ -13,10 +14,13 @@ import space.chunks.lobby.modules.chunkviewer.ChunkViewerModule
 import space.chunks.lobby.modules.chunkviewer.world.VoidWorldGenerator
 import space.chunks.lobby.modules.party.PartyModule
 import space.chunks.lobby.modules.party.PartyService
+import space.chunks.lobby.modules.queue.QueueModule
 import space.chunks.lobby.modules.spawn.SpawnModule
 import space.chunks.lobby.pack.PackService
 import space.chunks.lobby.pack.ResourcePackConfig
+import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.Texts
+import space.chunks.visual.ui.UiService
 import java.net.URI
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -27,26 +31,32 @@ class Plugin : JavaPlugin(), Listener {
     private val packConfig = ResourcePackConfig.parse(this.config)
     private val packService = PackService(this.logger, this, packConfig)
     private val partyService = PartyService()
+    private val uiService = UiService(ActionBar::send)
     private val texts = Texts(this)
 
     // modules
     private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService, texts)
-    private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this, texts)
-    private val partyMod = PartyModule(this, partyService, texts)
+    private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this, texts, this.uiService)
+    private val partyMod = PartyModule(this, partyService, texts, uiService)
+    private val queueMod = QueueModule(this, uiService)
 
     override fun onEnable() {
         val modules = listOf(
             chunkViewerMod,
             spawnMod,
             partyMod,
+            queueMod,
         )
+
+        InterfacesListeners.install(this)
+        Bukkit.getPluginManager().registerEvents(this.uiService, this)
+        this.uiService.start(this)
+        this.packService.startPeriodicPull()
+        Bukkit.getPluginManager().registerEvents(this, this)
 
         modules.forEach {
             it.onEnable()
         }
-
-        this.packService.startPeriodicPull()
-        Bukkit.getPluginManager().registerEvents(this, this)
     }
 
     @EventHandler

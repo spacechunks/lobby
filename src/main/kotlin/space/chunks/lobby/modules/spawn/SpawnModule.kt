@@ -6,22 +6,25 @@ import org.bukkit.plugin.Plugin
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.ui.Texts
+import space.chunks.visual.ui.UiService
 
 class SpawnModule(
     private val sessSvc: DisplaySessionService,
     plugin: Plugin,
     private val texts: Texts,
+    private val uiService: UiService,
 ) : LobbyModule(plugin, "spawn") {
-
     override fun onEnable() {
         val cfg = Config.parse(this.plugin.config)
         Bukkit.getPluginManager().registerEvents(
-            PlayerListener(this.plugin, cfg, this.sessSvc, this.texts),
+            PlayerListener(this.plugin, cfg, this.sessSvc, this.texts, this.uiService),
             this.plugin,
         )
 
         Bukkit.getServer().getWorld(cfg.world)?.setGameRule(GameRules.LOCATOR_BAR, false)
     }
 
-    override fun onDisable() {}
+    override fun onDisable() {
+        this.uiService.stop()
+    }
 }

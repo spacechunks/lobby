@@ -3,10 +3,12 @@ package space.chunks.lobby.modules.party
 import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
+import org.bukkit.entity.Player
 import org.bukkit.Bukkit
 import space.chunks.lobby.modules.party.event.PartyDisbandEvent
 import space.chunks.lobby.modules.party.event.PartyInviteEvent
 import space.chunks.lobby.modules.party.event.PartyInviteStatus
+import space.chunks.lobby.modules.party.event.PartyUpdateEvent
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.uuid.ExperimentalUuidApi
@@ -18,11 +20,14 @@ data class Party @OptIn(ExperimentalUuidApi::class) constructor(
     val id: String = Uuid.generateV7().toHexDashString()
 ) : ForwardingAudience {
     override fun audiences(): Iterable<Audience?> {
-        val l = mutableSetOf<Audience?>()
-        l.addAll(members.map { it.asPlayer() }.toSet())
-        l.add(owner.asPlayer())
-        return l
+        val audiences = mutableSetOf<Audience>()
+        members.mapNotNullTo(audiences) { it.asPlayer() }
+        owner.asPlayer()?.let(audiences::add)
+        return audiences
     }
+
+    fun onlinePlayers(): List<Player> =
+        listOfNotNull(owner.asPlayer()) + members.mapNotNull { it.asPlayer() }
 }
 
 data class PartyInvite @OptIn(ExperimentalUuidApi::class) constructor(
@@ -32,7 +37,7 @@ data class PartyInvite @OptIn(ExperimentalUuidApi::class) constructor(
 )
 
 data class PartyPlayer(val id: UUID, val name: String) {
-    fun asPlayer() = Bukkit.getPlayer(name)
+    fun asPlayer() = Bukkit.getPlayer(id)
 }
 
 class PartyService {
@@ -57,7 +62,7 @@ class PartyService {
 
     private val invites = CacheBuilder<String, PartyInvite>
         .newBuilder()
-        .expireAfterAccess(30, TimeUnit.SECONDS)
+        .expireAfterWrite(60, TimeUnit.MINUTES)
         .build<String, PartyInvite>()
 
     private val partyByPlayer = mutableMapOf<UUID, Party>()
@@ -78,8 +83,9 @@ class PartyService {
             this.invites.put(invite.id, invite)
 
             Bukkit.getPluginManager().callEvent(
-                PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING)
+                PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING, party)
             )
+            Bukkit.getPluginManager().callEvent(PartyUpdateEvent(party))
             return
         }
 
@@ -88,11 +94,19 @@ class PartyService {
             throw PartyException(PartyExceptionReason.NOT_OWNER)
         }
 
+        if (inviterParty.members.any { it.id == invitee.id }) {
+            throw PartyException(PartyExceptionReason.PLAYER_ALREADY_IN_PARTY)
+        }
+
+        if (this.hasPendingInvite(inviterParty.id, invitee.id)) {
+            throw PartyException(PartyExceptionReason.INVITE_ALREADY_PENDING)
+        }
+
         val invite = PartyInvite(inviterParty.id, invitee)
         this.invites.put(invite.id, invite)
 
         Bukkit.getPluginManager().callEvent(
-            PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING)
+            PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING, inviterParty)
         )
     }
 
@@ -110,8 +124,9 @@ class PartyService {
         this.invites.invalidate(inviteId)
 
         Bukkit.getPluginManager().callEvent(
-            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.ACCEPTED)
+            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.ACCEPTED, party)
         )
+        Bukkit.getPluginManager().callEvent(PartyUpdateEvent(party))
     }
 
     fun declineInvite(inviteId: String) {
@@ -122,8 +137,20 @@ class PartyService {
 
         this.invites.invalidate(inviteId)
         Bukkit.getPluginManager().callEvent(
-            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.DECLINED)
+            PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.DECLINED, party)
         )
+    }
+
+    fun getPendingInvites(playerId: UUID): List<PartyInvite> {
+        this.invites.cleanUp()
+        return this.invites.asMap().values.filter { it.player.id == playerId }
+    }
+
+    private fun hasPendingInvite(partyId: String, playerId: UUID): Boolean {
+        this.invites.cleanUp()
+        return this.invites.asMap().values.any {
+            it.partyId == partyId && it.player.id == playerId
+        }
     }
 
     fun getParty(playerId: UUID): Party? {
@@ -140,6 +167,10 @@ class PartyService {
             return null
         }
         return p2
+    }
+
+    fun getPartyById(partyId: String): Party? {
+        return this.parties.getIfPresent(partyId)
     }
 
     fun disbandParty(partyId: String, actorId: UUID) {
@@ -174,11 +205,17 @@ class PartyService {
             return
         }
 
+        val removedPlayer = Bukkit.getPlayer(toKick)
         party.members.removeIf { it.id == toKick }
         this.partyByPlayer.remove(toKick)
 
+        Bukkit.getPluginManager().callEvent(
+            PartyUpdateEvent(party, clearPlayers = listOfNotNull(removedPlayer))
+        )
+
         if (party.members.isEmpty()) {
             this.disbandParty(partyId, party.owner.id)
+            return
         }
     }
 }
