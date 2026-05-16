@@ -43,6 +43,7 @@ repositories {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    maven("https://maven.noxcrew.com/public")
 }
 
 dependencies {
@@ -55,6 +56,7 @@ dependencies {
     api("com.google.protobuf:protobuf-kotlin:3.25.8")
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("com.noxcrew.interfaces:interfaces:2.1.0-SNAPSHOT")
 }
 
 tasks.test {

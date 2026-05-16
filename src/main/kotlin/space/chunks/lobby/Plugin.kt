@@ -1,5 +1,6 @@
 package space.chunks.lobby
 
+import com.noxcrew.interfaces.InterfacesListeners
 import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConfigureEvent
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
@@ -47,6 +48,7 @@ class Plugin : JavaPlugin(), Listener {
             queueMod,
         )
 
+        InterfacesListeners.install(this)
         Bukkit.getPluginManager().registerEvents(this.uiService, this)
         this.uiService.start(this)
         this.packService.startPeriodicPull()
