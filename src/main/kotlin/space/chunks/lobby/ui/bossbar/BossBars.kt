@@ -17,7 +17,7 @@ class BossBars(private val uiService: UiService) {
         this.uiService.clear(players, this.partySlot)
     }
 
-    fun partyBar(player: Player, party: Party) {
+    fun sendPartyBar(player: Player, party: Party) {
         this.uiService.set(
             player,
             this.partySlot,
@@ -25,7 +25,7 @@ class BossBars(private val uiService: UiService) {
         )
     }
 
-    fun partyBar(players: List<Player>, party: Party) {
+    fun sendPartyBar(players: List<Player>, party: Party) {
         this.uiService.set(
             players,
             this.partySlot,
@@ -37,7 +37,7 @@ class BossBars(private val uiService: UiService) {
         this.uiService.clear(players, loadingSlot)
     }
 
-    fun loadingBar(players: List<Player>, chunk: String, flavor: String, maxPlayers: Int) {
+    fun sendLoadingBar(players: List<Player>, chunk: String, flavor: String, maxPlayers: Int) {
         uiService.set(
             players,
             loadingSlot,

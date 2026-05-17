@@ -71,7 +71,7 @@ class PlayerListener(
         val players =
             listOf(player, *party?.members?.map { it.asPlayer() }?.filterNotNull()?.toTypedArray() ?: arrayOf())
 
-        this.bossbars.loadingBar(players, chunk.name, flavor.name, players.count())
+        this.bossbars.sendLoadingBar(players, chunk.name, flavor.name, players.count())
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 

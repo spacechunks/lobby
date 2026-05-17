@@ -66,7 +66,7 @@ class PartyModule(
                     "party.invite.accepted-broadcast",
                     mapOf("member" to this.texts.player(invitee.name))
                 )
-                this.bossBars.partyBar(party.onlinePlayers(), party)
+                this.bossBars.sendPartyBar(party.onlinePlayers(), party)
             }
 
             PartyInviteStatus.PENDING -> {
@@ -91,7 +91,7 @@ class PartyModule(
     private fun onPlayerJoin(event: PlayerJoinEvent) {
         val player = event.player
         this.partyService.getParty(player.uniqueId)?.let {
-            this.bossBars.partyBar(player, it)
+            this.bossBars.sendPartyBar(player, it)
         }
 
         this.partyService.getPendingInvites(event.player.uniqueId).forEach { invite ->
