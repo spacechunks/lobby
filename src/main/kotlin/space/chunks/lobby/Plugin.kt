@@ -14,12 +14,12 @@ import space.chunks.lobby.modules.chunkviewer.ChunkViewerModule
 import space.chunks.lobby.modules.chunkviewer.world.VoidWorldGenerator
 import space.chunks.lobby.modules.party.PartyModule
 import space.chunks.lobby.modules.party.PartyService
-import space.chunks.lobby.modules.queue.QueueModule
 import space.chunks.lobby.modules.spawn.SpawnModule
 import space.chunks.lobby.pack.PackService
 import space.chunks.lobby.pack.ResourcePackConfig
 import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.Texts
+import space.chunks.lobby.ui.bossbar.BossBars
 import space.chunks.visual.ui.UiService
 import java.net.URI
 import java.util.*
@@ -33,19 +33,18 @@ class Plugin : JavaPlugin(), Listener {
     private val partyService = PartyService()
     private val uiService = UiService(ActionBar::send)
     private val texts = Texts(this)
+    private val bossbars = BossBars(this.uiService)
 
     // modules
-    private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService, texts)
+    private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService, texts, bossbars)
     private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this, texts, this.uiService)
     private val partyMod = PartyModule(this, partyService, texts, uiService)
-    private val queueMod = QueueModule(this, uiService)
 
     override fun onEnable() {
         val modules = listOf(
             chunkViewerMod,
             spawnMod,
             partyMod,
-            queueMod,
         )
 
         InterfacesListeners.install(this)

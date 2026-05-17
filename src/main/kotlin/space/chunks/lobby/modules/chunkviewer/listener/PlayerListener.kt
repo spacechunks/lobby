@@ -21,6 +21,7 @@ import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.ui.Texts
+import space.chunks.lobby.ui.bossbar.BossBars
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.logging.Logger
@@ -34,6 +35,7 @@ class PlayerListener(
     private val config: Config,
     private val partyService: PartyService,
     private val texts: Texts,
+    private val bossbars: BossBars,
 ) : Listener {
     private val playerTasks = mutableMapOf<UUID, BukkitTask>()
 
@@ -42,6 +44,7 @@ class PlayerListener(
         val player = event.player
         val flavor = event.flavor
         val ver = flavor.versionsList.first()
+        val chunk = event.chunk
 
         val party = this.partyService.getParty(player.uniqueId)
         if (party != null) {
@@ -65,23 +68,20 @@ class PlayerListener(
             )
         }
 
-        val players = listOf(player, *party?.members?.map { it.asPlayer() }?.toTypedArray() ?: arrayOf())
+        val players =
+            listOf(player, *party?.members?.map { it.asPlayer() }?.filterNotNull()?.toTypedArray() ?: arrayOf())
+
+        this.bossbars.loadingBar(players, chunk.name, flavor.name, players.count())
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 
-        player.sendMessage(
-            this.texts.component(
-                "chunkviewer.instance.starting",
-                mapOf("chunkName" to event.chunk.name)
-            )
-        )
-
-        this.runFlavorVersion(player.uniqueId.toString(), event.chunk.id, ver.id)
+        this.runFlavorVersion(player.uniqueId.toString(), chunk.id, ver.id)
             .exceptionally { e ->
                 players.forEach { player ->
-                    player?.sendMessage(
+                    player.sendMessage(
                         Component.text("Failed to run instance: ${e.message}").color(NamedTextColor.RED)
                     )
+                    this.bossbars.clearLoadingBar(players)
                 }
                 return@exceptionally null
             }

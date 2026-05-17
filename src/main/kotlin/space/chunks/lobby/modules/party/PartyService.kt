@@ -3,12 +3,9 @@ package space.chunks.lobby.modules.party
 import com.google.common.cache.CacheBuilder
 import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.audience.ForwardingAudience
-import org.bukkit.entity.Player
 import org.bukkit.Bukkit
-import space.chunks.lobby.modules.party.event.PartyDisbandEvent
-import space.chunks.lobby.modules.party.event.PartyInviteEvent
-import space.chunks.lobby.modules.party.event.PartyInviteStatus
-import space.chunks.lobby.modules.party.event.PartyUpdateEvent
+import org.bukkit.entity.Player
+import space.chunks.lobby.modules.party.event.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.uuid.ExperimentalUuidApi
@@ -85,7 +82,7 @@ class PartyService {
             Bukkit.getPluginManager().callEvent(
                 PartyInviteEvent(invitee, inviter, invite.id, PartyInviteStatus.PENDING, party)
             )
-            Bukkit.getPluginManager().callEvent(PartyUpdateEvent(party))
+            Bukkit.getPluginManager().callEvent(PartyCreatedEvent(party))
             return
         }
 
@@ -126,7 +123,6 @@ class PartyService {
         Bukkit.getPluginManager().callEvent(
             PartyInviteEvent(invite.player, party.owner, invite.id, PartyInviteStatus.ACCEPTED, party)
         )
-        Bukkit.getPluginManager().callEvent(PartyUpdateEvent(party))
     }
 
     fun declineInvite(inviteId: String) {
@@ -205,13 +201,15 @@ class PartyService {
             return
         }
 
-        val removedPlayer = Bukkit.getPlayer(toKick)
-        party.members.removeIf { it.id == toKick }
         this.partyByPlayer.remove(toKick)
 
-        Bukkit.getPluginManager().callEvent(
-            PartyUpdateEvent(party, clearPlayers = listOfNotNull(removedPlayer))
-        )
+        val pp = party.members.firstOrNull { it.id == toKick }
+        pp?.let {
+            party.members.remove(it)
+            Bukkit.getPluginManager().callEvent(
+                PartyPlayerKickedEvent(party, pp)
+            )
+        }
 
         if (party.members.isEmpty()) {
             this.disbandParty(partyId, party.owner.id)

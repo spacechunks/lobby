@@ -1,4 +1,4 @@
-package space.chunks.lobby.modules.queue
+package space.chunks.lobby.ui.bossbar
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -12,7 +12,7 @@ import space.chunks.visual.text.VisualText
 import space.chunks.visual.ui.UiRenderable
 import space.chunks.visual.ui.animation.LoadingFrames
 
-object QueueBossBar {
+object LoadingBossBar {
     private val miniMessage = MiniMessage.miniMessage()
     private const val minimumContentWidth = 200
     private const val columnGap = 8
@@ -21,19 +21,19 @@ object QueueBossBar {
     fun component(
         chunk: String,
         flavor: String,
-        queueState: QueueState,
+        queueState: LoadingState,
         players: Int,
         maxPlayers: Int,
         loadingFrame: Int? = null,
     ): Component =
-        miniMessage.deserialize(visual(chunk, flavor, queueState, players, maxPlayers, loadingFrame).asMiniMessage())
+        miniMessage.deserialize(view(chunk, flavor, queueState, players, maxPlayers, loadingFrame).asMiniMessage())
 
-    fun waitingForPlayers(chunk: String, flavor: String, players: Int, maxPlayers: Int): UiRenderable =
+    fun create(chunk: String, flavor: String, loadingState: LoadingState, players: Int, maxPlayers: Int): UiRenderable =
         UiRenderable { context ->
             component(
                 chunk = chunk,
                 flavor = flavor,
-                queueState = QueueState.WAITING_FOR_PLAYERS,
+                queueState = LoadingState.WAITING_FOR_PLAYERS,
                 players = players,
                 maxPlayers = maxPlayers,
                 loadingFrame = LoadingFrames.frameIndex(
@@ -44,10 +44,11 @@ object QueueBossBar {
             )
         }
 
-    private fun visual(
+
+    private fun view(
         chunk: String,
         flavor: String,
-        queueState: QueueState,
+        loadingState: LoadingState,
         players: Int,
         maxPlayers: Int,
         loadingFrame: Int?,
@@ -59,7 +60,7 @@ object QueueBossBar {
             .formattedComponent("<#dde8f6>$players/$maxPlayers")
 
         val action = VisualFonts.SpaceChunksVisualKit.bossBarLine2
-            .formattedComponent("<#009cff>${queueState.string}")
+            .formattedComponent("<#009cff>${loadingState.string}")
 
         val loadingIndicator = loadingFrame?.let(VisualKit.BossBar.LoadingSpinner::frame)
         val textColumn = VisualLayer(width = maxOf(label.width, action.width))
@@ -85,7 +86,7 @@ object QueueBossBar {
             .replace("\\", "\\\\")
             .replace("<", "\\<")
 
-    enum class QueueState(val string: String) {
+    enum class LoadingState(val string: String) {
         WAITING_FOR_PLAYERS("Waiting for players"),
         COUNTDONW("in 10s"),
         STARTING("Starting"),
