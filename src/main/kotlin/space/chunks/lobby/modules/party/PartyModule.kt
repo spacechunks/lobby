@@ -56,8 +56,7 @@ class PartyModule(
     private fun onPartyInvite(event: PartyInviteEvent) {
         val party = event.party
         val invitee = event.invitee
-        val inviter = event.invitee
-
+        val inviter = event.inviter
 
         when (event.status) {
             PartyInviteStatus.ACCEPTED -> {
