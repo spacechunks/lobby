@@ -1,4 +1,4 @@
-package space.chunks.lobby.ui
+package space.chunks.lobby.ui.bossbar
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -8,7 +8,7 @@ import space.chunks.lobby.ui.visual.PartyBossBarVisual
 object PartyBossBar {
     private val miniMessage = MiniMessage.miniMessage()
 
-    fun component(p: Party): Component {
+    fun create(p: Party): Component {
         return this.miniMessage.deserialize(
             PartyBossBarVisual.party(
                 ownerName = p.owner.name,

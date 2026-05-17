@@ -23,6 +23,7 @@ import space.chunks.lobby.modules.chunkviewer.world.VoidWorldGenerator
 import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.pack.ResourcePackConfig
 import space.chunks.lobby.ui.Texts
+import space.chunks.lobby.ui.bossbar.BossBars
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -31,6 +32,7 @@ class ChunkViewerModule(
     private val packConfig: ResourcePackConfig,
     private val partyService: PartyService,
     private val texts: Texts,
+    private val bossbars: BossBars,
 ) : LobbyModule(plugin, "chunk-viewer") {
     val chunks = CopyOnWriteArrayList<ChunkDisplay>()
     val worldName = "chunk_viewer"
@@ -104,7 +106,14 @@ class ChunkViewerModule(
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(
             PlayerListener(
-                this.logger, this.plugin, this.sessionService, instanceClient, cfg, partyService, this.texts,
+                this.logger,
+                this.plugin,
+                this.sessionService,
+                instanceClient,
+                cfg,
+                partyService,
+                this.texts,
+                this.bossbars,
             ),
             this.plugin,
         )
