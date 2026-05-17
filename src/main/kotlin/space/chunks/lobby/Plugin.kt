@@ -38,7 +38,7 @@ class Plugin : JavaPlugin(), Listener {
     // modules
     private val chunkViewerMod = ChunkViewerModule(this, packConfig, partyService, texts, bossbars)
     private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this, texts, this.uiService)
-    private val partyMod = PartyModule(this, partyService, texts, uiService)
+    private val partyMod = PartyModule(this, partyService, texts, this.bossbars)
 
     override fun onEnable() {
         val modules = listOf(
