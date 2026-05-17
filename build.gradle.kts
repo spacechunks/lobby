@@ -33,7 +33,7 @@ plugins {
 }
 
 group = "space.chunks"
-version = "2026.20.4"
+version = "2026.20.5"
 
 val pluginName = project.property("plugin.name").toString()
 
@@ -106,7 +106,7 @@ tasks.register("uploadToS3") {
         runBlocking {
             val s3 = S3Client.fromEnvironment()
             val bucketName = System.getenv("BUCKET_NAME") ?: error("BUCKET_NAME env var not set")
-            val key = "plugins/paper/$pluginName-${project.version}"
+            val key = "plugins/paper/$pluginName-${project.version}.jar"
 
             s3.putObject {
                 bucket = bucketName
