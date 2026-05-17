@@ -10,6 +10,7 @@ import org.bukkit.Bukkit
 import org.bukkit.GameRules
 import org.bukkit.NamespacedKey
 import org.bukkit.WorldCreator
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import org.bukkit.util.Vector
 import space.chunks.lobby.modules.LobbyModule
@@ -48,6 +49,8 @@ class ChunkViewerModule(
     // A BIT DARKER BLUE #53d0fd
 
     override fun onEnable() {
+        this.clearPersistedViewerEntities()
+
         Bukkit.createWorld(
             WorldCreator(this.worldName)
                 .generator(VoidWorldGenerator())
@@ -61,6 +64,7 @@ class ChunkViewerModule(
             w.setGameRule(GameRules.LOCATOR_BAR, false)
             w.time = 14000
             w.clearWeatherDuration = -1
+            this.clearViewerWorld(w)
         }
 
         val cfg = parseConfig(this.config)
@@ -122,4 +126,26 @@ class ChunkViewerModule(
     }
 
     override fun onDisable() {}
+
+    private fun clearPersistedViewerEntities() {
+        val entitiesFolder = File(Bukkit.getWorldContainer(), "$worldName/entities")
+        if (!entitiesFolder.exists()) {
+            return
+        }
+
+        if (entitiesFolder.deleteRecursively()) {
+            this.logger.info("cleared persisted entity region data from $worldName")
+        } else {
+            this.logger.warning("failed to clear persisted entity region data from $worldName")
+        }
+    }
+
+    private fun clearViewerWorld(world: org.bukkit.World) {
+        val removed = world.entities
+            .filterNot { it is Player }
+            .onEach { it.remove() }
+            .count()
+
+        this.logger.info("cleared $removed stale entities from $worldName")
+    }
 }

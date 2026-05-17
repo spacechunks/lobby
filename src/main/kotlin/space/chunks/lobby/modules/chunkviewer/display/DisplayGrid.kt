@@ -2,6 +2,7 @@ package space.chunks.lobby.modules.chunkviewer.display
 
 import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.scheduler.BukkitTask
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -19,6 +20,7 @@ class DisplayGrid(
     private var currentPage: Int = 0
     private var totalItems: Int = 0
     private var allGameItems = mutableListOf<ChunkDisplay>()
+    private var pendingRefreshTask: BukkitTask? = null
 
     fun getTotalPages(): Int {
         return max(1, ceil(totalItems.toDouble() / itemsPerPage).toInt())
@@ -44,10 +46,12 @@ class DisplayGrid(
     }
 
     fun refreshCurrentPage() {
+        this.pendingRefreshTask?.cancel()
+        this.pendingRefreshTask = null
+        clearDisplays()
+
         val startIndex = currentPage * itemsPerPage
         val endIndex = min(startIndex + itemsPerPage, totalItems)
-
-        val new = mutableListOf<ChunkDisplay>()
 
         for (i in startIndex until endIndex) {
             val item = allGameItems[i]
@@ -56,12 +60,11 @@ class DisplayGrid(
             item.location = position
             item.center = this.centerLocation
             item.spawn()
-            new.add(item)
+            this.displays.add(item)
         }
 
-        Bukkit.getScheduler().runTaskLater(this.plugin, { _ ->
-            clear()
-            this.displays.addAll(new)
+        this.pendingRefreshTask = Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
+            this.pendingRefreshTask = null
             if (displays.isNotEmpty()) {
                 setInitialFocus()
             }
@@ -109,6 +112,12 @@ class DisplayGrid(
     }
 
     fun clear() {
+        this.pendingRefreshTask?.cancel()
+        this.pendingRefreshTask = null
+        clearDisplays()
+    }
+
+    private fun clearDisplays() {
         displays.forEach {
             it.setFocus(false)
             it.remove()
