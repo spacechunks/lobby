@@ -22,10 +22,18 @@ abstract class View(
     protected val session: DisplaySession
 ) {
     protected val elements = mutableListOf<Entity>()
+    private val animationTasks = mutableListOf<BukkitRunnable>()
 
     abstract fun render()
     abstract fun close()
     abstract fun handleInput(player: Player, input: Input)
+
+    protected fun closeElements() {
+        this.animationTasks.forEach { it.cancel() }
+        this.animationTasks.clear()
+        this.elements.forEach { it.remove() }
+        this.elements.clear()
+    }
 
     protected fun spawnTextElement(txt: Component, loc: Location, scale: Float): TextDisplay {
         return loc.world.spawn(loc, TextDisplay::class.java) { d ->
@@ -69,7 +77,7 @@ abstract class View(
             val rand = java.util.Random()
             val step = rand.nextFloat(0.02f, 0.04f)
 
-            object : BukkitRunnable() {
+            val task = object : BukkitRunnable() {
                 var time: Double = Math.random() * Math.PI * 2
 
                 override fun run() {
@@ -93,7 +101,9 @@ abstract class View(
                     )
                     d.interpolationDelay = 0
                 }
-            }.runTaskTimer(this.plugin, 0L, 1)
+            }
+            this.animationTasks.add(task)
+            task.runTaskTimer(this.plugin, 0L, 1)
         }
     }
 }

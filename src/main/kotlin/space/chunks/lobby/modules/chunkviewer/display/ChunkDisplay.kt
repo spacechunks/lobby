@@ -9,6 +9,8 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.TextDisplay
 import org.bukkit.inventory.ItemStack
+import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scheduler.BukkitTask
 import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Matrix4f
@@ -29,9 +31,7 @@ class ChunkDisplay(
     private var tdName: TextDisplay? = null
     private var tdDesc: MutableList<TextDisplay> = mutableListOf()
     private var isFocused: Boolean = false
-    private var breathingTaskId: Int = -1
-    private var stopBreathing: Boolean = false
-    private var currScale: Float = -1.0f
+    private var breathingTask: BukkitTask? = null
 
     companion object {
         private val ICON_MATERIAL = Material.PAPER
@@ -41,6 +41,8 @@ class ChunkDisplay(
     }
 
     fun spawn() {
+        this.remove()
+
         val iconLocation = this.location!!.clone().add(0.0, 0.0, ICON_OFFSET)
         val world = iconLocation.world
 
@@ -65,11 +67,13 @@ class ChunkDisplay(
     }
 
     fun remove() {
+        this.clearFocusDisplays()
+        this.breathingTask?.cancel()
+        this.breathingTask = null
+        this.isFocused = false
         backgroundDisplay?.remove()
         highlightDisplay?.remove()
         itemDisplay?.remove()
-        this.tdDesc.forEach { it.remove() }
-        tdName?.remove()
         backgroundDisplay = null
         highlightDisplay = null
         itemDisplay = null
@@ -82,23 +86,21 @@ class ChunkDisplay(
 
         if (focused) {
             this.itemDisplay?.isGlowing = true
-            Bukkit.getScheduler().runTaskTimer(plugin!!, { t ->
-                if (t.isCancelled) {
-                    return@runTaskTimer
+            this.breathingTask?.cancel()
+            this.breathingTask = object : BukkitRunnable() {
+                override fun run() {
+                    val curr = this@ChunkDisplay.itemDisplay?.transformation?.scale?.x
+                    val scale = if (curr == ICON_FOCUS_SCALE) ICON_SCALE else ICON_FOCUS_SCALE
+
+                    this@ChunkDisplay.itemDisplay?.setTransformationMatrix(Matrix4f().scale(scale))
+                    this@ChunkDisplay.itemDisplay?.interpolationDuration = 15
+                    this@ChunkDisplay.itemDisplay?.interpolationDelay = 0
                 }
-
-                this.breathingTaskId = t.taskId
-                val curr = this.itemDisplay?.transformation?.scale?.x
-                val scale = if (curr == ICON_FOCUS_SCALE) ICON_SCALE else ICON_FOCUS_SCALE
-
-                this.itemDisplay?.setTransformationMatrix(Matrix4f().scale(scale))
-                this.itemDisplay?.interpolationDuration = 15
-                this.itemDisplay?.interpolationDelay = 0
-            }, 0L, 15L)
+            }.runTaskTimer(plugin!!, 0L, 15L)
         } else {
-            Bukkit.getScheduler().cancelTask(this.breathingTaskId)
+            this.breathingTask?.cancel()
+            this.breathingTask = null
             this.itemDisplay?.isGlowing = false
-            this.currScale = ICON_FOCUS_SCALE
 
             this.itemDisplay?.let { d ->
                 d.setTransformationMatrix(Matrix4f().scale(ICON_SCALE))
@@ -137,11 +139,17 @@ class ChunkDisplay(
             }
 
         } else {
-            this.tdName?.remove()
-            this.tdDesc.forEach { it.remove() }
+            this.clearFocusDisplays()
         }
 
         return true
+    }
+
+    private fun clearFocusDisplays() {
+        this.tdName?.remove()
+        this.tdName = null
+        this.tdDesc.forEach { it.remove() }
+        this.tdDesc.clear()
     }
 
     fun wrapText(input: String, maxLineLength: Int): MutableList<String?> {

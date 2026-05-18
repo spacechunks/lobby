@@ -26,12 +26,7 @@ class ChunkSelectView(
     private var arrowUp: ItemDisplay? = null
 
     override fun render() {
-        this.spawnItemDisplay(
-            center.clone().add(0.0, 3.5, 0.0),
-            Vector3f(7f, 3.5f, 1f),
-            Textures.LOGO_WIDE,
-            false,
-        )
+        this.spawnHeaderLogo()
 
         this.spawnItemDisplay(
             center.clone().add(-3.5, 3.5, 0.0),
@@ -91,7 +86,7 @@ class ChunkSelectView(
     }
 
     override fun close() {
-        this.elements.forEach { it.remove() }
+        this.closeElements()
         this.grid.clearAll()
     }
 
@@ -208,5 +203,14 @@ class ChunkSelectView(
         }
 
         this.arrowDown?.teleport(loc)
+    }
+
+    private fun spawnHeaderLogo() {
+        this.spawnItemDisplay(
+            ChunkViewerLayout.logoLocation(this.center),
+            ChunkViewerLayout.LOGO_SCALE,
+            Textures.LOGO_WIDE,
+            false,
+        )
     }
 }

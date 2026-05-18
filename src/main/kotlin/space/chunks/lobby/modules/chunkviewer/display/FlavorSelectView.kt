@@ -63,12 +63,7 @@ class FlavorSelectView(
     }
 
     override fun render() {
-        this.spawnItemDisplay(
-            center.clone().add(-0.05, 3.8, 0.0),
-            Vector3f(7f, 3.5f, 1f),
-            Textures.LOGO_WIDE,
-            false
-        )
+        this.spawnHeaderLogo()
 
         this.spawnTextElement(
             this.textsContent.component("chunkviewer.flavor-select.title").font(Fonts.CHUNK_VIEWER),
@@ -123,7 +118,7 @@ class FlavorSelectView(
     }
 
     override fun close() {
-        this.elements.forEach { it.remove() }
+        this.closeElements()
     }
 
     override fun handleInput(player: Player, input: Input) {
@@ -257,5 +252,14 @@ class FlavorSelectView(
         }
 
         this.selectMarker?.teleport(loc)
+    }
+
+    private fun spawnHeaderLogo() {
+        this.spawnItemDisplay(
+            ChunkViewerLayout.logoLocation(this.center),
+            ChunkViewerLayout.LOGO_SCALE,
+            Textures.LOGO_WIDE,
+            false,
+        )
     }
 }
