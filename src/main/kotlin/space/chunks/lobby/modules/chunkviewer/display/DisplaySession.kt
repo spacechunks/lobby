@@ -37,7 +37,9 @@ class DisplaySession(
         player.addPotionEffect(PotionEffectType.DARKNESS.createEffect(40, Int.MAX_VALUE))
         this.player.teleport(this.location)
 
-        this.camera = this.location.world
+        // place player 1.5 blocks further away from the view, to make room
+        // for descriptions longer than 100 chars.
+        this.camera = this.location.clone().subtract(0.0, 0.0, 1.5).world
             .spawn(this.location, ArmorStand::class.java) {
                 it.setAI(false)
                 it.canPickupItems = false

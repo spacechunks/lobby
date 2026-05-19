@@ -34,9 +34,7 @@ class DisplaySessionService(
         this.slots.add(slot)
         this.slotsPerPlayer[player] = slot
 
-        // place player 1.5 blocks further away from the view, to make room
-        // for descriptions longer than 100 chars.
-        val loc = slot.toLocation(w).subtract(0.0, 0.0, 1.5)
+        val loc = slot.toLocation(w)
 
         val sess = DisplaySession(player, this.plugin, loc, this.chunks, this.texts)
         this.sessions[player] = sess
