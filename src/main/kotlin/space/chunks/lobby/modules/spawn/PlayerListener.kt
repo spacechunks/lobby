@@ -11,6 +11,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.event.entity.FoodLevelChangeEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
@@ -42,6 +43,9 @@ class PlayerListener(
         event.joinMessage(Component.empty())
 
         val player = event.player
+        
+        // disable appleskin mod showing stuff in the actionbar
+        player.saturation = 0f
 
         this.uiService.show(player)
         ActionBar.clear(player)
@@ -137,6 +141,11 @@ class PlayerListener(
 
     @EventHandler
     private fun onDropItem(event: PlayerDropItemEvent) {
+        event.isCancelled = true
+    }
+
+    @EventHandler
+    private fun onFoodLevelChangeEvent(event: FoodLevelChangeEvent) {
         event.isCancelled = true
     }
 

@@ -108,7 +108,6 @@ class Plugin : JavaPlugin(), Listener {
         }
     }
 
-
     override fun getDefaultWorldGenerator(worldName: String, id: String?): ChunkGenerator {
         return VoidWorldGenerator()
     }
