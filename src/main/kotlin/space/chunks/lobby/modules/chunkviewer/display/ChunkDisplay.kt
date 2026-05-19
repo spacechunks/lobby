@@ -3,7 +3,10 @@ package space.chunks.lobby.modules.chunkviewer.display
 import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
-import org.bukkit.*
+import org.bukkit.Color
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Display
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay
@@ -121,6 +124,7 @@ class ChunkDisplay(
             this.tdName!!.setTransformationMatrix(
                 Matrix4f().scale(1.5f).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
             )
+            this.tdName!!.brightness = Display.Brightness(15, 15)
 
             val lines = wrapText(this.chunk.description, 30)
 
@@ -135,6 +139,7 @@ class ChunkDisplay(
                 tdDesc.setTransformationMatrix(
                     Matrix4f().scale(1f).rotate(AxisAngle4f(Math.toRadians(-180.0).toFloat(), 0f, 1f, 0f))
                 )
+                tdDesc.brightness = Display.Brightness(15, 15)
                 this.tdDesc.add(tdDesc)
             }
 
