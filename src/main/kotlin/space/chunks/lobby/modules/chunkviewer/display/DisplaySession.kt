@@ -39,8 +39,8 @@ class DisplaySession(
 
         // place player 1.5 blocks further away from the view, to make room
         // for descriptions longer than 100 chars.
-        this.camera = this.location.clone().subtract(0.0, 0.0, 1.5).world
-            .spawn(this.location, ArmorStand::class.java) {
+        this.camera = this.location.world
+            .spawn(this.location.clone().subtract(0.0, 0.0, 1.0), ArmorStand::class.java) {
                 it.setAI(false)
                 it.canPickupItems = false
                 it.isInvisible = true
