@@ -1,7 +1,7 @@
 name: ${name}
 version: ${version}
 main: space.chunks.lobby.Plugin
-api-version: 1.21.11
+api-version: 26.1
 #load: STARTUP # needed, so it can make use of the world generator that we set in bukkit.yml
 commands:
   len: { }

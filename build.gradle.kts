@@ -13,22 +13,21 @@ buildscript {
     }
     configurations.all {
         resolutionStrategy {
-            force("org.jetbrains.kotlin:kotlin-stdlib:2.3.10")
+            force("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
             force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             force("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.10.2")
         }
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-stdlib:2.3.10")
         classpath("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         classpath("aws.sdk.kotlin:s3:1.6.26")
     }
 }
 
 plugins {
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.20"
     id("xyz.jpenilla.run-paper") version "2.3.1"
-    id("com.gradleup.shadow") version "9.0.0-beta4"
+    id("com.gradleup.shadow") version "9.4.1"
     id("com.google.protobuf") version "0.9.5"
 }
 
@@ -52,9 +51,10 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.5.0")
     implementation("io.grpc:grpc-protobuf:1.61.0")
     implementation("io.grpc:grpc-netty:1.61.0")
+//    implementation("io.grpc:grpc-netty-shaded:1.61.0")
     implementation("aws.sdk.kotlin:s3:1.6.26")
     api("com.google.protobuf:protobuf-kotlin:3.25.8")
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.noxcrew.interfaces:interfaces:2.1.0-SNAPSHOT")
 }
@@ -65,18 +65,19 @@ tasks.test {
 
 
 java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
 }
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 tasks.withType<KotlinCompile> {
-    compilerOptions.jvmTarget.set(JvmTarget.JVM_21)
+    compilerOptions.jvmTarget.set(JvmTarget.JVM_25)
 }
 
 tasks.named("shadowJar", ShadowJar::class) {
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
     // ai told me to do this, because of class loader problems with paper
     relocate(
@@ -125,7 +126,7 @@ tasks {
         downloadPlugins {
             modrinth("ViaVersion", "5.9.1")
         }
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.1.2")
     }
 }
 
