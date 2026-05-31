@@ -23,7 +23,7 @@ import space.chunks.lobby.pack.Fonts
 class ChunkDisplay(
     val title: Component,
     val chunk: Types.Chunk,
-    private val thumbnailKey: NamespacedKey,
+    val thumbnailKey: NamespacedKey,
 ) {
     var location: Location? = null
     var center: Location? = null
