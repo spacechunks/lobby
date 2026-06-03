@@ -31,6 +31,7 @@ class DisplaySession(
 
     private var activeView: View? = null
     private lateinit var background: TextDisplay
+    private lateinit var behind: TextDisplay
     private lateinit var camera: ArmorStand
 
     fun start() {
@@ -61,8 +62,14 @@ class DisplaySession(
         // TODO: fetch chunks
         this.background = spawnWall(
             this.location.clone().add(0.0, 0.0, 20.0).addRotation(180f,0f),
-            1f,
+            2f,
         )
+
+        this.behind = spawnWall(
+            this.location.clone().subtract(0.0, 0.0, 20.0),
+            2f,
+        )
+
         this.activeView = ChunkSelectView(this.plugin, this.center, this, this.grid, this.texts)
         this.activeView?.render()
     }
@@ -70,6 +77,7 @@ class DisplaySession(
     fun stop() {
         this.activeView?.close()
         this.background.remove()
+        this.behind.remove()
         this.camera.remove()
     }
 

@@ -106,8 +106,6 @@ class ChunkViewerModule(
             }
         }, 0, 20 * 5)
 
-        val spawn = Vector(0.0, 100.0, 0.0)
-
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(
             PlayerListener(
