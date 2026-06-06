@@ -5,6 +5,7 @@ import org.bukkit.Location
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
+import org.bukkit.scheduler.BukkitRunnable
 import org.joml.Vector3f
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.pack.Sounds
@@ -27,6 +28,7 @@ class ChunkSelectView(
 
     override fun render() {
         this.spawnHeaderLogo()
+        this.spawnControlsHelp()
 
         this.spawnItemDisplay(
             center.clone().add(-3.5, 3.5, 0.0),
@@ -95,8 +97,7 @@ class ChunkSelectView(
             this.grid.setInitialFocus()
         }
 
-        var hasNext = false
-
+        var hasNext: Boolean
         when (input) {
             Input.W -> {
                 hasNext = this.grid.moveFocusUp()
@@ -212,5 +213,72 @@ class ChunkSelectView(
             Textures.LOGO_WIDE,
             false,
         )
+    }
+
+    private fun spawnControlsHelp() {
+        val loc = this.center.clone().subtract(-12.8, 6.5, 0.0)
+
+        val iter = mapOf(
+            "<font:chunkexplorer:text>\uE300</font>" to "Up",
+            "<font:chunkexplorer:text>\uE301</font>" to "Left",
+            "<font:chunkexplorer:text>\uE302</font>" to "Down",
+            "<font:chunkexplorer:text>\uE303</font>" to "Right",
+        ).cyclicIterator()
+
+        val wasdKeys = this.spawnTextElement(this.mm.deserialize(""), loc, 1.0f)
+        val wasdTd = this.spawnTextElement(this.mm.deserialize(""), loc.clone().subtract(0.0, 0.2, 0.0), 0.7f)
+        val wasdTask = object : BukkitRunnable() {
+            override fun run() {
+                val i = iter.next()
+                wasdKeys.text(mm.deserialize(i.key))
+                wasdTd.text(mm.deserialize(i.value))
+            }
+        }
+
+        val spaceSymsIter = listOf(
+            "<font:chunkexplorer:text>\uE304</font>",
+            "<font:chunkexplorer:text>\uE305</font>"
+        ).cyclicIterator()
+        val spaceLoc = loc.clone().subtract(0.0, 0.7, 0.0)
+        val spaceSym = this.spawnTextElement(this.mm.deserialize(""), spaceLoc, 1.0f)
+        this.spawnTextElement(this.mm.deserialize("Select"), spaceLoc.clone().subtract(0.0, 0.2, 0.0), 0.7f)
+        val spaceTask = object : BukkitRunnable() {
+            override fun run() {
+                spaceSym.text(mm.deserialize(spaceSymsIter()))
+            }
+        }
+
+        val shiftSymsIter = listOf(
+            "<font:chunkexplorer:text>\uE306</font>",
+            "<font:chunkexplorer:text>\uE307</font>"
+        ).cyclicIterator()
+        val shiftLoc = spaceLoc.clone().subtract(0.0, 0.85, 0.0)
+        val shiftSym = this.spawnTextElement(this.mm.deserialize(""), shiftLoc, 1.0f)
+        this.spawnTextElement(this.mm.deserialize("Back"), shiftLoc.clone().subtract(0.0, 0.2, 0.0), 0.7f)
+        val shiftTask = object : BukkitRunnable() {
+            override fun run() {
+                shiftSym.text(mm.deserialize(shiftSymsIter()))
+            }
+        }
+
+        this.animationTasks.add(shiftTask)
+        this.animationTasks.add(spaceTask)
+        this.animationTasks.add(wasdTask)
+
+        shiftTask.runTaskTimer(this.plugin, 0L, 20L)
+        spaceTask.runTaskTimer(this.plugin, 0L, 20L)
+        wasdTask.runTaskTimer(this.plugin, 0L, 20L)
+    }
+
+    fun <K, V> Map<K, V>.cyclicIterator(): Iterator<Map.Entry<K, V>> {
+        val entries = this.entries.toList()
+        return iterator {
+            while (true) yieldAll(entries)
+        }
+    }
+
+    fun <T> List<T>.cyclicIterator(): () -> T {
+        var index = 0
+        return { this[index++ % size] }
     }
 }

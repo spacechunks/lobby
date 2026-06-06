@@ -1,6 +1,7 @@
 package space.chunks.lobby.modules.chunkviewer.display
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.Material
@@ -22,7 +23,8 @@ abstract class View(
     protected val session: DisplaySession
 ) {
     protected val elements = mutableListOf<Entity>()
-    private val animationTasks = mutableListOf<BukkitRunnable>()
+    protected val mm = MiniMessage.miniMessage()
+    protected val animationTasks = mutableListOf<BukkitRunnable>()
 
     abstract fun render()
     abstract fun close()

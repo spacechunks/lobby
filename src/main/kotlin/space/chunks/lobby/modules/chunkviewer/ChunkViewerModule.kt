@@ -80,6 +80,7 @@ class ChunkViewerModule(
         val instanceClient = InstanceServiceGrpcKt.InstanceServiceCoroutineStub(channel)
             .withCallCredentials(AuthCredentials(cfg.controlPlane.apiToken))
 
+        // TODO: implement pagination
         Bukkit.getScheduler().runTaskTimerAsynchronously(this.plugin, { _ ->
             runBlocking {
                 val resp = chunkClient.listChunks(listChunksRequest {})
@@ -104,8 +105,6 @@ class ChunkViewerModule(
                 chunks.addAll(d)
             }
         }, 0, 20 * 5)
-
-        val spawn = Vector(0.0, 100.0, 0.0)
 
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(

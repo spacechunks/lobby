@@ -101,7 +101,7 @@ class PlayerListener(
         this.playerTasks.remove(player.uniqueId)
     }
 
-    private fun instanceCreationCompleted(players: List<Player?>, instance: InstanceTypes.Instance) {
+    private fun instanceCreationCompleted(players: List<Player>, instance: InstanceTypes.Instance) {
         val state = instance.state
 
         if (state == InstanceTypes.InstanceState.CREATION_FAILED
@@ -109,19 +109,20 @@ class PlayerListener(
             || state == InstanceTypes.InstanceState.DELETED
         ) {
             players.forEach {
-                it?.sendMessage(this.texts.component("chunkviewer.instance.creation-failed", mapOf("state" to state)))
+                it.sendMessage(this.texts.component("chunkviewer.instance.creation-failed", mapOf("state" to state)))
             }
+            this.bossbars.clearLoadingBar(players)
             return
         }
 
         players.forEach {
             val data = "{\"id\":\"${instance.id}\",\"addr\":\"${instance.ip}:${instance.port}\"}".toByteArray()
-            it?.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
+            it.storeCookie(NamespacedKey.fromString("spacechunks:explorer/gateway/transfer")!!, data)
 
             // as usual, we have to wait before transferring the player to the
             // instance, otherwise the resource pack won't unload
             Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
-                it?.transfer(this.config.gatewayHost, this.config.gatewayPort)
+                it.transfer(this.config.gatewayHost, this.config.gatewayPort)
             }, 10L)
         }
     }

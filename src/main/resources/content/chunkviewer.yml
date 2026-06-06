@@ -7,4 +7,4 @@ chunkviewer:
   instance:
     owner-required: '<party-prefix> <error>You have to be the party owner to start a game.'
     starting: '<prefix> <body>Starting instance for Chunk <white><chunk_name>'
-    creation-failed: '<prefix> <error>Instance failed to be created. Reason: <highlight><state>'
+    creation-failed: '<prefix> <error>Instance failed to be created. Reason: <header><state>'
