@@ -1,0 +1,11 @@
+name: ${name}
+version: ${version}
+main: space.chunks.lobby.Plugin
+api-version: 1.21.11
+
+dependencies:
+  server:
+    WorldService:
+      load: BEFORE
+      required: true
+      join-classpath: true

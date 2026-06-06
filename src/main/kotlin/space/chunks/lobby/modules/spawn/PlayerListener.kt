@@ -24,6 +24,7 @@ import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
+import space.chunks.worldservice.atlas.Atlas
 import space.chunks.visual.ui.UiService
 import java.time.Duration
 
@@ -37,6 +38,11 @@ class PlayerListener(
 
     private val transition = ScreenTransition(this.plugin, this.texts)
     private val hotbar = Hotbar(this.sessionService, this.texts, this.uiService, this.transition)
+    private val spawnLocation by Atlas.api.requiredLocation(
+        world = { Bukkit.getWorld(this.config.world) },
+        key = "spawn",
+        fallback = { this.configuredSpawnLocation() },
+    )
 
     @EventHandler
     private fun onPlayerJoin(event: PlayerJoinEvent) {
@@ -52,14 +58,7 @@ class PlayerListener(
         player.inventory.clear()
         player.gameMode = GameMode.ADVENTURE
 
-        player.teleport(
-            Location(
-                Bukkit.getWorld(this.config.world),
-                this.config.spawnLocation.x,
-                this.config.spawnLocation.y,
-                this.config.spawnLocation.z
-            )
-        )
+        player.teleport(this.spawnLocation)
 
         player.sendPlayerListHeaderAndFooter(
             this.texts.component("spawn.tablist.header"),
@@ -172,14 +171,7 @@ class PlayerListener(
         )
         player.spectatorTarget = null
         player.gameMode = GameMode.ADVENTURE
-        player.teleport(
-            Location(
-                Bukkit.getWorld(this.config.world),
-                this.config.spawnLocation.x,
-                this.config.spawnLocation.y,
-                this.config.spawnLocation.z
-            )
-        )
+        player.teleport(this.spawnLocation)
 
         this.sessionService.closeSession(player)
         this.uiService.show(player)
@@ -192,6 +184,18 @@ class PlayerListener(
             "${this.playerTextPath(player)}.player-name",
             mapOf("name" to player.name)
         )
+
+    private fun configuredSpawnLocation(): Location {
+        val world = Bukkit.getWorld(this.config.world)
+            ?: throw IllegalStateException("spawn world is not loaded: ${this.config.world}")
+
+        return Location(
+            world,
+            this.config.spawnLocation.x,
+            this.config.spawnLocation.y,
+            this.config.spawnLocation.z,
+        )
+    }
 
     private fun playerTextPath(player: Player): String {
         val sections = this.texts.sectionKeys("spawn.player")

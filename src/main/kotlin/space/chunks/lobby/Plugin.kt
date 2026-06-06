@@ -47,7 +47,7 @@ class Plugin : JavaPlugin(), Listener {
             partyMod,
         )
 
-        InterfacesListeners.install(this)
+        installInterfaces()
         Bukkit.getPluginManager().registerEvents(this.uiService, this)
         this.uiService.start(this)
         this.packService.startPeriodicPull()
@@ -55,6 +55,17 @@ class Plugin : JavaPlugin(), Listener {
 
         modules.forEach {
             it.onEnable()
+        }
+    }
+
+    private fun installInterfaces() {
+        runCatching {
+            InterfacesListeners.install(this)
+        }.onFailure { ex ->
+            if (ex !is IllegalArgumentException) {
+                throw ex
+            }
+            logger.info("Noxcrew interfaces are already installed; reusing the existing listener.")
         }
     }
 

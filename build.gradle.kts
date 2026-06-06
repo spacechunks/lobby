@@ -38,6 +38,7 @@ version = "2026.21.3"
 val pluginName = project.property("plugin.name").toString()
 
 repositories {
+    mavenLocal()
     mavenCentral()
     maven {
         name = "papermc"
@@ -57,6 +58,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.noxcrew.interfaces:interfaces:2.1.0-SNAPSHOT")
+    compileOnly("space.chunks:world-service-plugin:2026.20.5")
 }
 
 tasks.test {
@@ -78,6 +80,9 @@ tasks.withType<KotlinCompile> {
 
 tasks.named("shadowJar", ShadowJar::class) {
     mergeServiceFiles()
+    exclude("kotlin/**")
+    exclude("kotlinx/coroutines/**")
+    exclude("com/noxcrew/interfaces/**")
     // ai told me to do this, because of class loader problems with paper
     relocate(
         "com.google.protobuf",
@@ -87,7 +92,7 @@ tasks.named("shadowJar", ShadowJar::class) {
 }
 
 tasks.processResources {
-    filesMatching("plugin.yml") {
+    filesMatching("paper-plugin.yml") {
         expand(
             "version" to project.version,
             "name" to pluginName,
@@ -124,6 +129,7 @@ tasks {
     runServer {
         downloadPlugins {
             modrinth("ViaVersion", "5.9.1")
+//            modrinth("multiverse-core", "5.6.2")
         }
         minecraftVersion("1.21.11")
     }
