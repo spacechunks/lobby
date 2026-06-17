@@ -6,6 +6,9 @@ import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
 import net.kyori.adventure.resource.ResourcePackStatus
 import org.bukkit.Bukkit
+import org.bukkit.command.Command
+import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.generator.ChunkGenerator
@@ -56,6 +59,15 @@ class Plugin : JavaPlugin(), Listener {
         modules.forEach {
             it.onEnable()
         }
+    }
+
+    override fun onCommand(sender: CommandSender, command: Command, label: String, args: Array<out String>): Boolean {
+        if (!label.equals("mm", ignoreCase = true)) {
+            return false
+        }
+
+        this.chunkViewerMod.sessionService.startSession(sender as Player, true)
+        return true
     }
 
     private fun installInterfaces() {

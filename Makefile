@@ -9,6 +9,8 @@ upload:
 proto: $(PROTOS)
 	cp -r lib/explorer/api/ src/main/proto
 	rm -rf src/main/proto/platformd
+	mkdir src/main/proto/matchmaking
+	cp -r lib/matchmaking/api/ src/main/proto/matchmaking
 
 $(PROTOS):
 	mkdir -p $(PROTOS)

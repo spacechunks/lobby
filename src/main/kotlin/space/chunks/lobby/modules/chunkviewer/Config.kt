@@ -23,11 +23,33 @@ data class ControlPlaneConfig(
     }
 }
 
+data class MatchmakingConfig(
+    val addr: String,
+    val port: Int,
+//    val apiToken: String,
+) {
+    companion object {
+        fun parse(config: FileConfiguration): MatchmakingConfig {
+            val mmEndpoint =
+                config.getString("chunkViewer.matchmaking.endpoint")
+                    ?: throw RuntimeException("chunkViewer.matchmaking.endpoint is missing")
+
+            val parts = parseAddress(mmEndpoint)
+
+//            val controlPlaneAPIToken = config.getString("chunkViewer.mm.apiToken")
+//                ?: throw RuntimeException("chunkViewer.controlPlane.apiToken is missing")
+
+            return MatchmakingConfig(parts.first, parts.second)
+        }
+    }
+}
+
 data class Config(
     val instancePollIntervalSeconds: Int,
     val gatewayHost: String,
     val gatewayPort: Int,
     val controlPlane: ControlPlaneConfig,
+    val mm: MatchmakingConfig,
 )
 
 fun parseConfig(config: FileConfiguration): Config {
@@ -40,7 +62,8 @@ fun parseConfig(config: FileConfiguration): Config {
         config.getInt("chunkViewer.instancePollIntervalSeconds", 1),
         parts.first,
         parts.second,
-        ControlPlaneConfig.parse(config)
+        ControlPlaneConfig.parse(config),
+        MatchmakingConfig.parse(config)
     )
 }
 

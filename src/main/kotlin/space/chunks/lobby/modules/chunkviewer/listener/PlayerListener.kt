@@ -1,13 +1,15 @@
 package space.chunks.lobby.modules.chunkviewer.listener
 
-import chunks.space.api.explorer.instance.v1alpha1.Api
 import chunks.space.api.explorer.instance.v1alpha1.InstanceServiceGrpcKt
+import chunks.space.api.matchmaking.v1alpha1.MatchmakingServiceGrpcKt
+import chunks.space.api.matchmaking.v1alpha1.removeTicketRequest
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import io.grpc.StatusException
-import kotlinx.coroutines.runBlocking
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -15,7 +17,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
-import org.bukkit.scheduler.BukkitTask
 import space.chunks.lobby.modules.chunkviewer.Config
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
@@ -23,21 +24,26 @@ import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.ui.Texts
 import space.chunks.lobby.ui.bossbar.BossBars
 import java.util.*
-import java.util.concurrent.CompletableFuture
+import java.util.logging.Level
 import java.util.logging.Logger
+import kotlin.time.Duration.Companion.milliseconds
+import chunks.space.api.explorer.instance.v1alpha1.Api as instancev1alpha1Api
 import chunks.space.api.explorer.instance.v1alpha1.Types as InstanceTypes
+import chunks.space.api.matchmaking.v1alpha1.Api as mmv1alphaApi
 
 class PlayerListener(
     private val logger: Logger,
     private val plugin: Plugin,
     private val sessionService: DisplaySessionService,
     private val instanceClient: InstanceServiceGrpcKt.InstanceServiceCoroutineStub,
+    private val mmClient: MatchmakingServiceGrpcKt.MatchmakingServiceCoroutineStub,
     private val config: Config,
     private val partyService: PartyService,
     private val texts: Texts,
     private val bossbars: BossBars,
+    private val scope: CoroutineScope,
 ) : Listener {
-    private val playerTasks = mutableMapOf<UUID, BukkitTask>()
+    private val playerJobs = mutableMapOf<UUID, Job>()
 
     @EventHandler
     private fun onPlayerFlavorSelect(event: PlayerSelectFlavorEvent) {
@@ -75,21 +81,30 @@ class PlayerListener(
 
         this.logger.info("flavor selected. playerId=${player.uniqueId} flavorId=${flavor.id} flavorVersionId=${ver.id}")
 
-        this.runFlavorVersion(player.uniqueId.toString(), chunk.id, ver.id)
-            .exceptionally { e ->
-                players.forEach { player ->
-                    player.sendMessage(
-                        Component.text("Failed to run instance: ${e.message}").color(NamedTextColor.RED)
-                    )
-                    this.bossbars.clearLoadingBar(players)
+        val job = this.scope.launch {
+            if (event.mmMode) {
+                var ticket: mmv1alphaApi.Ticket? = null
+                try {
+                    ticket = createTicket(players, flavor.id)
+                    val instanceId = pollTicket(ticket.id)
+                    val ins = waitForInstance(player.uniqueId, instanceId)
+                    instanceCreationCompleted(players, ins)
+                } catch (e: Exception) {
+                    logger.log(Level.WARNING, "error while creating and waiting for ticket", e)
+                    if (ticket != null) {
+                        mmClient.removeTicket(removeTicketRequest { ticketId = ticket.id })
+                    }
                 }
-                return@exceptionally null
+                return@launch
             }
-            .thenCompose {
-                return@thenCompose this.waitForInstance(player.uniqueId, it.id)
-            }.thenAccept {
-                this.instanceCreationCompleted(players, it)
-            }
+
+            var ins = runFlavorVersion(player.uniqueId.toString(), ver.id)
+            ins = waitForInstance(player.uniqueId, ins.id)
+
+            instanceCreationCompleted(players, ins)
+        }
+
+        this.playerJobs[player.uniqueId] = job
     }
 
     @EventHandler
@@ -97,8 +112,8 @@ class PlayerListener(
         val player = event.player
         this.sessionService.closeSession(player)
 
-        this.playerTasks[player.uniqueId]?.cancel()
-        this.playerTasks.remove(player.uniqueId)
+        this.playerJobs[player.uniqueId]?.cancel()
+        this.playerJobs.remove(player.uniqueId)
     }
 
     private fun instanceCreationCompleted(players: List<Player>, instance: InstanceTypes.Instance) {
@@ -127,79 +142,73 @@ class PlayerListener(
         }
     }
 
-    private fun runFlavorVersion(
-        orderedBy: String,
-        chunkId: String,
-        versionId: String
-    ): CompletableFuture<InstanceTypes.Instance> {
-        val f = CompletableFuture<InstanceTypes.Instance>()
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
-            runBlocking {
-                var resp: Api.RunFlavorVersionResponse?
-
-                try {
-                    val req = Api.RunFlavorVersionRequest
-                        .newBuilder()
-                        .setFlavorVersionId(versionId)
-                        .setChunkId(chunkId)
-                        .setOrderedBy(orderedBy)
-                        .build()
-                    resp = instanceClient.runFlavorVersion(req)
-                } catch (e: StatusException) {
-                    f.completeExceptionally(e)
-                    return@runBlocking
-                }
-
-                f.complete(resp.instance)
-            }
-        })
-        return f
-    }
-
-    private fun waitForInstance(playerId: UUID, instanceId: String): CompletableFuture<InstanceTypes.Instance> {
-        val f = CompletableFuture<InstanceTypes.Instance>()
+    private suspend fun waitForInstance(playerId: UUID, instanceId: String): InstanceTypes.Instance {
         this.logger.info("waiting for instance to be ready. playerId=${playerId} instanceId=$instanceId")
+        while (true) {
+            try {
 
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, { t ->
-            this.playerTasks[playerId] = t
-            runBlocking {
-                val req = Api.GetInstanceRequest
-                    .newBuilder()
-                    .setId(instanceId)
-                    .build()
-
+                val req = instancev1alpha1Api.GetInstanceRequest.newBuilder().setId(instanceId).build()
                 val resp = instanceClient.getInstance(req)
-
                 when (val state = resp.instance.state) {
+                    InstanceTypes.InstanceState.RUNNING,
                     InstanceTypes.InstanceState.CREATION_FAILED,
                     InstanceTypes.InstanceState.DELETING,
-                    InstanceTypes.InstanceState.DELETED -> {
-                        logger.info("instance creation failed. playerId=${playerId} instanceId=$instanceId instanceState=${state}")
-                        t.cancel()
-                        playerTasks.remove(playerId)
-                        f.complete(resp.instance)
-                    }
+                    InstanceTypes.InstanceState.DELETED -> return resp.instance
 
-                    InstanceTypes.InstanceState.PENDING, InstanceTypes.InstanceState.CREATING -> {
-                        return@runBlocking
+                    else -> {
+                        logger.info("instance not ready yet, state=$state")
+                        delay((config.instancePollIntervalSeconds * 1000L).milliseconds)
                     }
+                }
+            } catch (e: Exception) {
+                logger.log(Level.WARNING, "error polling instance", e)
+            }
+        }
+    }
 
-                    InstanceTypes.InstanceState.RUNNING -> {
-                        logger.info("instance running. playerId=${playerId} instanceId=$instanceId instanceState=${state} instancePort=${resp.instance.port} instanceIp=${resp.instance.ip}")
-                        t.cancel()
-                        playerTasks.remove(playerId)
-                        f.complete(resp.instance)
+    private suspend fun pollTicket(ticketId: String): String {
+        while (true) {
+            val req = mmv1alphaApi.GetTicketRequest.newBuilder().setTicketId(ticketId).build()
+
+            try {
+                val resp = mmClient.getTicket(req)
+                when (resp.ticket.status) {
+                    mmv1alphaApi.TicketStatus.NO_PLAYABLE_FLAVOR_VERSION -> {
+                        throw RuntimeException("NO_PLAYABLE_FLAVOR_VERSION")
                     }
 
                     else -> {
-                        // we continue just in case the system heals at some point.
-                        // if the player disconnects, we stop the task anyway.
-                        logger.warning("instance in unknown state. playerId=${playerId} instanceId=$instanceId instanceState=${state}")
-                        return@runBlocking
+                        if (resp.ticket.hasAssignment()) {
+                            return resp.ticket.assignment.instanceId
+                        }
+                        delay((config.instancePollIntervalSeconds * 1000L).milliseconds)
                     }
                 }
+            } catch (e: StatusException) {
+                logger.log(Level.WARNING, "error polling ticket", e)
             }
-        }, 0L, 20 * this.config.instancePollIntervalSeconds.toLong())
-        return f
+        }
+    }
+
+    private suspend fun runFlavorVersion(orderedBy: String, versionId: String): InstanceTypes.Instance {
+        val req = instancev1alpha1Api.RunFlavorVersionRequest.newBuilder()
+            .setFlavorVersionId(versionId)
+            .setOrderedBy(orderedBy)
+            .build()
+        return instanceClient.runFlavorVersion(req).instance
+    }
+
+    private suspend fun createTicket(players: List<Player>, flavorId: String): mmv1alphaApi.Ticket {
+        logger.info("creating ticket. flavorId=$flavorId players=${players.joinToString(",") { it.name }}")
+        val createReq = mmv1alphaApi.CreateTicketRequest.newBuilder()
+            .setFlavorId(flavorId)
+            .setPlayerCount(players.size)
+            .build()
+        val resp = mmClient.createTicket(createReq)
+        val activateReq = mmv1alphaApi.ActivateTicketRequest.newBuilder()
+            .setTicketId(resp.ticket.id)
+            .build()
+        mmClient.activateTicket(activateReq)
+        return resp.ticket
     }
 }

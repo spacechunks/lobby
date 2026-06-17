@@ -129,7 +129,9 @@ class FlavorSelectView(
             Input.D -> this.currPage++
             Input.SPACE -> {
                 val selected = this.flavors.getPage(this.currPage)[this.currIdx]
-                Bukkit.getPluginManager().callEvent(PlayerSelectFlavorEvent(this.chunk, selected, player))
+                Bukkit.getPluginManager().callEvent(
+                    PlayerSelectFlavorEvent(this.chunk, selected, this.session.mmMode, player)
+                )
             }
             Input.SNEAK -> {
                 player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)

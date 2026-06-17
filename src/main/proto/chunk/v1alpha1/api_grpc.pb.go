@@ -46,6 +46,7 @@ const (
 	ChunkService_UploadThumbnail_FullMethodName               = "/chunk.v1alpha1.ChunkService/UploadThumbnail"
 	ChunkService_DeleteFlavor_FullMethodName                  = "/chunk.v1alpha1.ChunkService/DeleteFlavor"
 	ChunkService_DeleteChunk_FullMethodName                   = "/chunk.v1alpha1.ChunkService/DeleteChunk"
+	ChunkService_GetFlavor_FullMethodName                     = "/chunk.v1alpha1.ChunkService/GetFlavor"
 )
 
 // ChunkServiceClient is the client API for ChunkService service.
@@ -61,8 +62,13 @@ type ChunkServiceClient interface {
 	//
 	// Defined error codes:
 	// - INVALID_ARGUMENT:
-	//   - name is invalid
+	//   - name is invalid. names cannot start or end with a
+	//     space, underscore or slash. they cannot contain linux
+	//     path operators (.. or ../ or /).
 	//   - too many tags have been provided
+	//   - tag is invalid. "tags can only contain lower-case ascii letters,
+	//     numbers and dashes. dashes cannot be at the start or beginning of
+	//     the tag.
 	//   - name exceeds the maximum amount of allowed chars
 	//   - description exceeds the maximum amount of allowed chars.
 	CreateChunk(ctx context.Context, in *CreateChunkRequest, opts ...grpc.CallOption) (*CreateChunkResponse, error)
@@ -85,8 +91,13 @@ type ChunkServiceClient interface {
 	//
 	// - INVALID_ARGUMENT:
 	//   - chunk id is invalid
-	//   - name is invalid
+	//   - name is invalid. names cannot start or end with a space,
+	//     underscore or slash. they cannot contain linux path
+	//     operators (.. or ../ or /).
 	//   - too many tags have been provided
+	//   - tag is invalid. "tags can only contain lower-case ascii letters,
+	//     numbers and dashes. dashes cannot be at the start or beginning of
+	//     the tag.
 	//   - name exceeds the maximum amount of allowed chars
 	//   - description exceeds the maximum amount of allowed chars.
 	UpdateChunk(ctx context.Context, in *UpdateChunkRequest, opts ...grpc.CallOption) (*UpdateChunkResponse, error)
@@ -102,7 +113,9 @@ type ChunkServiceClient interface {
 	//
 	// - INVALID_ARGUMENT:
 	//   - the provided chunk id is invalid
-	//   - the provided flavor name is invalid
+	//   - the provided flavor name is invalid. names cannot start or end
+	//     with a space, underscore or slash. they cannot contain linux path
+	//     operators (.. or ../ or /).
 	CreateFlavor(ctx context.Context, in *CreateFlavorRequest, opts ...grpc.CallOption) (*CreateFlavorResponse, error)
 	// CreateFlavorVersion creates a new flavor version for a
 	// given flavor by determining the added, changed and removed
@@ -117,6 +130,10 @@ type ChunkServiceClient interface {
 	// - ALREADY_EXISTS:
 	//   - the flavor version about to be created is already present
 	//   - a version with the exact same set of files already exists
+	//
+	// - INVALID_ARGUMENT:
+	//   - the version is invalid. versions cannot start or end with a space,
+	//     underscore or slash. they cannot contain linux path operators (.. or ../ or /)
 	//
 	// - FAILED_PRECONDITION:
 	//   - the provided version hash does not match with the provided file hashes
@@ -183,6 +200,12 @@ type ChunkServiceClient interface {
 	// - INVALID_ARGUMENT:
 	//   - chunk id is invalid
 	DeleteChunk(ctx context.Context, in *DeleteChunkRequest, opts ...grpc.CallOption) (*DeleteChunkResponse, error)
+	// GetFlavor returns the flavor specified by the provided id. Note that the file hashes of flavor
+	// versions are not being populated as of now.
+	// Defined error codes:
+	// - NOT_FOUND:
+	//   - the targeted flavor does not exist
+	GetFlavor(ctx context.Context, in *GetFlavorRequest, opts ...grpc.CallOption) (*GetFlavorResponse, error)
 }
 
 type chunkServiceClient struct {
@@ -313,6 +336,16 @@ func (c *chunkServiceClient) DeleteChunk(ctx context.Context, in *DeleteChunkReq
 	return out, nil
 }
 
+func (c *chunkServiceClient) GetFlavor(ctx context.Context, in *GetFlavorRequest, opts ...grpc.CallOption) (*GetFlavorResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetFlavorResponse)
+	err := c.cc.Invoke(ctx, ChunkService_GetFlavor_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChunkServiceServer is the server API for ChunkService service.
 // All implementations must embed UnimplementedChunkServiceServer
 // for forward compatibility.
@@ -326,8 +359,13 @@ type ChunkServiceServer interface {
 	//
 	// Defined error codes:
 	// - INVALID_ARGUMENT:
-	//   - name is invalid
+	//   - name is invalid. names cannot start or end with a
+	//     space, underscore or slash. they cannot contain linux
+	//     path operators (.. or ../ or /).
 	//   - too many tags have been provided
+	//   - tag is invalid. "tags can only contain lower-case ascii letters,
+	//     numbers and dashes. dashes cannot be at the start or beginning of
+	//     the tag.
 	//   - name exceeds the maximum amount of allowed chars
 	//   - description exceeds the maximum amount of allowed chars.
 	CreateChunk(context.Context, *CreateChunkRequest) (*CreateChunkResponse, error)
@@ -350,8 +388,13 @@ type ChunkServiceServer interface {
 	//
 	// - INVALID_ARGUMENT:
 	//   - chunk id is invalid
-	//   - name is invalid
+	//   - name is invalid. names cannot start or end with a space,
+	//     underscore or slash. they cannot contain linux path
+	//     operators (.. or ../ or /).
 	//   - too many tags have been provided
+	//   - tag is invalid. "tags can only contain lower-case ascii letters,
+	//     numbers and dashes. dashes cannot be at the start or beginning of
+	//     the tag.
 	//   - name exceeds the maximum amount of allowed chars
 	//   - description exceeds the maximum amount of allowed chars.
 	UpdateChunk(context.Context, *UpdateChunkRequest) (*UpdateChunkResponse, error)
@@ -367,7 +410,9 @@ type ChunkServiceServer interface {
 	//
 	// - INVALID_ARGUMENT:
 	//   - the provided chunk id is invalid
-	//   - the provided flavor name is invalid
+	//   - the provided flavor name is invalid. names cannot start or end
+	//     with a space, underscore or slash. they cannot contain linux path
+	//     operators (.. or ../ or /).
 	CreateFlavor(context.Context, *CreateFlavorRequest) (*CreateFlavorResponse, error)
 	// CreateFlavorVersion creates a new flavor version for a
 	// given flavor by determining the added, changed and removed
@@ -382,6 +427,10 @@ type ChunkServiceServer interface {
 	// - ALREADY_EXISTS:
 	//   - the flavor version about to be created is already present
 	//   - a version with the exact same set of files already exists
+	//
+	// - INVALID_ARGUMENT:
+	//   - the version is invalid. versions cannot start or end with a space,
+	//     underscore or slash. they cannot contain linux path operators (.. or ../ or /)
 	//
 	// - FAILED_PRECONDITION:
 	//   - the provided version hash does not match with the provided file hashes
@@ -448,6 +497,12 @@ type ChunkServiceServer interface {
 	// - INVALID_ARGUMENT:
 	//   - chunk id is invalid
 	DeleteChunk(context.Context, *DeleteChunkRequest) (*DeleteChunkResponse, error)
+	// GetFlavor returns the flavor specified by the provided id. Note that the file hashes of flavor
+	// versions are not being populated as of now.
+	// Defined error codes:
+	// - NOT_FOUND:
+	//   - the targeted flavor does not exist
+	GetFlavor(context.Context, *GetFlavorRequest) (*GetFlavorResponse, error)
 	mustEmbedUnimplementedChunkServiceServer()
 }
 
@@ -493,6 +548,9 @@ func (UnimplementedChunkServiceServer) DeleteFlavor(context.Context, *DeleteFlav
 }
 func (UnimplementedChunkServiceServer) DeleteChunk(context.Context, *DeleteChunkRequest) (*DeleteChunkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteChunk not implemented")
+}
+func (UnimplementedChunkServiceServer) GetFlavor(context.Context, *GetFlavorRequest) (*GetFlavorResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetFlavor not implemented")
 }
 func (UnimplementedChunkServiceServer) mustEmbedUnimplementedChunkServiceServer() {}
 func (UnimplementedChunkServiceServer) testEmbeddedByValue()                      {}
@@ -731,6 +789,24 @@ func _ChunkService_DeleteChunk_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ChunkService_GetFlavor_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetFlavorRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChunkServiceServer).GetFlavor(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChunkService_GetFlavor_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChunkServiceServer).GetFlavor(ctx, req.(*GetFlavorRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChunkService_ServiceDesc is the grpc.ServiceDesc for ChunkService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -785,6 +861,10 @@ var ChunkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteChunk",
 			Handler:    _ChunkService_DeleteChunk_Handler,
+		},
+		{
+			MethodName: "GetFlavor",
+			Handler:    _ChunkService_GetFlavor_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

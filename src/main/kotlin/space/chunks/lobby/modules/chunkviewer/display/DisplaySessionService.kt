@@ -22,7 +22,7 @@ class DisplaySessionService(
     /**
      * starts the display session for a player with a 10-tick delay.
      */
-    fun startSession(player: Player) {
+    fun startSession(player: Player, mmMode: Boolean = false) {
         this.lock.lock()
         try {
             // TODO: check if the player has the latest pack installed, if not -> re-send
@@ -49,7 +49,7 @@ class DisplaySessionService(
                 clones.add(ChunkDisplay(it.title, it.chunk, it.thumbnailKey))
             }
 
-            val sess = DisplaySession(player, this.plugin, loc.clone(), clones, this.texts)
+            val sess = DisplaySession(player, this.plugin, loc.clone(), clones, mmMode, this.texts)
             this.sessions[player] = sess
 
             loc.chunk.load()

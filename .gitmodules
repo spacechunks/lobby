@@ -1,3 +1,6 @@
 [submodule "lib/explorer"]
 	path = lib/explorer
 	url = git@github.com:spacechunks/explorer.git
+[submodule "lib/matchmaking"]
+	path = lib/matchmaking
+	url = git@github.com:spacechunks/matchmaking.git
