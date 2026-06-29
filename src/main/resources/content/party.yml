@@ -56,6 +56,9 @@ party:
     declined-target:
       - ' '
       - '<party-prefix> <header>Your party invitation was <error>declined <header>by <member><header>.'
+    party-join-ticket-removal-failed:
+      - ' '
+      - '<party-prefix> <error><invitee> could not join the party as removing their matchmaking ticket failed.'
   list:
     header:
       - ' '
