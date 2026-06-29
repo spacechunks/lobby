@@ -33,7 +33,7 @@ object LoadingBossBar {
             component(
                 chunk = chunk,
                 flavor = flavor,
-                queueState = LoadingState.WAITING_FOR_PLAYERS,
+                queueState = loadingState,
                 players = players,
                 maxPlayers = maxPlayers,
                 loadingFrame = LoadingFrames.frameIndex(
@@ -88,7 +88,7 @@ object LoadingBossBar {
 
     enum class LoadingState(val string: String) {
         WAITING_FOR_PLAYERS("Waiting for players"),
-        COUNTDONW("in 10s"),
+        MATCH_FOUND("Match found, starting shortly..."),
         STARTING("Starting"),
     }
 }

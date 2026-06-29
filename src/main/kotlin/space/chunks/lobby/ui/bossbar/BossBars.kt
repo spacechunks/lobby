@@ -37,15 +37,22 @@ class BossBars(private val uiService: UiService) {
         this.uiService.clear(players, loadingSlot)
     }
 
-    fun sendLoadingBar(players: List<Player>, chunk: String, flavor: String, maxPlayers: Int) {
+    fun sendLoadingBar(
+        players: List<Player>,
+        playerCount: Int,
+        loadingState: LoadingBossBar.LoadingState,
+        chunk: String,
+        flavor: String,
+        maxPlayers: Int
+    ) {
         uiService.set(
             players,
             loadingSlot,
             LoadingBossBar.create(
                 chunk,
                 flavor,
-                LoadingBossBar.LoadingState.STARTING,
-                players.count(),
+                loadingState,
+                playerCount,
                 maxPlayers
             ),
         )
