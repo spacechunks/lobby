@@ -7,10 +7,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.plugin.Plugin
 import space.chunks.lobby.modules.LobbyModule
-import space.chunks.lobby.modules.party.event.PartyDisbandEvent
-import space.chunks.lobby.modules.party.event.PartyInviteEvent
-import space.chunks.lobby.modules.party.event.PartyInviteStatus
-import space.chunks.lobby.modules.party.event.PartyPlayerKickedEvent
+import space.chunks.lobby.modules.party.event.*
 import space.chunks.lobby.ui.Texts
 import space.chunks.lobby.ui.bossbar.BossBars
 
@@ -46,7 +43,7 @@ class PartyModule(
     }
 
     @EventHandler
-    private fun onPartyUpdate(event: PartyPlayerKickedEvent) {
+    private fun onPartyPlayerKicked(event: PartyPlayerKickedEvent) {
         event.player.asPlayer()?.let {
             bossBars.clearPartyBar(it)
         }
@@ -65,6 +62,23 @@ class PartyModule(
                     "party.invite.accepted-broadcast",
                     mapOf("member" to this.texts.player(invitee.name))
                 )
+
+                val event = PartyPlayerJoinEvent(party, invitee)
+                Bukkit.getPluginManager().callEvent(event)
+
+                if (event.isCancelled) {
+                    this.logger.info("party player join event cancelled, removing player from party. partyId=${party.id} playerName=${invitee.name} playerId=${invitee.id}")
+                    this.partyService.removePlayerSilent(party.id, invitee.id)
+                    inviter.asPlayer()?.let { player ->
+                        this.texts.send(
+                            player,
+                            "party.invite.party-join-ticket-removal-failed",
+                            mapOf("invitee" to invitee.name)
+                        )
+                    }
+                    return
+                }
+
                 this.bossBars.sendPartyBar(party.onlinePlayers(), party)
             }
 
