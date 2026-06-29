@@ -62,7 +62,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.noxcrew.interfaces:interfaces:2.1.0-SNAPSHOT")
-    compileOnly("space.chunks:world-service-plugin:2026.20.5")
+//    compileOnly("space.chunks:world-service-plugin:2026.20.5")
 }
 
 tasks.test {

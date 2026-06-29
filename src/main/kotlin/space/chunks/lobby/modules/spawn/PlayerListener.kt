@@ -24,7 +24,6 @@ import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
-import space.chunks.worldservice.atlas.Atlas
 import space.chunks.visual.ui.UiService
 import java.time.Duration
 
@@ -35,14 +34,15 @@ class PlayerListener(
     private val texts: Texts,
     private val uiService: UiService,
 ) : Listener {
-
     private val transition = ScreenTransition(this.plugin, this.texts)
     private val hotbar = Hotbar(this.sessionService, this.texts, this.uiService, this.transition)
-    private val spawnLocation by Atlas.api.requiredLocation(
-        world = { Bukkit.getWorld(this.config.world) },
-        key = "spawn",
-        fallback = { this.configuredSpawnLocation() },
-    )
+    private val spawnLocation = this.configuredSpawnLocation()
+
+//    by Atlas.api.requiredLocation(
+//        world = { Bukkit.getWorld(this.config.world) },
+//        key = "spawn",
+//        fallback = { this.configuredSpawnLocation() },
+//    )
 
     @EventHandler
     private fun onPlayerJoin(event: PlayerJoinEvent) {
