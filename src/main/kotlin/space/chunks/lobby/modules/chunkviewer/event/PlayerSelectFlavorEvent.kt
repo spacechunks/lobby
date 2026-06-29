@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerEvent
 class PlayerSelectFlavorEvent(
     val chunk: Types.Chunk,
     val flavor: Types.Flavor,
+    val mmMode: Boolean,
     player: Player,
 ) : PlayerEvent(player) {
     override fun getHandlers(): HandlerList = HANDLERS

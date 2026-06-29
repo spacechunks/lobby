@@ -8,6 +8,7 @@ sources:
   - content/chunkviewer.yml
   - content/party.yml
   - content/spawn.yml
+  - content/matchmaking.yml
 
 # ==========================================
 # MiniMessage tags

@@ -2,9 +2,7 @@ package space.chunks.lobby.modules.chunkviewer
 
 import chunks.space.api.explorer.chunk.v1alpha1.ChunkServiceGrpcKt
 import chunks.space.api.explorer.chunk.v1alpha1.listChunksRequest
-import chunks.space.api.explorer.instance.v1alpha1.InstanceServiceGrpcKt
-import io.grpc.ManagedChannelBuilder
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.GameRules
@@ -16,24 +14,20 @@ import org.bukkit.util.Vector
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.chunkviewer.display.ChunkDisplay
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
-import space.chunks.lobby.modules.chunkviewer.grpc.AuthCredentials
 import space.chunks.lobby.modules.chunkviewer.listener.CancelListener
 import space.chunks.lobby.modules.chunkviewer.listener.ControlsListener
 import space.chunks.lobby.modules.chunkviewer.listener.PlayerListener
 import space.chunks.lobby.modules.chunkviewer.world.VoidWorldGenerator
-import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.pack.ResourcePackConfig
 import space.chunks.lobby.ui.Texts
-import space.chunks.lobby.ui.bossbar.BossBars
 import java.io.File
 import java.util.concurrent.CopyOnWriteArrayList
 
 class ChunkViewerModule(
     plugin: Plugin,
     private val packConfig: ResourcePackConfig,
-    private val partyService: PartyService,
+    private val chunkClient: ChunkServiceGrpcKt.ChunkServiceCoroutineStub,
     private val texts: Texts,
-    private val bossbars: BossBars,
 ) : LobbyModule(plugin, "chunk-viewer") {
     val chunks = CopyOnWriteArrayList<ChunkDisplay>()
     val worldName = "chunk_viewer"
@@ -44,6 +38,8 @@ class ChunkViewerModule(
         this.worldName,
         this.texts,
     )
+
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     // LIGHT BLUE #7ce8fe
     // A BIT DARKER BLUE #53d0fd
@@ -67,20 +63,7 @@ class ChunkViewerModule(
             this.clearViewerWorld(w)
         }
 
-        val cfg = parseConfig(this.config)
-
-        val channel = ManagedChannelBuilder
-            .forAddress(cfg.controlPlane.addr, cfg.controlPlane.port)
-            .useTransportSecurity()
-            .build()
-
-        val chunkClient = ChunkServiceGrpcKt.ChunkServiceCoroutineStub(channel)
-            .withCallCredentials(AuthCredentials(cfg.controlPlane.apiToken))
-
-        val instanceClient = InstanceServiceGrpcKt.InstanceServiceCoroutineStub(channel)
-            .withCallCredentials(AuthCredentials(cfg.controlPlane.apiToken))
-
-        // TODO: implement pagination
+        // TODO: implement pagination -> create ChunkService in controlplane/chunk package
         Bukkit.getScheduler().runTaskTimerAsynchronously(this.plugin, { _ ->
             runBlocking {
                 val resp = chunkClient.listChunks(listChunksRequest {})
@@ -107,24 +90,13 @@ class ChunkViewerModule(
         }, 0, 20 * 5)
 
         Bukkit.getPluginManager().registerEvents(ControlsListener(this.sessionService), this.plugin)
-        Bukkit.getPluginManager().registerEvents(
-            PlayerListener(
-                this.logger,
-                this.plugin,
-                this.sessionService,
-                instanceClient,
-                cfg,
-                partyService,
-                this.texts,
-                this.bossbars,
-            ),
-            this.plugin,
-        )
-
+        Bukkit.getPluginManager().registerEvents(PlayerListener(this.sessionService), this.plugin)
         Bukkit.getPluginManager().registerEvents(CancelListener(), this.plugin)
     }
 
-    override fun onDisable() {}
+    override fun onDisable() {
+        scope.cancel()
+    }
 
     private fun clearPersistedViewerEntities() {
         val entitiesFolder = File(Bukkit.getWorldContainer(), "$worldName/entities")

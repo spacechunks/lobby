@@ -216,4 +216,14 @@ class PartyService {
             return
         }
     }
+
+    // removePlayerSilent will remove a player from a party without causing
+    // any events to be fired. the party will also not be disbanded if there
+    // would be the owner left.
+    fun removePlayerSilent(partyId: String, playerId: UUID) {
+        this.parties.getIfPresent(partyId)?.let { party ->
+            party.members.firstOrNull { it.id == playerId }
+            this.partyByPlayer.remove(playerId)
+        }
+    }
 }

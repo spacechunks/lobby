@@ -1,0 +1,106 @@
+/*
+ A basic matchmaking service for the Chunk Explorer.
+ Copyright (C) 2026 Yannic Rieger <oss@76k.io>
+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Affero General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Affero General Public License for more details.
+
+ You should have received a copy of the GNU Affero General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+syntax = "proto3";
+
+package matchmaking.v1alpha1;
+
+option go_package = "github.com/spacechunks/matchmaking/api/v1alpha1";
+option java_package = "chunks.space.api.matchmaking.v1alpha1";
+
+import "buf/validate/validate.proto";
+
+service MatchmakingService {
+    rpc GetTicket(GetTicketRequest) returns (GetTicketResponse);
+    rpc RemoveTicket(RemoveTicketRequest) returns (RemoveTicketResponse);
+    rpc RemoveAllTickets(RemoveAllTicketsRequest) returns (RemoveAllTicketsResponse);
+    rpc CreateTicket(CreateTicketRequest) returns (CreateTicketResponse);
+    rpc ActivateTicket(ActivateTicketRequest) returns (ActivateTicketResponse);
+}
+
+enum TicketStatus {
+    INACTIVE = 0;
+    ACTIVE = 1;
+    NO_PLAYABLE_FLAVOR_VERSION = 2;
+}
+
+message Match {
+    string id = 1;
+    uint32 player_count = 2;
+    string flavor_version_id = 3;
+    uint32 maxPlayers = 4;
+}
+
+message Ticket {
+    string id = 1;
+    string flavor_id = 2;
+    uint32 player_count = 3;
+    TicketStatus status = 4;
+    Assignment assignment = 5;
+    Match match = 6;
+}
+
+message Assignment {
+    string instance_id = 1;
+}
+
+message SearchMatchRequest {
+    string flavor_id = 2 [(buf.validate.field).string.uuid = true];
+    string player_count = 3;
+}
+
+message SearchMatchResponse {
+    Ticket ticket = 1;
+}
+
+message GetTicketRequest {
+    string ticket_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message GetTicketResponse {
+    Ticket ticket = 1;
+}
+
+message RemoveTicketRequest {
+    string ticket_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message RemoveTicketResponse {
+}
+
+message RemoveAllTicketsRequest {
+}
+
+message RemoveAllTicketsResponse {
+}
+
+message CreateTicketRequest {
+    string flavor_id = 1 [(buf.validate.field).string.uuid = true];
+    uint32 player_count = 2;
+}
+
+message CreateTicketResponse {
+    Ticket ticket = 1;
+}
+
+message ActivateTicketRequest {
+    string ticket_id = 1 [(buf.validate.field).string.uuid = true];
+}
+
+message ActivateTicketResponse {
+}

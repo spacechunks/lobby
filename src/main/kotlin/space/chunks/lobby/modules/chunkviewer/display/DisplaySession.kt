@@ -19,6 +19,7 @@ class DisplaySession(
     val plugin: Plugin,
     val location: Location,
     val chunks: List<ChunkDisplay>,
+    val mmMode: Boolean,
     private val texts: Texts,
 ) {
     val center = this.location.clone().add(0.0, 3.0, 10.0)

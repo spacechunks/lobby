@@ -12,6 +12,11 @@ buildscript {
         mavenCentral()
     }
     configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "io.grpc") {
+                useVersion("1.62.2")
+            }
+        }
         resolutionStrategy {
             force("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
             force("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
@@ -50,9 +55,8 @@ dependencies {
     testImplementation(kotlin("test"))
     implementation(kotlin("stdlib"))
     implementation("io.grpc:grpc-kotlin-stub:1.5.0")
-    implementation("io.grpc:grpc-protobuf:1.61.0")
-    implementation("io.grpc:grpc-netty:1.61.0")
-//    implementation("io.grpc:grpc-netty-shaded:1.61.0")
+    implementation("io.grpc:grpc-protobuf:1.62.2")
+    implementation("io.grpc:grpc-netty:1.62.2")
     implementation("aws.sdk.kotlin:s3:1.6.26")
     api("com.google.protobuf:protobuf-kotlin:3.25.8")
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
@@ -129,8 +133,7 @@ tasks.register("uploadToS3") {
 tasks {
     runServer {
         downloadPlugins {
-            modrinth("ViaVersion", "5.9.1")
-//            modrinth("multiverse-core", "5.6.2")
+            modrinth("ViaVersion", "5.10.0")
         }
         minecraftVersion("26.1.2")
     }
