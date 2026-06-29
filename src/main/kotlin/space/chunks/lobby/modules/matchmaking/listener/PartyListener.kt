@@ -25,14 +25,13 @@ class PartyListener(
         val player = event.player
         this.logger.info("player kicked from party, removing ticket. partyId=${party.id} playerName=${player.name} playerId=${player.id}")
         this.mmService.removeTicketByActor(party.id)
-        // TODO: display message to players that due to changes
-        //       to the players in the party the matchmaking has been
-        //       cancelled.
         this.instanceService.cancelJob(party.id)
         this.bossbars.clearLoadingBar(party.onlinePlayers())
         player.asPlayer()?.let { player ->
             this.bossbars.clearLoadingBar(listOf(player))
         }
+
+        this.texts.send(party, "matchmaking.ticket.cancelled-player-left-party")
     }
 
     @EventHandler
@@ -58,15 +57,10 @@ class PartyListener(
             // so it will not be matched anymore.
             logger.info("removing ticket for player joining party. playerName=${player.name} playerId=${player.id}")
             this.mmService.removeTicketByActor(event.player.id.toString())
+            this.texts.send(party, "matchmaking.ticket.cancelled-player-joined-party")
         } catch (e: Exception) {
             logger.log(Level.SEVERE, "error removing ticket for player joining party", e)
             event.isCancelled = true
         }
-
-        this.texts.send(party, "")
-
-        // TODO: display message to players that due to changes
-        //       to the players in the party the matchmaking has been
-        //       cancelled.
     }
 }

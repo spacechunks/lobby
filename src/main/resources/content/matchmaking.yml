@@ -13,3 +13,9 @@ matchmaking:
     cancelled-service-unavailable:
       - ' '
       - '<prefix> <error>Matchmaking unavailable. Please retry at a later time.'
+    cancelled-player-left-party:
+      - ' '
+      - '<prefix> <header>A player left your party. You have been <error>dropped <header>out of the queue.'
+    cancelled-player-joined-party:
+      - ' '
+      - '<prefix> <header>A player joined your party. You have been <error>dropped <header>out of the queue.'
