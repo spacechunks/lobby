@@ -43,7 +43,8 @@ class MMModule(
                 this.logger,
                 this.mmService,
                 this.instanceService,
-                this.bossbars
+                this.bossbars,
+                this.texts,
             ),
             this.plugin,
         )
