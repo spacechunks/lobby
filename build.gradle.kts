@@ -37,7 +37,7 @@ plugins {
 }
 
 group = "space.chunks"
-version = "2026.27.1"
+version = "2026.27.2"
 
 val pluginName = project.property("plugin.name").toString()
 
@@ -85,9 +85,9 @@ tasks.withType<KotlinCompile> {
 tasks.named("shadowJar", ShadowJar::class) {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     mergeServiceFiles()
-    exclude("kotlin/**")
-    exclude("kotlinx/coroutines/**")
-    exclude("com/noxcrew/interfaces/**")
+//    exclude("kotlin/**")
+//    exclude("kotlinx/coroutines/**")
+//    exclude("com/noxcrew/interfaces/**")
     // ai told me to do this, because of class loader problems with paper
     relocate(
         "com.google.protobuf",

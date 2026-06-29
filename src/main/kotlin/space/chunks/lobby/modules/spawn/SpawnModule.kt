@@ -1,7 +1,12 @@
 package space.chunks.lobby.modules.spawn
 
+import com.mojang.brigadier.Command
+import io.papermc.paper.command.brigadier.Commands
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.bukkit.Bukkit
 import org.bukkit.GameRules
+import org.bukkit.Location
+import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
@@ -20,6 +25,32 @@ class SpawnModule(
             PlayerListener(this.plugin, cfg, this.sessSvc, this.texts, this.uiService),
             this.plugin,
         )
+
+        this.plugin.lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+            event.registrar().register(
+                Commands.literal("spawn")
+                    .executes { ctx ->
+                        if (ctx.source.sender !is Player) {
+                            return@executes Command.SINGLE_SUCCESS
+                        }
+                        val player = ctx.source.sender as Player
+
+                        val world = Bukkit.getWorld(cfg.world)
+                            ?: throw IllegalStateException("spawn world is not loaded: ${cfg.world}")
+
+                        player.teleport(
+                            Location(
+                                world,
+                                cfg.spawnLocation.x,
+                                cfg.spawnLocation.y,
+                                cfg.spawnLocation.z,
+                            )
+                        )
+                        Command.SINGLE_SUCCESS
+                    }
+                    .build()
+            )
+        }
 
         Bukkit.getServer().getWorld(cfg.world)?.setGameRule(GameRules.LOCATOR_BAR, false)
     }
