@@ -133,7 +133,7 @@ tasks.register("uploadToS3") {
 tasks {
     runServer {
         downloadPlugins {
-            modrinth("ViaVersion", "5.9.1")
+            modrinth("ViaVersion", "5.10.0")
         }
         minecraftVersion("26.1.2")
     }
