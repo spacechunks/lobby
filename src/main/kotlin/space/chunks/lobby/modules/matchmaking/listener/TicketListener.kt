@@ -3,6 +3,7 @@ package space.chunks.lobby.modules.matchmaking.listener
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import space.chunks.lobby.controlplane.instance.InstanceService
+import space.chunks.lobby.extensions.toAudience
 import space.chunks.lobby.modules.matchmaking.Config
 import space.chunks.lobby.modules.matchmaking.MMService
 import space.chunks.lobby.modules.matchmaking.event.*
@@ -77,9 +78,11 @@ class TicketListener(
     fun onMatchCancelled(event: MatchCancelledEvent) {
         val data = event.data
         val players = getPlayersByActorId(this.partyService, data.actorId)
-        players.forEach { player -> player.sendMessage("match cancelled")}
 
-        // TODO: tell players the match was cancelled and they are being requeued (?)
+        this.texts.send(
+            players.toAudience(),
+            "matchmaking.match.cancelled",
+        )
 
         // this is a bit nasty, because we operate on potentially outdated data,
         // since the chunk is still the one initially fetched by the chunk viewer.
@@ -106,11 +109,22 @@ class TicketListener(
     fun onTicketCancelled(event: TicketCancelledEvent) {
         val players = getPlayersByActorId(this.partyService, event.actorId)
         this.bossbars.clearLoadingBar(players)
-        // TODO: display ticket id
         when (event.cause) {
-            TicketCancelCause.NO_PLAYABLE_FLAVOR_VERSION -> players.forEach { it.sendMessage("NO_PLAYABLE_FLAVOR_VERSION") }
-            TicketCancelCause.NOT_FOUND -> players.forEach { it.sendMessage("ticket was removed") }
-            TicketCancelCause.SERVICE_UNAVAILABLE -> players.forEach { it.sendMessage("service unavailable") }
+            TicketCancelCause.NO_PLAYABLE_FLAVOR_VERSION -> this.texts.send(
+                players.toAudience(),
+                "matchmaking.ticket.cancelled-no-playable-flavor-version",
+            )
+
+            TicketCancelCause.NOT_FOUND -> this.texts.send(
+                players.toAudience(),
+                "matchmaking.ticket.cancelled-not-found",
+                mapOf("ticket_id" to event.ticketId!!)
+            )
+
+            TicketCancelCause.SERVICE_UNAVAILABLE -> this.texts.send(
+                players.toAudience(),
+                "matchmaking.ticket.cancelled-service-unavailable",
+            )
         }
     }
 }

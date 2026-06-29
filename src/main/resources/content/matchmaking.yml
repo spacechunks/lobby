@@ -1,0 +1,15 @@
+matchmaking:
+  match:
+    cancelled:
+      - ' '
+      - '<prefix> <header>Match has been cancelled. You will be put back into the queue.'
+  ticket:
+    cancelled-no-playable-flavor-version:
+      - ' '
+      - '<prefix> <error>There is no playable version for the selected flavor. <hover:show_text:"<body>Click to copy"><click:copy_to_clipboard:"<ticket_id>">Ticket ID: <ticket_id></click></hover>'
+    cancelled-not-found:
+      - ' '
+      - '<prefix> <error>The ticket could not be found. <hover:show_text:"<body>Click to copy"><click:copy_to_clipboard:"<ticket_id>">Ticket ID: <ticket_id></click></hover>'
+    cancelled-service-unavailable:
+      - ' '
+      - '<prefix> <error>Matchmaking unavailable. Please retry at a later time.'
