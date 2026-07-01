@@ -22,3 +22,6 @@ matchmaking:
     cancelled-ticket-removed:
       - ' '
       - '<prefix> <header>You left the queue.'
+    removal-failed:
+      - ' '
+      - '<prefix> <error>Leaving the queue failed.'

@@ -1,10 +1,12 @@
 package space.chunks.lobby.modules.chunkviewer.display
 
 import chunks.space.api.explorer.chunk.v1alpha1.Types
+import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
@@ -21,14 +23,17 @@ class ModeSelectView(
     private val flavor: Types.Flavor,
     private val textsContent: Texts,
 ): View(plugin, center, session) {
-    val leftPos = this.center.clone().add(7.8, -2.55, 0.0)
-    val rightPos = this.center.clone().add(-1.75, -2.55, 0.0)
-    val selectionMarker = this.spawnItemDisplay(
+    private val leftPos = this.center.clone().add(7.8, -2.55, 0.0)
+    private val rightPos = this.center.clone().add(-1.75, -2.55, 0.0)
+    private val selectionMarker = this.spawnItemDisplay(
         leftPos,
         Vector3f(0.5f, 0.5f, .5f),
         Textures.ARROW_RIGHT,
         false,
     )
+
+    private lateinit var publicMatch: TextDisplay
+    private lateinit var privateMatch: TextDisplay
 
     override fun render() {
         this.spawnItemDisplay(
@@ -44,7 +49,7 @@ class ModeSelectView(
         )
 
         // left
-        this.spawnTextElement(
+        this.publicMatch = this.spawnTextElement(
             this.textsContent
                 .component("chunkviewer.mode-select.matchmaking")
                 .color(TextColor.fromHexString("#52cefd"))
@@ -53,10 +58,9 @@ class ModeSelectView(
         )
 
         // right
-        this.spawnTextElement(
+        this.privateMatch = this.spawnTextElement(
             this.textsContent
                 .component("chunkviewer.mode-select.private")
-                .color(TextColor.fromHexString("#52cefd"))
                 .font(Fonts.CHUNK_VIEWER),
             this.center.clone().add(-5.0, -3.0, 0.0), 3.5f,
         )
@@ -104,7 +108,11 @@ class ModeSelectView(
                 return
             }
 
+            this.publicMatch.text(this.publicMatch.text().color(TextColor.fromHexString("#52cefd")))
+            this.privateMatch.text(this.privateMatch.text().color(NamedTextColor.WHITE))
+
             this.selectionMarker.teleport(leftPos)
+
             player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
             return
         }
@@ -115,7 +123,11 @@ class ModeSelectView(
                 return
             }
 
+            this.privateMatch.text(this.privateMatch.text().color(TextColor.fromHexString("#52cefd")))
+            this.publicMatch.text(this.publicMatch.text().color(NamedTextColor.WHITE))
+
             this.selectionMarker.teleport(rightPos)
+
             player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
             return
         }
