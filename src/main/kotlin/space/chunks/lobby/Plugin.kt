@@ -86,7 +86,14 @@ class Plugin : JavaPlugin(), Listener {
 
     // modules
     private val chunkViewerMod = ChunkViewerModule(this, this.packConfig, this.chunkClient, this.texts)
-    private val spawnMod = SpawnModule(this.chunkViewerMod.sessionService, this, this.texts, this.uiService)
+    private val spawnMod = SpawnModule(
+        this.chunkViewerMod.sessionService,
+        this,
+        this.texts,
+        this.uiService,
+        this.partyService,
+        this.mmService,
+    )
     private val partyMod = PartyModule(this, this.partyService, this.texts, this.bossbars)
     private val mmMod = MMModule(
         this,

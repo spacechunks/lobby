@@ -19,3 +19,6 @@ matchmaking:
     cancelled-player-joined-party:
       - ' '
       - '<prefix> <header>A player joined your party. You have been <error>dropped <header>out of the queue.'
+    cancelled-ticket-removed:
+      - ' '
+      - '<prefix> <header>You left the queue.'

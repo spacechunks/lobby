@@ -10,6 +10,8 @@ import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
+import space.chunks.lobby.modules.matchmaking.MMService
+import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.ui.Texts
 import space.chunks.visual.ui.UiService
 
@@ -18,11 +20,21 @@ class SpawnModule(
     plugin: Plugin,
     private val texts: Texts,
     private val uiService: UiService,
+    private val partyService: PartyService,
+    private val mmService: MMService,
 ) : LobbyModule(plugin, "spawn") {
     override fun onEnable() {
         val cfg = Config.parse(this.plugin.config)
         Bukkit.getPluginManager().registerEvents(
-            PlayerListener(this.plugin, cfg, this.sessSvc, this.texts, this.uiService),
+            PlayerListener(
+                this.plugin,
+                cfg,
+                this.sessSvc,
+                this.texts,
+                this.uiService,
+                this.mmService,
+                this.partyService,
+            ),
             this.plugin,
         )
 

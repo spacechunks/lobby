@@ -7,6 +7,7 @@ enum class TicketCancelCause {
     NOT_FOUND,
     NO_PLAYABLE_FLAVOR_VERSION,
     SERVICE_UNAVAILABLE,
+    REMOVED,
 }
 
 class TicketCancelledEvent(val actorId: String, val ticketId: String?, val cause: TicketCancelCause) : Event() {

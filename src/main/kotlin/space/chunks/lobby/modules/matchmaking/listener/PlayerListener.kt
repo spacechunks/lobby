@@ -25,7 +25,7 @@ class PlayerListener(
     private val texts: Texts,
     private val bossbars: BossBars,
     private val config: Config,
-    private val instanceService: InstanceService
+    private val instanceService: InstanceService,
 ) : Listener {
     @EventHandler
     private fun onPlayerFlavorSelect(event: PlayerSelectFlavorEvent) {

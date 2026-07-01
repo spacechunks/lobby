@@ -21,6 +21,8 @@ import org.bukkit.potion.PotionEffectType
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
+import space.chunks.lobby.modules.matchmaking.MMService
+import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
@@ -33,9 +35,18 @@ class PlayerListener(
     private val sessionService: DisplaySessionService,
     private val texts: Texts,
     private val uiService: UiService,
+    private val mmService: MMService,
+    private val partyService: PartyService,
 ) : Listener {
     private val transition = ScreenTransition(this.plugin, this.texts)
-    private val hotbar = Hotbar(this.sessionService, this.texts, this.uiService, this.transition)
+    private val hotbar = Hotbar(
+        this.sessionService,
+        this.texts,
+        this.uiService,
+        this.transition,
+        this.partyService,
+        this.mmService,
+    )
     private val spawnLocation = this.configuredSpawnLocation()
 
 //    by Atlas.api.requiredLocation(
