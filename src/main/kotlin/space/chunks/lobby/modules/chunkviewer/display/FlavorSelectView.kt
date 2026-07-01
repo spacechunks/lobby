@@ -3,14 +3,12 @@ package space.chunks.lobby.modules.chunkviewer.display
 import chunks.space.api.explorer.chunk.v1alpha1.Types
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.entity.TextDisplay
 import org.bukkit.plugin.Plugin
 import org.joml.Vector3f
-import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.pack.Fonts
 import space.chunks.lobby.pack.Sounds
 import space.chunks.lobby.pack.Textures
@@ -129,8 +127,16 @@ class FlavorSelectView(
             Input.D -> this.currPage++
             Input.SPACE -> {
                 val selected = this.flavors.getPage(this.currPage)[this.currIdx]
-                Bukkit.getPluginManager().callEvent(
-                    PlayerSelectFlavorEvent(this.chunk, selected, this.session.mmMode, player)
+                player.playSound(player.location, Sounds.CLICK, 0.5f, 1f)
+                this.session.switchWindow(
+                    ModeSelectView(
+                        this.plugin,
+                        this.center,
+                        this.session,
+                        this.chunk,
+                        selected,
+                        this.textsContent,
+                    ),
                 )
             }
             Input.SNEAK -> {
