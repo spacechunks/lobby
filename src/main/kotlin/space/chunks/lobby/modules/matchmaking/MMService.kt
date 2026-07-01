@@ -81,6 +81,8 @@ class MMService(
                     client.removeTicket(removeTicketRequest {
                         ticketId = data.ticket.id
                     })
+                    
+                    plugin.callSyncEvent(TicketCancelledEvent(actorId, null, TicketCancelCause.REMOVED))
                 }
             }
         } catch (e: StatusException) {
