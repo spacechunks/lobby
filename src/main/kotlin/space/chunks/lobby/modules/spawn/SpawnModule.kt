@@ -27,6 +27,7 @@ class SpawnModule(
         val cfg = Config.parse(this.plugin.config)
         Bukkit.getPluginManager().registerEvents(
             PlayerListener(
+                this.logger,
                 this.plugin,
                 cfg,
                 this.sessSvc,

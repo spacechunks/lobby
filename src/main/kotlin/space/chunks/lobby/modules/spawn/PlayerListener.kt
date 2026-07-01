@@ -28,8 +28,10 @@ import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
 import space.chunks.visual.ui.UiService
 import java.time.Duration
+import java.util.logging.Logger
 
 class PlayerListener(
+    private val logger: Logger,
     private val plugin: Plugin,
     private val config: Config,
     private val sessionService: DisplaySessionService,
@@ -40,6 +42,7 @@ class PlayerListener(
 ) : Listener {
     private val transition = ScreenTransition(this.plugin, this.texts)
     private val hotbar = Hotbar(
+        this.logger,
         this.sessionService,
         this.texts,
         this.uiService,

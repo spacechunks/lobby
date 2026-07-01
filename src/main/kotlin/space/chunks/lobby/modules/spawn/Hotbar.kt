@@ -22,8 +22,11 @@ import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
 import space.chunks.visual.ui.UiService
+import java.util.logging.Level
+import java.util.logging.Logger
 
 class Hotbar(
+    private val logger: Logger,
     private val sessionService: DisplaySessionService,
     private val texts: Texts,
     private val uiService: UiService,
@@ -103,17 +106,28 @@ class Hotbar(
                         ItemStack(Material.BARRIER)
                     ),
                     clickHandler = ClickHandler { context ->
-                        context.player.removeMetadata(PlayerMetadataKeys.MM_SEARCH)
+                        val player = context.player
+
+                        player.removeMetadata(PlayerMetadataKeys.MM_SEARCH)
 
                         // for whatever reason reopening the inventory does not work
-                        view.player.inventory.clear(5)
+                        player.inventory.clear(5)
 //                        InterfacesConstants.SCOPE.launch {
 //                            context.view.reopen()
 //                        }
 
-                        val party = partyService.getPartyById(context.player.uniqueId.toString())
-                        val actorId = party?.id ?: context.player.uniqueId.toString()
-                        mmService.removeTicketByActor(actorId)
+
+                        val party = partyService.getPartyById(player.uniqueId.toString())
+                        val actorId = party?.id ?: player.uniqueId.toString()
+                        try {
+                            mmService.removeTicketByActor(actorId)
+                        } catch (e: Exception) {
+                            logger.log(Level.SEVERE, "error removing ticket by actor. actorId=$actorId", e)
+                            texts.send(
+                                player,
+                                "matchmaking.ticket.removal-failed",
+                            )
+                        }
                     }
                 )
             }
