@@ -37,7 +37,7 @@ plugins {
 }
 
 group = "space.chunks"
-version = "2026.27.3"
+version = "2026.28.1"
 
 val pluginName = project.property("plugin.name").toString()
 
