@@ -25,3 +25,4 @@ spawn:
     inventory: '<header>Inventory'
     party: '<header>Party'
     settings: '<header>Settings'
+    cancel-matchmaking: '<header>Cancel search'

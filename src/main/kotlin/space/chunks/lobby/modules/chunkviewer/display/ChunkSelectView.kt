@@ -223,7 +223,7 @@ class ChunkSelectView(
     }
 
     private fun spawnControlsHelp() {
-        val loc = this.center.clone().subtract(-12.8, 6.5, 0.0)
+        val loc = this.center.clone().subtract(-10.8, 6.5, 0.0)
 
         val iter = mapOf(
             "<font:chunkexplorer:text>\uE300</font>" to "Up",

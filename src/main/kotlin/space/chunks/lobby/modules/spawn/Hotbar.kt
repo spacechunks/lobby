@@ -37,7 +37,7 @@ class Hotbar(
 
     private val hotbarInterface = buildPlayerInterface {
         withTransform { pane, view ->
-            pane.hotbar[0] = StaticElement(
+            pane.hotbar[4] = StaticElement(
                 Drawable.drawable(
                     ItemStack(Material.PAPER).apply {
                         editMeta {
@@ -60,56 +60,60 @@ class Hotbar(
                 }
             )
 
-            pane.hotbar[1] = StaticElement(
-                Drawable.drawable(
-                    ItemStack(Material.PAPER).apply {
-                        editMeta {
-                            it.itemModel = Items.MAP
-                            it.displayName(texts.component("spawn.hotbar.warps"))
-                        }
-                    }
-                )
-            )
-
-            pane.hotbar[2] = StaticElement(
-                Drawable.drawable(
-                    ItemStack(Material.PAPER).apply {
-                        editMeta {
-                            it.itemModel = Items.INVENTORY
-                            it.displayName(texts.component("spawn.hotbar.inventory"))
-                        }
-                    }
-                )
-            )
-
-            pane.hotbar[3] = StaticElement(
-                Drawable.drawable(
-                    ItemStack(Material.PAPER).apply {
-                        editMeta {
-                            it.itemModel = Items.PARTY
-                            it.displayName(texts.component("spawn.hotbar.party"))
-                        }
-                    }
-                )
-            )
-
-            pane.hotbar[4] = StaticElement(
-                Drawable.drawable(
-                    ItemStack(Material.PAPER).apply {
-                        editMeta {
-                            it.itemModel = Items.SETTINGS
-                            it.displayName(texts.component("spawn.hotbar.settings"))
-                        }
-                    }
-                )
-            )
+//            pane.hotbar[1] = StaticElement(
+//                Drawable.drawable(
+//                    ItemStack(Material.PAPER).apply {
+//                        editMeta {
+//                            it.itemModel = Items.MAP
+//                            it.displayName(texts.component("spawn.hotbar.warps"))
+//                        }
+//                    }
+//                )
+//            )
+//
+//            pane.hotbar[2] = StaticElement(
+//                Drawable.drawable(
+//                    ItemStack(Material.PAPER).apply {
+//                        editMeta {
+//                            it.itemModel = Items.INVENTORY
+//                            it.displayName(texts.component("spawn.hotbar.inventory"))
+//                        }
+//                    }
+//                )
+//            )
+//
+//            pane.hotbar[3] = StaticElement(
+//                Drawable.drawable(
+//                    ItemStack(Material.PAPER).apply {
+//                        editMeta {
+//                            it.itemModel = Items.PARTY
+//                            it.displayName(texts.component("spawn.hotbar.party"))
+//                        }
+//                    }
+//                )
+//            )
+//
+//            pane.hotbar[4] = StaticElement(
+//                Drawable.drawable(
+//                    ItemStack(Material.PAPER).apply {
+//                        editMeta {
+//                            it.itemModel = Items.SETTINGS
+//                            it.displayName(texts.component("spawn.hotbar.settings"))
+//                        }
+//                    }
+//                )
+//            )
 
             val mm = view.player.getBool(PlayerMetadataKeys.MM_SEARCH, false)
 
             if (mm) {
-                pane.hotbar[5] = StaticElement(
+                pane.hotbar[0] = StaticElement(
                     Drawable.drawable(
-                        ItemStack(Material.BARRIER)
+                        ItemStack(Material.BARRIER).apply {
+                            editMeta {
+                                it.displayName(texts.component("spawn.hotbar.cancel-matchmaking"))
+                            }
+                        }
                     ),
                     clickHandler = ClickHandler { context ->
                         val player = context.player
@@ -117,7 +121,7 @@ class Hotbar(
                         player.removeMetadata(PlayerMetadataKeys.MM_SEARCH)
 
                         // for whatever reason reopening the inventory does not work
-                        player.inventory.clear(5)
+                        player.inventory.clear(0)
 //                        InterfacesConstants.SCOPE.launch {
 //                            context.view.reopen()
 //                        }
