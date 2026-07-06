@@ -223,7 +223,7 @@ class ChunkSelectView(
     }
 
     private fun spawnControlsHelp() {
-        val loc = this.center.clone().subtract(-10.8, 6.5, 0.0)
+        val loc = this.center.clone().subtract(-11.8, 8.1, 0.0)
 
         val iter = mapOf(
             "<font:chunkexplorer:text>\uE300</font>" to "Up",
@@ -246,9 +246,9 @@ class ChunkSelectView(
             "<font:chunkexplorer:text>\uE304</font>",
             "<font:chunkexplorer:text>\uE305</font>"
         ).cyclicIterator()
-        val spaceLoc = loc.clone().subtract(0.0, 0.7, 0.0)
+        val spaceLoc = loc.clone().subtract(1.0, -0.05, 0.0)
         val spaceSym = this.spawnTextElement(this.mm.deserialize(""), spaceLoc, 1.0f)
-        this.spawnTextElement(this.mm.deserialize("Select"), spaceLoc.clone().subtract(0.0, 0.2, 0.0), 0.7f)
+        this.spawnTextElement(this.mm.deserialize("Select"), spaceLoc.clone().subtract(0.0, 0.25, 0.0), 0.7f)
         val spaceTask = object : BukkitRunnable() {
             override fun run() {
                 spaceSym.text(mm.deserialize(spaceSymsIter()))
@@ -259,7 +259,7 @@ class ChunkSelectView(
             "<font:chunkexplorer:text>\uE306</font>",
             "<font:chunkexplorer:text>\uE307</font>"
         ).cyclicIterator()
-        val shiftLoc = spaceLoc.clone().subtract(0.0, 0.85, 0.0)
+        val shiftLoc = loc.clone().subtract(1.85, 0.0, 0.0)
         val shiftSym = this.spawnTextElement(this.mm.deserialize(""), shiftLoc, 1.0f)
         this.spawnTextElement(this.mm.deserialize("Back"), shiftLoc.clone().subtract(0.0, 0.2, 0.0), 0.7f)
         val shiftTask = object : BukkitRunnable() {
