@@ -55,7 +55,7 @@ class TicketListener(
         val player = party?.owner?.asPlayer() ?: Bukkit.getPlayer(UUID.fromString(data.actorId))
 
         player?.let {
-            it.setBool(PlayerMetadataKeys.MM_SEARCH, true)
+            it.setBool(PlayerMetadataKeys.MM_SEARCH_ONGOING, true)
 
             InterfacesConstants.SCOPE.launch {
                 InterfacesListeners.INSTANCE.getOpenPlayerInterface(it.uniqueId)?.reopen()

@@ -8,11 +8,14 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.plugin.Plugin
 import space.chunks.lobby.controlplane.instance.InstanceService
+import space.chunks.lobby.extensions.removeMetadata
+import space.chunks.lobby.extensions.setBool
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.modules.matchmaking.Config
 import space.chunks.lobby.modules.matchmaking.MMService
 import space.chunks.lobby.modules.matchmaking.waitForInstance
 import space.chunks.lobby.modules.party.PartyService
+import space.chunks.lobby.player.PlayerMetadataKeys
 import space.chunks.lobby.ui.Texts
 import space.chunks.lobby.ui.bossbar.BossBars
 import java.util.logging.Logger
@@ -71,7 +74,9 @@ class PlayerListener(
             return
         }
 
+
         val orderedBy = party?.owner?.id?.toString() ?: player.uniqueId.toString()
+        player.setBool(PlayerMetadataKeys.MM_PRIVATE_ONGOING, true)
         this.instanceService.runFlavorVersion(orderedBy, ver.id).thenAccept { instance ->
             waitForInstance(
                 this.logger,
@@ -83,6 +88,9 @@ class PlayerListener(
                 this.texts,
                 actorId,
                 instance.id,
+                onComplete = {
+                    player.removeMetadata(PlayerMetadataKeys.MM_PRIVATE_ONGOING)
+                }
             )
         }
     }

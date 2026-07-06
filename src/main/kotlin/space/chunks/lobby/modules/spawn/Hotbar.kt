@@ -48,7 +48,13 @@ class Hotbar(
                 ),
                 clickHandler = ClickHandler { context ->
                     val player = context.player
-                    if (player.getBool(PlayerMetadataKeys.MM_SEARCH, false)) {
+
+                    if (player.getBool(PlayerMetadataKeys.MM_PRIVATE_ONGOING, false)) {
+                        player.sendMessage(texts.component("chunkviewer.matchmaking.private-ongoing"))
+                        return@ClickHandler
+                    }
+
+                    if (player.getBool(PlayerMetadataKeys.MM_SEARCH_ONGOING, false)) {
                         player.sendMessage(texts.component("chunkviewer.matchmaking.already-searching"))
                         return@ClickHandler
                     }
@@ -104,7 +110,7 @@ class Hotbar(
 //                )
 //            )
 
-            val mm = view.player.getBool(PlayerMetadataKeys.MM_SEARCH, false)
+            val mm = view.player.getBool(PlayerMetadataKeys.MM_SEARCH_ONGOING, false)
 
             if (mm) {
                 pane.hotbar[0] = StaticElement(
@@ -118,7 +124,7 @@ class Hotbar(
                     clickHandler = ClickHandler { context ->
                         val player = context.player
 
-                        player.removeMetadata(PlayerMetadataKeys.MM_SEARCH)
+                        player.removeMetadata(PlayerMetadataKeys.MM_SEARCH_ONGOING)
 
                         // for whatever reason reopening the inventory does not work
                         player.inventory.clear(0)

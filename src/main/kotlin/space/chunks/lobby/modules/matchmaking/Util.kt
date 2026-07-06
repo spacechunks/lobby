@@ -23,6 +23,7 @@ fun waitForInstance(
     texts: Texts,
     actorId: String,
     instanceId: String,
+    onComplete: () -> Unit = {}
 ) {
     val players = getPlayersByActorId(partyService, actorId)
 
@@ -51,6 +52,8 @@ fun waitForInstance(
                     )
                 }
 
+                onComplete()
+
                 bossbars.clearLoadingBar(players)
                 logger.info("instance creation failed, removing ticket. actorId=$actorId instanceId=${instance.id} instanceState=$state")
                 mmService.removeTicketByActor(actorId)
@@ -70,7 +73,8 @@ fun waitForInstance(
                     // as usual, we have to wait before transferring the player to the
                     // instance, otherwise the resource pack won't unload
 //                    Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
-                        it.transfer(config.gatewayHost, config.gatewayPort)
+                    onComplete()
+                    it.transfer(config.gatewayHost, config.gatewayPort)
 //                    }, 10L)
                 }
             }

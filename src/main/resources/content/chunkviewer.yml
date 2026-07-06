@@ -1,6 +1,7 @@
 chunkviewer:
   matchmaking:
     already-searching: '<prefix> <error>You are already searching for a game. Cancel your search to choose another game.'
+    private-ongoing: '<prefix> <error>You already request a private server. Wait for your request to finish.'
   display:
     background: '<black><font:chunkexplorer:title>'
   flavor-select:
