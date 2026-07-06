@@ -63,7 +63,13 @@ class PlayerListener(
         event.joinMessage(Component.empty())
 
         val player = event.player
-        
+
+        // clear all keys, because they should only be valid for one session.
+        // a session in this case lasts until the player disconnects.
+        player.persistentDataContainer.keys.forEach {
+            player.persistentDataContainer.remove(it)
+        }
+
         // disable appleskin mod showing stuff in the actionbar
         player.saturation = 0f
 

@@ -1,4 +1,6 @@
 chunkviewer:
+  matchmaking:
+    already-searching: '<prefix> <error>You are already searching for a game. Cancel your search to choose another game.'
   display:
     background: '<black><font:chunkexplorer:title>'
   flavor-select:

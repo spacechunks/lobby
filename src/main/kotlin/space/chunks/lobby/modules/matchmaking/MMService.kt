@@ -125,29 +125,35 @@ class MMService(
                     return
                 }
 
-                val data = this.ticketsByActor[actorId] ?: continue
+                val oldData = this.ticketsByActor[actorId] ?: continue
+
+                // playerCount and maxPlayers are both  set to 0 in the old ticket (if the old ticket did not have
+                // a match before). this will lead to a display issue. so, update the data right now to avoid it.
+                val newData = MMData(
+                    newTicket,
+                    oldData.chunk,
+                    oldData.flavor,
+                    oldData.actorId,
+                )
+
+                this.ticketsByActor[actorId] = newData
 
                 if (newTicket.hasMatch()) {
-                    this.plugin.callSyncEvent(MatchUpdateEvent(data))
+                    this.plugin.callSyncEvent(MatchUpdateEvent(newData))
                 }
 
                 if (newTicket.hasAssignment()) {
-                    this.plugin.callSyncEvent(TicketAssignmentEvent(actorId, newTicket.id, newTicket.assignment.instanceId))
+                    this.plugin.callSyncEvent(
+                        TicketAssignmentEvent(actorId, newTicket.id, newTicket.assignment.instanceId)
+                    )
                     return
                 }
 
                 // the old ticket (data.ticket) did have a match, but the new updated one (newTicket)
                 // does not have one, it means that the match was cancelled
-                if (data.ticket.hasMatch() && !newTicket.hasMatch()) {
-                    this.plugin.callSyncEvent(MatchCancelledEvent(data))
+                if (oldData.ticket.hasMatch() && !newTicket.hasMatch()) {
+                    this.plugin.callSyncEvent(MatchCancelledEvent(newData))
                 }
-
-                this.ticketsByActor[actorId] = MMData(
-                    newTicket,
-                    data.chunk,
-                    data.flavor,
-                    data.actorId,
-                )
             } catch (e: StatusException) {
                 if (e.status.code == Status.Code.NOT_FOUND) {
                     this.plugin.callSyncEvent(

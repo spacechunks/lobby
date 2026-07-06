@@ -47,8 +47,14 @@ class Hotbar(
                     }
                 ),
                 clickHandler = ClickHandler { context ->
+                    val player = context.player
+                    if (player.getBool(PlayerMetadataKeys.MM_SEARCH, false)) {
+                        player.sendMessage(texts.component("chunkviewer.matchmaking.already-searching"))
+                        return@ClickHandler
+                    }
+
                     completingLater = true
-                    this@Hotbar.openTeleporter(context.player) {
+                    this@Hotbar.openTeleporter(player) {
                         complete()
                     }
                 }
@@ -115,7 +121,6 @@ class Hotbar(
 //                        InterfacesConstants.SCOPE.launch {
 //                            context.view.reopen()
 //                        }
-
 
                         val party = partyService.getPartyById(player.uniqueId.toString())
                         val actorId = party?.id ?: player.uniqueId.toString()
