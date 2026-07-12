@@ -15,6 +15,7 @@ import space.chunks.lobby.modules.party.PartyService
 import space.chunks.lobby.ui.Texts
 import space.chunks.visual.ui.UiService
 
+
 class SpawnModule(
     private val sessSvc: DisplaySessionService,
     plugin: Plugin,
@@ -43,6 +44,10 @@ class SpawnModule(
             event.registrar().register(
                 Commands.literal("spawn")
                     .executes { ctx ->
+//                        Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
+//                            dummy.animate("hand_wave")
+//                        }, 20L * 2)
+                        
                         if (ctx.source.sender !is Player) {
                             return@executes Command.SINGLE_SUCCESS
                         }

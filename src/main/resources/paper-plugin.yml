@@ -2,8 +2,11 @@ name: ${name}
 version: ${version}
 main: space.chunks.lobby.Plugin
 api-version: 26.1
-#dependencies:
-#  server:
+dependencies:
+  server:
+    BetterModel:
+      load: BEFORE
+      join-classpath: true
 #    WorldService:
 #      load: BEFORE
 #      required: true
