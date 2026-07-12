@@ -20,6 +20,10 @@ class LookAtPlayerTask(private val tracker: DummyTracker, private val player: Pl
     override fun run() {
         val targetLoc = this.player.location
 
+        if (targetLoc.world.name != this.origin.world.name) {
+            return
+        }
+
         if (targetLoc.distance(origin) > RANGE) {
             if (!facingDefault) {
                 tracker.location(BukkitAdapter.adapt(origin.clone())) // snap back to original facing

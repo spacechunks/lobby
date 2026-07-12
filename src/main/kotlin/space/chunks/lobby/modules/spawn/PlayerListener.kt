@@ -9,10 +9,7 @@ import kr.toxicity.model.api.bukkit.platform.BukkitAdapter
 import kr.toxicity.model.api.tracker.DummyTracker
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
-import org.bukkit.Bukkit
-import org.bukkit.GameMode
-import org.bukkit.Location
-import org.bukkit.NamespacedKey
+import org.bukkit.*
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -187,9 +184,20 @@ class PlayerListener(
     private fun onPlayerInteract(event: PlayerInteractEvent) {
         // nexo uses note blocks to display custom blocks.
         // interacting with them will change the block.
-//        if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
-//            event.isCancelled = true
-//        }
+        if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
+            event.isCancelled = true
+        }
+    }
+
+    @EventHandler
+    private fun onWorldChange(event: PlayerChangedWorldEvent) {
+        // we have to respawn robo again, because it's gone when we switch worlds
+        // delay, so the player's chunks are actually loaded client-side first.
+        plugin.server.scheduler.runTaskLater(plugin, Runnable {
+            this.robosPerPlayer[event.player]?.despawn()
+            this.robosPerPlayer[event.player]?.spawn(BukkitAdapter.adapt(event.player))
+            this.robosPerPlayer[event.player]?.animate("hand_wave")
+        }, 5L);
     }
 
     @EventHandler
