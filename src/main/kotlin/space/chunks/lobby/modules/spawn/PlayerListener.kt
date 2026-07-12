@@ -22,7 +22,6 @@ import org.bukkit.event.player.*
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitTask
-import space.chunks.lobby.GDPRDialog
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
@@ -46,7 +45,6 @@ class PlayerListener(
     private val uiService: UiService,
     private val mmService: MMService,
     private val partyService: PartyService,
-    private val gdprDiag: GDPRDialog,
 ) : Listener {
     private val transition = ScreenTransition(this.plugin, this.texts)
     private val hotbar = Hotbar(
