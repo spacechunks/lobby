@@ -35,3 +35,7 @@ object Items {
     val INVENTORY = NamespacedKey.fromString("nexo:crate")
     val MAP = NamespacedKey.fromString("nexo:map")
 }
+
+object Models {
+    val ROBO_BLUE = "robo"
+}

@@ -63,6 +63,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation("com.noxcrew.interfaces:interfaces:2.1.0-SNAPSHOT")
 //    compileOnly("space.chunks:world-service-plugin:2026.20.5")
+    compileOnly("io.github.toxicity188:bettermodel-bukkit-api:3.2.0")
 }
 
 tasks.test {
@@ -134,6 +135,7 @@ tasks {
     runServer {
         downloadPlugins {
             modrinth("ViaVersion", "5.10.0")
+            modrinth("BetterModel", "8xoSUfzr") // version: 3.2.0
         }
         minecraftVersion("26.1.2")
     }

@@ -4,30 +4,36 @@ import com.google.gson.JsonParser
 import com.noxcrew.interfaces.InterfacesConstants
 import io.papermc.paper.event.player.AsyncChatEvent
 import kotlinx.coroutines.launch
+import kr.toxicity.model.api.BetterModel
+import kr.toxicity.model.api.bukkit.platform.BukkitAdapter
+import kr.toxicity.model.api.tracker.DummyTracker
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.title.Title
-import org.bukkit.*
+import org.bukkit.Bukkit
+import org.bukkit.GameMode
+import org.bukkit.Location
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageEvent
 import org.bukkit.event.entity.FoodLevelChangeEvent
-import org.bukkit.event.player.PlayerDropItemEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerJoinEvent
-import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.event.player.*
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
+import org.bukkit.scheduler.BukkitTask
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
 import space.chunks.lobby.modules.matchmaking.MMService
 import space.chunks.lobby.modules.party.PartyService
+import space.chunks.lobby.pack.Models
 import space.chunks.lobby.ui.ActionBar
 import space.chunks.lobby.ui.ScreenTransition
 import space.chunks.lobby.ui.Texts
 import space.chunks.visual.ui.UiService
 import java.time.Duration
+import java.util.function.Consumer
 import java.util.logging.Logger
 
 class PlayerListener(
@@ -50,7 +56,10 @@ class PlayerListener(
         this.partyService,
         this.mmService,
     )
-    private val spawnLocation = this.configuredSpawnLocation()
+    private val spawnLocation = this.location(this.config.spawnLocation)
+
+    private val robosPerPlayer = mutableMapOf<Player, DummyTracker>()
+    private val tasksPerPlayer = mutableMapOf<Player, BukkitTask>()
 
 //    by Atlas.api.requiredLocation(
 //        world = { Bukkit.getWorld(this.config.world) },
@@ -128,6 +137,34 @@ class PlayerListener(
                     return@thenAccept
                 }
             }
+
+        val roboLoc = this.location(this.config.roboSpawnLocation)
+        roboLoc.yaw = 180f
+
+        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+            BetterModel.model(Models.ROBO_BLUE)
+                .map({ r -> r.create(BukkitAdapter.adapt(roboLoc)) })
+                .ifPresent { dummy ->
+                    this.robosPerPlayer[player] = dummy
+                    dummy.spawn(BukkitAdapter.adapt(player))
+
+                    val task = LookAtPlayerTask(dummy, player, roboLoc)
+                        .runTaskTimer(plugin, 0L, 2L)
+
+                    this.tasksPerPlayer[player] = task
+
+                    Bukkit.getScheduler().runTaskTimer(plugin, Consumer {
+                        if (player.resourcePackStatus != PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
+                            return@Consumer
+                        }
+                        
+                        // wait a bit until loading screen is gone
+                        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+                            dummy.animate("hand_wave")
+                        }, 10)
+                    }, 0, 20)
+                }
+        }, 20)
     }
 
     @EventHandler
@@ -148,9 +185,9 @@ class PlayerListener(
     private fun onPlayerInteract(event: PlayerInteractEvent) {
         // nexo uses note blocks to display custom blocks.
         // interacting with them will change the block.
-        if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
-            event.isCancelled = true
-        }
+//        if (event.clickedBlock?.type == Material.NOTE_BLOCK) {
+//            event.isCancelled = true
+//        }
     }
 
     @EventHandler
@@ -171,6 +208,14 @@ class PlayerListener(
     @EventHandler
     private fun onQuit(event: PlayerQuitEvent) {
         event.quitMessage(Component.empty())
+
+        val player = event.player
+
+        this.tasksPerPlayer[player]?.cancel()
+        this.tasksPerPlayer.remove(player)
+
+        this.robosPerPlayer[player]?.close()
+        this.robosPerPlayer.remove(player)
     }
 
     @EventHandler
@@ -205,15 +250,15 @@ class PlayerListener(
             mapOf("name" to player.name)
         )
 
-    private fun configuredSpawnLocation(): Location {
+    private fun location(cfg: VectorConfig): Location {
         val world = Bukkit.getWorld(this.config.world)
             ?: throw IllegalStateException("spawn world is not loaded: ${this.config.world}")
 
         return Location(
             world,
-            this.config.spawnLocation.x,
-            this.config.spawnLocation.y,
-            this.config.spawnLocation.z,
+            cfg.x,
+            cfg.y,
+            cfg.z,
         )
     }
 
