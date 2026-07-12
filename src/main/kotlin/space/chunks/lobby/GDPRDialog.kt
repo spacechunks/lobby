@@ -11,12 +11,11 @@ import net.kyori.adventure.audience.Audience
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.event.ClickCallback
 import net.kyori.adventure.text.format.NamedTextColor
-import org.bukkit.event.Listener
 import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
-class GDPRDialog : Listener {
+class GDPRDialog {
     fun show(audience: Audience): CompletableFuture<Boolean> {
         val f = CompletableFuture<Boolean>()
         val d = Dialog.create { builder ->
