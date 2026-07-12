@@ -153,9 +153,25 @@ class Plugin : JavaPlugin(), Listener {
     @EventHandler
     fun onAsyncConfigure(event: AsyncPlayerConnectionConfigureEvent) {
         val conn = event.connection
-        val future = CompletableFuture<ResourcePackStatus>()
-        val hash = this.packService.packHash.get()
 
+//        // TODO: fetch if gdpr has been accepted or not
+//
+//        val gdprDiag = GDPRDialog()
+//        val gdprFut = gdprDiag.show(conn.audience)
+//
+//        val accepted = try {
+//            gdprFut.get(3, TimeUnit.MINUTES)
+//        } catch (_: Exception) {
+//            false
+//        }
+//
+//        if (!accepted) {
+//            conn.disconnect(Component.text("You have to accept the privacy policy to play!").color(NamedTextColor.RED))
+//            return
+//        }
+
+        val packFut = CompletableFuture<ResourcePackStatus>()
+        val hash = this.packService.packHash.get()
         val info = ResourcePackInfo.resourcePackInfo(
             UUID.fromString("92de217b-8b2b-403b-86a5-fe26fa3a9b5f"),
             URI.create(this.packService.packDownloadUrl),
@@ -166,14 +182,14 @@ class Plugin : JavaPlugin(), Listener {
             .packs(info)
             .required(true)
             .callback { _, status, _ ->
-                future.complete(status)
+                packFut.complete(status)
             }
             .build()
 
         conn.audience.sendResourcePacks(request)
 
         val status = try {
-            future.get(30, TimeUnit.SECONDS)
+            packFut.get(30, TimeUnit.SECONDS)
         } catch (_: Throwable) {
             null
         }

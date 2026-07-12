@@ -8,6 +8,7 @@ import org.bukkit.GameRules
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.plugin.Plugin
+import space.chunks.lobby.GDPRDialog
 import space.chunks.lobby.modules.LobbyModule
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.matchmaking.MMService
@@ -26,6 +27,10 @@ class SpawnModule(
 ) : LobbyModule(plugin, "spawn") {
     override fun onEnable() {
         val cfg = Config.parse(this.plugin.config)
+        val gdprDiag = GDPRDialog()
+
+        Bukkit.getPluginManager().registerEvents(gdprDiag, this.plugin)
+
         Bukkit.getPluginManager().registerEvents(
             PlayerListener(
                 this.logger,
@@ -36,6 +41,7 @@ class SpawnModule(
                 this.uiService,
                 this.mmService,
                 this.partyService,
+                gdprDiag,
             ),
             this.plugin,
         )
@@ -47,6 +53,7 @@ class SpawnModule(
                         if (ctx.source.sender !is Player) {
                             return@executes Command.SINGLE_SUCCESS
                         }
+
                         val player = ctx.source.sender as Player
 
                         val world = Bukkit.getWorld(cfg.world)

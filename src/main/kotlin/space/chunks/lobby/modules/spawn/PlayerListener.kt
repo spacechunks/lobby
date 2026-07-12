@@ -22,6 +22,7 @@ import org.bukkit.event.player.*
 import org.bukkit.plugin.Plugin
 import org.bukkit.potion.PotionEffectType
 import org.bukkit.scheduler.BukkitTask
+import space.chunks.lobby.GDPRDialog
 import space.chunks.lobby.modules.chunkviewer.display.DisplaySessionService
 import space.chunks.lobby.modules.chunkviewer.event.PlayerIntentLeaveDisplaySessionEvent
 import space.chunks.lobby.modules.chunkviewer.event.PlayerSelectFlavorEvent
@@ -45,6 +46,7 @@ class PlayerListener(
     private val uiService: UiService,
     private val mmService: MMService,
     private val partyService: PartyService,
+    private val gdprDiag: GDPRDialog,
 ) : Listener {
     private val transition = ScreenTransition(this.plugin, this.texts)
     private val hotbar = Hotbar(
@@ -56,8 +58,8 @@ class PlayerListener(
         this.partyService,
         this.mmService,
     )
-    private val spawnLocation = this.location(this.config.spawnLocation)
 
+    private val spawnLocation = this.location(this.config.spawnLocation)
     private val robosPerPlayer = mutableMapOf<Player, DummyTracker>()
     private val tasksPerPlayer = mutableMapOf<Player, BukkitTask>()
 
@@ -162,6 +164,8 @@ class PlayerListener(
                         Bukkit.getScheduler().runTaskLater(plugin, Runnable {
                             dummy.animate("hand_wave")
                         }, 10)
+
+                        it.cancel()
                     }, 0, 20)
                 }
         }, 20)
