@@ -44,10 +44,6 @@ class SpawnModule(
             event.registrar().register(
                 Commands.literal("spawn")
                     .executes { ctx ->
-//                        Bukkit.getScheduler().runTaskLater(this.plugin, Runnable {
-//                            dummy.animate("hand_wave")
-//                        }, 20L * 2)
-                        
                         if (ctx.source.sender !is Player) {
                             return@executes Command.SINGLE_SUCCESS
                         }
