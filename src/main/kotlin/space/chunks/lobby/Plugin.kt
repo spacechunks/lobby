@@ -10,6 +10,8 @@ import io.papermc.paper.event.connection.configuration.AsyncPlayerConnectionConf
 import net.kyori.adventure.resource.ResourcePackInfo
 import net.kyori.adventure.resource.ResourcePackRequest
 import net.kyori.adventure.resource.ResourcePackStatus
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
@@ -18,6 +20,11 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.generator.ChunkGenerator
 import org.bukkit.plugin.java.JavaPlugin
+import org.ktorm.database.Database
+import org.ktorm.dsl.*
+import org.ktorm.schema.Table
+import org.ktorm.schema.timestamp
+import org.ktorm.schema.uuid
 import space.chunks.lobby.controlplane.instance.InstanceService
 import space.chunks.lobby.modules.chunkviewer.ChunkViewerModule
 import space.chunks.lobby.modules.chunkviewer.grpc.AuthCredentials
@@ -34,16 +41,19 @@ import space.chunks.lobby.ui.Texts
 import space.chunks.lobby.ui.bossbar.BossBars
 import space.chunks.visual.ui.UiService
 import java.net.URI
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration.Companion.seconds
 import space.chunks.lobby.controlplane.Config as ControlPlaneConfig
 import space.chunks.lobby.modules.matchmaking.Config as MMConfig
+import space.chunks.lobby.modules.spawn.Config as SpawnConfig
 
 class Plugin : JavaPlugin(), Listener {
     private val cpConfig = ControlPlaneConfig.parse(this.config)
     private val mmConfig = MMConfig.parse(this.config)
+    private val spawnConfig = SpawnConfig.parse(this.config)
 
     private val cpChannel = ManagedChannelBuilder
         .forAddress(this.cpConfig.addr, this.cpConfig.port)
@@ -105,6 +115,8 @@ class Plugin : JavaPlugin(), Listener {
         this.mmConfig,
     )
 
+    private lateinit var db: Database
+
     private val modules = listOf(
         chunkViewerMod,
         spawnMod,
@@ -113,6 +125,10 @@ class Plugin : JavaPlugin(), Listener {
     )
 
     override fun onEnable() {
+        Class.forName("org.postgresql.Driver")
+        this.db = Database.connect(
+            url = this.spawnConfig.postgresDSN,
+        )
         installInterfaces()
         Bukkit.getPluginManager().registerEvents(this.uiService, this)
         this.uiService.start(this)
@@ -150,25 +166,52 @@ class Plugin : JavaPlugin(), Listener {
         }
     }
 
+
+    object PlayerProfiles : Table<Nothing>("player_profiles") {
+        val id = uuid("id").primaryKey()
+        val minecraftId = uuid("minecraft_id")
+        val firstJoined = timestamp("first_joined")
+        val createdAt = timestamp("created_at")
+        val updatedAt = timestamp("updated_at")
+    }
+
+    fun getFirstJoined(database: Database, minecraftId: UUID): Instant? {
+        return database
+            .from(PlayerProfiles)
+            .select(PlayerProfiles.firstJoined)
+            .where { PlayerProfiles.minecraftId eq minecraftId }
+            .map { row -> row[PlayerProfiles.firstJoined] }
+            .firstOrNull()
+    }
+
     @EventHandler
     fun onAsyncConfigure(event: AsyncPlayerConnectionConfigureEvent) {
         val conn = event.connection
+        val firstJoined = getFirstJoined(this.db, conn.profile.id!!)
 
-//        // TODO: fetch if gdpr has been accepted or not
-//
-//        val gdprDiag = GDPRDialog()
-//        val gdprFut = gdprDiag.show(conn.audience)
-//
-//        val accepted = try {
-//            gdprFut.get(3, TimeUnit.MINUTES)
-//        } catch (_: Exception) {
-//            false
-//        }
-//
-//        if (!accepted) {
-//            conn.disconnect(Component.text("You have to accept the privacy policy to play!").color(NamedTextColor.RED))
-//            return
-//        }
+        if (firstJoined == null) {
+            val gdprDiag = GDPRDialog()
+            val gdprFut = gdprDiag.show(conn.audience)
+
+            val accepted = try {
+                gdprFut.get(3, TimeUnit.MINUTES)
+            } catch (_: Exception) {
+                false
+            }
+
+            if (!accepted) {
+                conn.disconnect(
+                    Component.text("You have to accept the privacy policy to play!")
+                        .color(NamedTextColor.RED)
+                )
+                return
+            }
+
+            this.db.insert(PlayerProfiles) {
+                set(it.minecraftId, conn.profile.id)
+                set(it.firstJoined, Instant.now())
+            }
+        }
 
         val packFut = CompletableFuture<ResourcePackStatus>()
         val hash = this.packService.packHash.get()
