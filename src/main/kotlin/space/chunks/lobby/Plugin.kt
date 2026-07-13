@@ -190,7 +190,7 @@ class Plugin : JavaPlugin(), Listener {
         val firstJoined = getFirstJoined(this.db, conn.profile.id!!)
 
         if (firstJoined == null) {
-            val gdprDiag = GDPRDialog()
+            val gdprDiag = PrivacyPolicyDialog()
             val gdprFut = gdprDiag.show(conn.audience)
 
             val accepted = try {
