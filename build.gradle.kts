@@ -37,7 +37,7 @@ plugins {
 }
 
 group = "space.chunks"
-version = "2026.28.7"
+version = "2026.28.8"
 
 val pluginName = project.property("plugin.name").toString()
 
@@ -64,6 +64,9 @@ dependencies {
     implementation("com.noxcrew.interfaces:interfaces:2.1.0-SNAPSHOT")
 //    compileOnly("space.chunks:world-service-plugin:2026.20.5")
     compileOnly("io.github.toxicity188:bettermodel-bukkit-api:3.2.0")
+    implementation("org.ktorm:ktorm-core:4.1.1")
+    implementation("org.ktorm:ktorm-support-postgresql:4.1.1")
+    implementation("org.postgresql:postgresql:42.7.4")
 }
 
 tasks.test {

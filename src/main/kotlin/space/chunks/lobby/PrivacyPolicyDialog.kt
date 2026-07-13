@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.toJavaDuration
 
-class GDPRDialog {
+class PrivacyPolicyDialog {
     fun show(audience: Audience): CompletableFuture<Boolean> {
         val f = CompletableFuture<Boolean>()
         val d = Dialog.create { builder ->

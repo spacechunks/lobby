@@ -24,6 +24,7 @@ data class Config(
     val world: String,
     val spawnLocation: VectorConfig,
     val roboSpawnLocation: VectorConfig,
+    val postgresDSN: String
 ) {
     companion object {
         fun parse(config: FileConfiguration): Config {
@@ -35,10 +36,14 @@ data class Config(
                 config.getConfigurationSection("spawn.roboLocation")
                     ?: throw IllegalArgumentException("spawn.roboLocation is missing")
 
+            val postgresDSN =
+                config.getString("spawn.postgresDSN") ?: throw IllegalArgumentException("postgresDSN is missing")
+
             return Config(
                 config.getString("spawn.world") ?: throw IllegalArgumentException("spawn.world is missing"),
                 VectorConfig.parse(spawnLoc),
                 VectorConfig.parse(roboLoc),
+                postgresDSN,
             )
         }
     }
