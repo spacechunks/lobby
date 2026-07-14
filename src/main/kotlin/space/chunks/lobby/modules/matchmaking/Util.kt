@@ -23,6 +23,7 @@ fun waitForInstance(
     texts: Texts,
     actorId: String,
     instanceId: String,
+    playerCount: Int,
     onComplete: () -> Unit = {}
 ) {
     val players = getPlayersByActorId(partyService, actorId)
@@ -30,7 +31,7 @@ fun waitForInstance(
     instanceService.getInstance(instanceId).thenAccept { instance ->
         bossbars.sendLoadingBar(
             players,
-            players.size,
+            playerCount,
             LoadingBossBar.LoadingState.STARTING,
             instance.chunk.name,
             instance.flavor.name,

@@ -43,6 +43,7 @@ class TicketListener(
             texts,
             event.actorId,
             event.instanceId,
+            event.ticket.match.playerCount,
         )
     }
 

@@ -88,9 +88,10 @@ class PlayerListener(
                 this.texts,
                 actorId,
                 instance.id,
+                players.size,
                 onComplete = {
                     player.removeMetadata(PlayerMetadataKeys.MM_PRIVATE_ONGOING)
-                }
+                },
             )
         }
     }

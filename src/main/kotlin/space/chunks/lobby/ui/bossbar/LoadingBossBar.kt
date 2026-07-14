@@ -89,6 +89,6 @@ object LoadingBossBar {
     enum class LoadingState(val string: String) {
         WAITING_FOR_PLAYERS("Waiting for players"),
         MATCH_FOUND("Match found, starting shortly..."),
-        STARTING("Starting"),
+        STARTING("Starting..."),
     }
 }
