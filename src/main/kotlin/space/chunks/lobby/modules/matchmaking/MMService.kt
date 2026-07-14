@@ -148,7 +148,7 @@ class MMService(
 
                 if (newTicket.hasAssignment()) {
                     this.plugin.callSyncEvent(
-                        TicketAssignmentEvent(actorId, newTicket.id, newTicket.assignment.instanceId)
+                        TicketAssignmentEvent(actorId, newTicket, newTicket.assignment.instanceId)
                     )
                     return
                 }
