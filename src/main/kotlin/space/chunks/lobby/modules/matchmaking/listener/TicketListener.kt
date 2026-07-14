@@ -113,6 +113,8 @@ class TicketListener(
             ?.versionsList
             ?.first()
 
+        this.mmService.createAndPollTicket(data.actorId, data.chunk, data.flavor, players.size)
+
         bossbars.sendLoadingBar(
             players,
             players.size,

@@ -23,6 +23,11 @@ class PartyListener(
     fun onPartyPlayerKicked(event: PartyPlayerKickedEvent) {
         val party = event.party
         val player = event.player
+
+        if (!this.mmService.hastTicket(party.id)) {
+            return
+        }
+
         this.logger.info("player kicked from party, removing ticket. partyId=${party.id} playerName=${player.name} playerId=${player.id}")
         this.mmService.removeTicketByActor(party.id)
         this.instanceService.cancelJob(party.id)
@@ -37,6 +42,11 @@ class PartyListener(
     @EventHandler
     fun onPartyDisband(event: PartyDisbandEvent) {
         val party = event.party
+
+        if (!this.mmService.hastTicket(party.id)) {
+            return
+        }
+
         this.logger.info("party disbanded, removing ticket. partyId=${party.id}")
         this.mmService.removeTicketByActor(event.party.id)
         this.instanceService.cancelJob(party.id)
@@ -47,9 +57,15 @@ class PartyListener(
     fun onPartyPlayerJoin(event: PartyPlayerJoinEvent) {
         val party = event.party
         val player = event.player
+
+        if (!this.mmService.hastTicket(party.id)) {
+            return
+        }
+
         this.logger.info("player joined party, removing ticket. partyId=${party.id} playerName=${event.player.name} playerId=${event.player.id}")
-        this.mmService.removeTicketByActor(event.party.id)
-        this.instanceService.cancelJob(event.party.id)
+
+        this.mmService.removeTicketByActor(party.id)
+        this.instanceService.cancelJob(party.id)
         this.bossbars.clearLoadingBar(party.onlinePlayers())
 
         try {

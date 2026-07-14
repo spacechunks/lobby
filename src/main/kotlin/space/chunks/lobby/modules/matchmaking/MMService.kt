@@ -104,6 +104,10 @@ class MMService(
         this.actorJobs.clear()
     }
 
+    fun hastTicket(actorId: String): Boolean {
+        return this.ticketsByActor[actorId] != null
+    }
+
     private suspend fun pollTicket(
         actorId: String,
         ticketId: String,
